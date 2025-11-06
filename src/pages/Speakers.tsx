@@ -131,6 +131,17 @@ const Speakers = () => {
                     {speaker.title && <p className="text-accent font-semibold mb-3">{speaker.title}</p>}
                     {speaker.bio && <p className="text-muted-foreground mb-4 line-clamp-3">{speaker.bio}</p>}
                     
+                    {/* Year Badges */}
+                    {speaker.years && speaker.years.length > 0 && (
+                      <div className="flex gap-2 mb-4">
+                        {speaker.years.map((year) => (
+                          <Badge key={year} variant="secondary" className="bg-primary/20 text-primary border-primary/30">
+                            {year}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                    
                     {/* Social Icons */}
                     <div className="flex gap-3 mt-4">
                       {speaker.linkedin_url && (
@@ -213,10 +224,22 @@ const Speakers = () => {
                     />
                     <div className="flex-1">
                       {selectedSpeaker.title && (
-                        <p className="text-accent font-semibold text-xl mb-4">
+                        <p className="text-accent font-semibold text-xl mb-2">
                           {selectedSpeaker.title}
                         </p>
                       )}
+                      
+                      {/* Year Badges in Dialog */}
+                      {selectedSpeaker.years && selectedSpeaker.years.length > 0 && (
+                        <div className="flex gap-2 mb-4">
+                          {selectedSpeaker.years.map((year) => (
+                            <Badge key={year} variant="secondary" className="bg-primary/20 text-primary border-primary/30">
+                              {year}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      
                       {selectedSpeaker.bio && (
                         <p className="text-muted-foreground leading-relaxed">
                           {selectedSpeaker.bio}
