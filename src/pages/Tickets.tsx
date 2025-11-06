@@ -20,7 +20,8 @@ const Tickets = () => {
     {
       name: "Standard",
       price: "£147",
-      originalPrice: "£297",
+      originalPrice: "£497",
+      discount: "70%",
       description: "In-person access to Festival of AI 2026",
       features: [
         "Full day access to all sessions",
@@ -34,6 +35,7 @@ const Tickets = () => {
       name: "Virtual",
       price: "£147",
       originalPrice: "£297",
+      discount: "50%",
       description: "Join us online from anywhere",
       features: [
         "Full day virtual access to all sessions",
@@ -45,7 +47,8 @@ const Tickets = () => {
     {
       name: "Workshop",
       price: "£197",
-      originalPrice: "£497",
+      originalPrice: "£697",
+      discount: "72%",
       description: "Full access including exclusive workshops",
       features: [
         "Full day access to all sessions",
@@ -127,12 +130,17 @@ const Tickets = () => {
                   <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
                   <p className="text-muted-foreground text-sm mb-4">{tier.description}</p>
                   <div className="mb-6">
-                    <div className="flex items-baseline gap-2">
+                    <div className="flex items-baseline gap-2 mb-1">
                       <span className="text-4xl font-black text-accent">{tier.price}</span>
                       {tier.originalPrice && (
-                        <span className="text-lg text-muted-foreground line-through">
-                          {tier.originalPrice}
-                        </span>
+                        <>
+                          <span className="text-lg text-muted-foreground line-through">
+                            {tier.originalPrice}
+                          </span>
+                          <span className="text-sm font-bold text-accent bg-accent/20 px-2 py-1 rounded">
+                            SAVE {tier.discount}
+                          </span>
+                        </>
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground">per person</p>
