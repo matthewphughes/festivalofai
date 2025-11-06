@@ -22,7 +22,7 @@ interface Speaker {
   company: string | null;
   bio: string | null;
   image_url: string | null;
-  year: number | null;
+  years: number[] | null;
   linkedin_url: string | null;
   twitter_url: string | null;
   youtube_url: string | null;
@@ -47,7 +47,7 @@ const AdminSpeakers = () => {
     title: "",
     company: "",
     bio: "",
-    year: "",
+    years: [] as number[],
     linkedin_url: "",
     twitter_url: "",
     youtube_url: "",
@@ -222,7 +222,7 @@ const AdminSpeakers = () => {
       title: "",
       company: "",
       bio: "",
-      year: "",
+      years: [],
       linkedin_url: "",
       twitter_url: "",
       youtube_url: "",
@@ -242,7 +242,7 @@ const AdminSpeakers = () => {
       title: speaker.title || "",
       company: speaker.company || "",
       bio: speaker.bio || "",
-      year: speaker.year?.toString() || "",
+      years: speaker.years || [],
       linkedin_url: speaker.linkedin_url || "",
       twitter_url: speaker.twitter_url || "",
       youtube_url: speaker.youtube_url || "",
@@ -289,7 +289,7 @@ const AdminSpeakers = () => {
         title: formData.title || null,
         company: formData.company || null,
         bio: formData.bio || null,
-        year: formData.year ? parseInt(formData.year) : null,
+        years: formData.years.length > 0 ? formData.years : null,
         image_url: imageUrl,
         linkedin_url: formData.linkedin_url || null,
         twitter_url: formData.twitter_url || null,
@@ -424,7 +424,9 @@ const AdminSpeakers = () => {
                       </TableCell>
                       <TableCell>
                         <div className="text-sm font-medium">
-                          {speaker.year || <span className="text-muted-foreground">-</span>}
+                          {speaker.years && speaker.years.length > 0 
+                            ? speaker.years.sort().join(', ') 
+                            : <span className="text-muted-foreground">-</span>}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -567,19 +569,39 @@ const AdminSpeakers = () => {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="year">Year</Label>
-                  <Select
-                    value={formData.year}
-                    onValueChange={(value) => setFormData({ ...formData, year: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="2025">2025</SelectItem>
-                      <SelectItem value="2026">2026</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label>Years</Label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.years.includes(2025)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData({ ...formData, years: [...formData.years, 2025].sort() });
+                          } else {
+                            setFormData({ ...formData, years: formData.years.filter(y => y !== 2025) });
+                          }
+                        }}
+                        className="w-4 h-4"
+                      />
+                      <span>2025</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.years.includes(2026)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData({ ...formData, years: [...formData.years, 2026].sort() });
+                          } else {
+                            setFormData({ ...formData, years: formData.years.filter(y => y !== 2026) });
+                          }
+                        }}
+                        className="w-4 h-4"
+                      />
+                      <span>2026</span>
+                    </label>
+                  </div>
                 </div>
               </div>
 

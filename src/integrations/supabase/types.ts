@@ -106,7 +106,7 @@ export type Database = {
           twitter_url: string | null
           updated_at: string | null
           website_url: string | null
-          year: number | null
+          years: number[] | null
           youtube_url: string | null
         }
         Insert: {
@@ -123,7 +123,7 @@ export type Database = {
           twitter_url?: string | null
           updated_at?: string | null
           website_url?: string | null
-          year?: number | null
+          years?: number[] | null
           youtube_url?: string | null
         }
         Update: {
@@ -140,7 +140,7 @@ export type Database = {
           twitter_url?: string | null
           updated_at?: string | null
           website_url?: string | null
-          year?: number | null
+          years?: number[] | null
           youtube_url?: string | null
         }
         Relationships: []

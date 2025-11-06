@@ -17,7 +17,7 @@ interface Speaker {
   company: string | null;
   bio: string | null;
   image_url: string | null;
-  year: number | null;
+  years: number[] | null;
   linkedin_url: string | null;
   twitter_url: string | null;
   youtube_url: string | null;
@@ -54,7 +54,7 @@ const Speakers = () => {
 
   const filteredSpeakers = yearFilter === "all" 
     ? speakers 
-    : speakers.filter(s => s.year === parseInt(yearFilter));
+    : speakers.filter(s => s.years?.includes(parseInt(yearFilter)));
 
   return (
     <div className="min-h-screen relative">
