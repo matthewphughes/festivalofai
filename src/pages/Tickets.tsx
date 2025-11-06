@@ -4,6 +4,12 @@ import StarField from "@/components/StarField";
 import CountdownTimer from "@/components/CountdownTimer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Check, CreditCard, Calendar } from "lucide-react";
 import { addDays, nextMonday, set } from "date-fns";
 
@@ -248,6 +254,79 @@ const Tickets = () => {
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* FAQ Section */}
+          <Card className="mt-16 bg-card/50 backdrop-blur-sm border-border">
+            <CardContent className="p-8 md:p-12">
+              <h2 className="text-3xl font-bold mb-8 text-center">Frequently Asked Questions</h2>
+              <Accordion type="single" collapsible className="max-w-3xl mx-auto">
+                <AccordionItem value="item-1">
+                  <AccordionTrigger className="text-left">
+                    What is the difference between "Pay in Full" and "Pay Monthly"?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    <strong>Pay in Full:</strong> Pay the complete ticket price upfront and secure your Super Early Bird discount immediately. This is the most cost-effective option.
+                    <br /><br />
+                    <strong>Pay Monthly:</strong> Spread your payment over installments leading up to the event. The total amount remains the same, but you can manage your budget more flexibly. Monthly payment plans must be completed before the event date.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-2">
+                  <AccordionTrigger className="text-left">
+                    What happens when Super Early Bird pricing ends?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    When the Super Early Bird period ends on Monday at lunchtime, ticket prices will increase to the next pricing phase. Standard and Virtual tickets will move from £147 to a higher price point, and Workshop tickets will increase from £197. We recommend booking now to lock in the maximum discount of up to 72% off regular prices.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-3">
+                  <AccordionTrigger className="text-left">
+                    What is your refund policy?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    We offer a full refund if you cancel more than 30 days before the event (by September 16, 2026). Cancellations made 15-30 days before the event receive a 50% refund. Unfortunately, we cannot offer refunds for cancellations made less than 15 days before the event date. All refund requests must be submitted in writing to our support team.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-4">
+                  <AccordionTrigger className="text-left">
+                    Can I upgrade my ticket after purchase?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Yes! You can upgrade from Standard to Workshop or from Virtual to either Standard or Workshop at any time before the event. Simply pay the difference between your current ticket and the upgraded ticket at the then-current pricing. Contact our support team to process your upgrade.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-5">
+                  <AccordionTrigger className="text-left">
+                    Are group discounts available?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Absolutely! We offer group discounts for teams and organizations. Groups of 3-5 people receive 10% off, 6-10 people get 15% off, and groups of 10+ people receive 20% off the total ticket price. Group discounts can be combined with current pricing phases for maximum savings. Contact us using the button above to arrange your group booking.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-6">
+                  <AccordionTrigger className="text-left">
+                    What is included in the gift bag and workbook?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Every attendee receives a curated gift bag containing event merchandise, sponsor goodies, and exclusive items from our partners. The comprehensive workbook includes session notes, speaker insights, resources, and space for your own notes throughout the day. Virtual attendees receive digital versions of both the gift bag contents and the workbook.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-7">
+                  <AccordionTrigger className="text-left">
+                    Can I transfer my ticket to someone else?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Yes, tickets are transferable. You can transfer your ticket to another person at no additional cost by contacting our support team with the new attendee's details at least 7 days before the event. The new attendee will receive all the same benefits and materials included with your original ticket purchase.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </CardContent>
           </Card>
         </div>
