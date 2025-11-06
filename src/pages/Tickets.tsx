@@ -8,50 +8,43 @@ import { Check } from "lucide-react";
 const Tickets = () => {
   const ticketTiers = [
     {
-      name: "Early Bird",
-      price: "£199",
-      originalPrice: "£299",
-      description: "Limited availability - book now to save!",
+      name: "Standard",
+      price: "£147",
+      originalPrice: "£297",
+      description: "In-person access to Festival of AI 2026",
       features: [
         "Full day access to all sessions",
-        "Breakfast, lunch & refreshments",
+        "Networking reception",
+        "Gift bag",
+        "Workbook",
+      ],
+      highlighted: false,
+    },
+    {
+      name: "Virtual",
+      price: "£147",
+      originalPrice: "£297",
+      description: "Join us online from anywhere",
+      features: [
+        "Full day virtual access to all sessions",
+        "Digital gift bag",
+        "Digital workbook",
+      ],
+      highlighted: false,
+    },
+    {
+      name: "Workshop",
+      price: "£197",
+      originalPrice: "£497",
+      description: "Full access including exclusive workshops",
+      features: [
+        "Full day access to all sessions",
         "Access to all workshops",
         "Networking reception",
-        "Event materials & resources",
-        "Certificate of attendance",
+        "Gift bag",
+        "Workbook",
       ],
       highlighted: true,
-    },
-    {
-      name: "Standard",
-      price: "£249",
-      originalPrice: null,
-      description: "Best value for individual attendees",
-      features: [
-        "Full day access to all sessions",
-        "Breakfast, lunch & refreshments",
-        "Access to all workshops",
-        "Networking reception",
-        "Event materials & resources",
-        "Certificate of attendance",
-      ],
-      highlighted: false,
-    },
-    {
-      name: "VIP",
-      price: "£399",
-      originalPrice: null,
-      description: "Premium experience with exclusive benefits",
-      features: [
-        "Everything in Standard, plus:",
-        "VIP seating in all sessions",
-        "Private meet & greet with speakers",
-        "Exclusive VIP lunch",
-        "Premium swag bag",
-        "1-year access to event recordings",
-        "Priority Q&A opportunities",
-      ],
-      highlighted: false,
     },
   ];
 
@@ -85,9 +78,12 @@ const Tickets = () => {
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
               Get Your <span className="text-accent">Tickets</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-4">
               Secure your spot at Festival of AI 2026 - October 16th at the National Space Center, Leicester
             </p>
+            <div className="inline-block bg-accent/20 text-accent border border-accent/50 px-4 py-2 rounded-full text-sm font-bold">
+              🎉 SUPER EARLY BIRD PRICING - Limited Time Only!
+            </div>
           </div>
 
           {/* Ticket Tiers */}
@@ -104,7 +100,7 @@ const Tickets = () => {
                 <CardContent className="p-8">
                   {tier.highlighted && (
                     <div className="bg-accent text-accent-foreground text-sm font-bold px-3 py-1 rounded-full inline-block mb-4">
-                      BEST VALUE
+                      SUPER EARLY BIRD
                     </div>
                   )}
                   <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
@@ -172,22 +168,13 @@ const Tickets = () => {
           <Card className="bg-card/50 backdrop-blur-sm border-border">
             <CardContent className="p-8 md:p-12">
               <h2 className="text-3xl font-bold mb-8 text-center">What's Included</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
                 <div className="flex items-start gap-3">
                   <span className="text-accent text-2xl">🎓</span>
                   <div>
                     <h3 className="font-bold mb-1">Educational Sessions</h3>
                     <p className="text-sm text-muted-foreground">
-                      Full access to all keynotes, workshops, and panel discussions
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-accent text-2xl">🍽️</span>
-                  <div>
-                    <h3 className="font-bold mb-1">Catering</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Breakfast, lunch, and refreshments throughout the day
+                      Full day access to keynotes and panel discussions
                     </p>
                   </div>
                 </div>
@@ -201,29 +188,20 @@ const Tickets = () => {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="text-accent text-2xl">📚</span>
-                  <div>
-                    <h3 className="font-bold mb-1">Resources</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Digital materials, slides, and exclusive content
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
                   <span className="text-accent text-2xl">🎁</span>
                   <div>
-                    <h3 className="font-bold mb-1">Swag Bag</h3>
+                    <h3 className="font-bold mb-1">Gift Bag</h3>
                     <p className="text-sm text-muted-foreground">
                       Event merchandise and sponsor goodies
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="text-accent text-2xl">📜</span>
+                  <span className="text-accent text-2xl">📚</span>
                   <div>
-                    <h3 className="font-bold mb-1">Certificate</h3>
+                    <h3 className="font-bold mb-1">Workbook</h3>
                     <p className="text-sm text-muted-foreground">
-                      Official certificate of attendance
+                      Comprehensive event workbook and materials
                     </p>
                   </div>
                 </div>
