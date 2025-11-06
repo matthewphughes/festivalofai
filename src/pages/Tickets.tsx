@@ -12,8 +12,14 @@ import {
 } from "@/components/ui/accordion";
 import { Check, CreditCard, Calendar } from "lucide-react";
 import { addDays, nextMonday, set } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const Tickets = () => {
+  const { toast } = useToast();
+  const [loadingTicket, setLoadingTicket] = useState<string | null>(null);
+
   // Calculate next Monday at 12:00 PM (lunchtime)
   const getNextMondayLunchtime = () => {
     const now = new Date();
@@ -22,6 +28,67 @@ const Tickets = () => {
   };
 
   const superEarlyBirdEndDate = getNextMondayLunchtime();
+
+  // Stripe price IDs for each ticket type
+  const TICKET_PRICE_IDS = {
+    standard: "price_1SQckxEFw97UKMysNftdefca",
+    virtual: "price_1SQckzEFw97UKMysjNFfteCQ",
+    workshop: "price_1SQcl0EFw97UKMysV6lBdWb5",
+  };
+
+  const handleCheckout = async (priceId: string, ticketName: string) => {
+    setLoadingTicket(ticketName);
+    
+    try {
+      // Check if user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to purchase tickets.",
+          variant: "destructive",
+        });
+        setLoadingTicket(null);
+        return;
+      }
+
+      // Call the create-checkout edge function
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { price_id: priceId },
+      });
+
+      if (error) {
+        console.error('Checkout error:', error);
+        toast({
+          title: "Checkout Error",
+          description: error.message || "Failed to create checkout session. Please try again.",
+          variant: "destructive",
+        });
+        setLoadingTicket(null);
+        return;
+      }
+
+      if (data?.url) {
+        // Open Stripe checkout in a new tab
+        window.open(data.url, '_blank');
+        toast({
+          title: "Redirecting to Checkout",
+          description: "Opening Stripe checkout in a new tab...",
+        });
+      }
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingTicket(null);
+    }
+  };
+
   const ticketTiers = [
     {
       name: "Standard",
@@ -29,6 +96,7 @@ const Tickets = () => {
       originalPrice: "£497",
       discount: "70%",
       description: "In-person access to Festival of AI 2026",
+      priceId: TICKET_PRICE_IDS.standard,
       features: [
         "Full day access to all sessions",
         "Networking reception",
@@ -44,6 +112,7 @@ const Tickets = () => {
       originalPrice: "£497",
       discount: "70%",
       description: "Join us online from anywhere",
+      priceId: TICKET_PRICE_IDS.virtual,
       features: [
         "Full day virtual access to all sessions",
         "Digital gift bag",
@@ -58,6 +127,7 @@ const Tickets = () => {
       originalPrice: "£697",
       discount: "72%",
       description: "Full access including exclusive workshops",
+      priceId: TICKET_PRICE_IDS.workshop,
       features: [
         "Full day access to all sessions",
         "Access to all workshops",
@@ -169,9 +239,11 @@ const Tickets = () => {
                         : "bg-primary hover:bg-primary/90"
                     }`}
                     size="lg"
+                    onClick={() => handleCheckout(tier.priceId, tier.name)}
+                    disabled={loadingTicket === tier.name}
                   >
                     <CreditCard className="w-4 h-4 mr-2" />
-                    Pay in Full
+                    {loadingTicket === tier.name ? "Processing..." : "Pay in Full"}
                   </Button>
                   <Button
                     variant="outline"
