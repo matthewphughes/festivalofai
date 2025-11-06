@@ -34,8 +34,8 @@ const Tickets = () => {
     {
       name: "Virtual",
       price: "£147",
-      originalPrice: "£297",
-      discount: "50%",
+      originalPrice: "£497",
+      discount: "70%",
       description: "Join us online from anywhere",
       features: [
         "Full day virtual access to all sessions",
