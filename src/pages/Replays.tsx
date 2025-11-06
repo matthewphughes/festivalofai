@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Play, Clock, LogOut, Shield, ArrowLeft, Edit, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import ReplayCard from "@/components/ReplayCard";
 
 
 // Validation schema for replay editing
@@ -207,156 +208,21 @@ const Replays = () => {
   };
 
 
-  const replays2025 = replays.filter(r => r.event_year === 2025);
-  const replays2026 = replays.filter(r => r.event_year === 2026);
+  const replays2025 = useMemo(() => replays.filter(r => r.event_year === 2025), [replays]);
+  const replays2026 = useMemo(() => replays.filter(r => r.event_year === 2026), [replays]);
 
-  const handleSpeakerClick = async (speakerId: string | null) => {
+  const handleSpeakerClick = useCallback((speakerId: string | null) => {
     if (!speakerId) return;
     
     const speaker = speakers.find(s => s.id === speakerId);
     if (speaker) {
       setSelectedSpeaker(speaker);
     }
-  };
+  }, [speakers]);
 
-  const ReplayCard = ({ replay }: { replay: Replay }) => {
-    const isEditing = editingId === replay.id;
-
-    return (
-      <Card key={replay.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-        <div className="aspect-video bg-muted">
-          <iframe
-            src={getYouTubeEmbedUrl(replay.video_url)}
-            title={replay.title}
-            className="w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
-        <CardHeader>
-          <div className="flex items-start justify-between gap-2 mb-2">
-            {isEditing ? (
-              <Input
-                value={editForm.title || ""}
-                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                placeholder="Title"
-                className="flex-1"
-              />
-            ) : (
-              <CardTitle className="text-lg">{replay.title}</CardTitle>
-            )}
-            <div className="flex gap-2">
-              <Badge variant="outline">{replay.event_year}</Badge>
-              {isAdmin && !isEditing && (
-                <Button size="sm" variant="ghost" onClick={() => startEditing(replay)}>
-                  <Edit className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          </div>
-          {isEditing ? (
-            <Select
-              value={editForm.speaker_id || "none"}
-              onValueChange={(value) => setEditForm({ ...editForm, speaker_id: value === "none" ? null : value })}
-            >
-              <SelectTrigger className="mb-2">
-                <SelectValue placeholder="Select Speaker" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover z-50">
-                <SelectItem value="none">No Speaker</SelectItem>
-                {speakers.map((speaker) => (
-                  <SelectItem key={speaker.id} value={speaker.id}>
-                    {speaker.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            replay.speaker_name && (
-              <button
-                onClick={() => handleSpeakerClick(replay.speaker_id)}
-                className="text-sm font-medium text-primary hover:underline cursor-pointer text-left"
-              >
-                by {replay.speaker_name}
-              </button>
-            )
-          )}
-          {isEditing ? (
-            <Textarea
-              value={editForm.description || ""}
-              onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-              placeholder="Description"
-              rows={3}
-            />
-          ) : (
-            replay.description && (
-              <CardDescription className="line-clamp-2">
-                {replay.description}
-              </CardDescription>
-            )
-          )}
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-2">
-            {isEditing ? (
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  value={editForm.duration_minutes || ""}
-                  onChange={(e) => setEditForm({ ...editForm, duration_minutes: parseInt(e.target.value) || null })}
-                  placeholder="Duration (minutes)"
-                  className="w-32"
-                />
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={editForm.published || false}
-                    onChange={(e) => setEditForm({ ...editForm, published: e.target.checked })}
-                    className="rounded"
-                  />
-                  Published
-                </label>
-              </div>
-            ) : (
-              replay.duration_minutes && (
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4 mr-1" />
-                  {replay.duration_minutes} min
-                </div>
-              )
-            )}
-            {isEditing ? (
-              <div className="flex gap-2">
-                <Button size="sm" onClick={() => saveEdit(replay.id)} className="flex-1">
-                  <Save className="h-4 w-4 mr-1" />
-                  Save
-                </Button>
-                <Button size="sm" variant="outline" onClick={cancelEditing}>
-                  <X className="h-4 w-4 mr-1" />
-                  Cancel
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between gap-2">
-                {!replay.published && (
-                  <Badge variant="secondary">Unpublished</Badge>
-                )}
-                {isAdmin && (
-                  <Button 
-                    size="sm" 
-                    variant={replay.published ? "outline" : "default"}
-                    onClick={() => togglePublished(replay.id, replay.published)}
-                  >
-                    {replay.published ? "Unpublish" : "Publish"}
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
+  const handleEditFormChange = useCallback((field: string, value: any) => {
+    setEditForm(prev => ({ ...prev, [field]: value }));
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -419,7 +285,21 @@ const Replays = () => {
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {replays2025.map((replay) => (
-                    <ReplayCard key={replay.id} replay={replay} />
+                    <ReplayCard
+                      key={replay.id}
+                      replay={replay}
+                      isEditing={editingId === replay.id}
+                      isAdmin={isAdmin}
+                      editForm={editForm}
+                      speakers={speakers}
+                      onStartEdit={startEditing}
+                      onCancelEdit={cancelEditing}
+                      onSaveEdit={saveEdit}
+                      onTogglePublished={togglePublished}
+                      onSpeakerClick={handleSpeakerClick}
+                      onEditFormChange={handleEditFormChange}
+                      getYouTubeEmbedUrl={getYouTubeEmbedUrl}
+                    />
                   ))}
                 </div>
               )}
@@ -436,7 +316,21 @@ const Replays = () => {
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {replays2026.map((replay) => (
-                    <ReplayCard key={replay.id} replay={replay} />
+                    <ReplayCard
+                      key={replay.id}
+                      replay={replay}
+                      isEditing={editingId === replay.id}
+                      isAdmin={isAdmin}
+                      editForm={editForm}
+                      speakers={speakers}
+                      onStartEdit={startEditing}
+                      onCancelEdit={cancelEditing}
+                      onSaveEdit={saveEdit}
+                      onTogglePublished={togglePublished}
+                      onSpeakerClick={handleSpeakerClick}
+                      onEditFormChange={handleEditFormChange}
+                      getYouTubeEmbedUrl={getYouTubeEmbedUrl}
+                    />
                   ))}
                 </div>
               )}
