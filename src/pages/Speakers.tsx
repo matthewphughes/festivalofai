@@ -5,81 +5,139 @@ import StarField from "@/components/StarField";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { Linkedin, Twitter, Globe } from "lucide-react";
 import matthewHughesImage from "@/assets/speaker-matthew-hughes.jpg";
 
 const Speakers = () => {
   const [selectedSpeaker, setSelectedSpeaker] = useState<typeof speakers[0] | null>(null);
+  const [yearFilter, setYearFilter] = useState<"all" | "2025" | "2026">("all");
 
   const speakers = [
     {
       name: "Matthew Hughes",
       title: "Festival of AI Founder",
-      bio: "Leading expert in practical AI implementation for businesses and founder of the Festival of AI.",
+      bio: "Known online as The King of Video, seasoned YouTube strategist and video marketing mentor.",
       image: matthewHughesImage,
-      fullBio: "Matthew Hughes is the visionary founder of the Festival of AI, bringing together the brightest minds in artificial intelligence to share knowledge and inspire innovation. With years of experience in AI implementation and business transformation, Matthew is passionate about making AI accessible and practical for organizations of all sizes.",
+      fullBio: "Matt Hughes, known online as The King of Video, is a seasoned YouTube strategist and video marketing mentor helping entrepreneurs and business owners confidently grow their brand on YouTube. With over a decade in content creation and a flair for making things fun and simple, Matt helps clients launch channels, repurpose content like pros, and show up consistently without the overwhelm. He's the founder of Creator Events, Festival of AI and TubeFest.",
+      years: [2025, 2026],
       social: {
         linkedin: "https://linkedin.com/in/matthughes",
         twitter: "https://twitter.com/matthughes",
-        website: "https://festivalofai.com"
+        website: "https://festivalof.ai"
       }
     },
     {
-      name: "Dr. Sarah Chen",
-      title: "Machine Learning Researcher",
-      bio: "PhD in AI with focus on real-world business applications.",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
-      fullBio: "Dr. Sarah Chen is a leading researcher in machine learning with a focus on practical business applications. Her work bridges the gap between cutting-edge research and real-world implementation.",
+      name: "Heather Murray",
+      title: "Generative AI Expert & Founder of AI for Non-Techies",
+      bio: "Top 5 MarTech influencer globally, international speaker and award-winning AI training expert.",
+      image: "https://festivalof.ai/wp-content/uploads/2025/05/Heather-Murray.png",
+      fullBio: "Heather is a generative AI expert, Top 5 MarTech influencer globally, international speaker and Founder of AI for Non-Techies (award-winning AI training and learning hub). Regularly featured in Forbes magazine, Heather brings energy and enthusiasm to the world of AI. Her accessible, jargon-free approach helps people overcome confusion, reluctance and fear when it comes to where to start. Heather has formed powerful working partnerships with the likes of Toyota, Mitsubishi and Salesforce, and drove $75m in client pipeline in 2023, all with the help of AI.",
+      years: [2025],
       social: {
         linkedin: "https://linkedin.com",
         twitter: "https://twitter.com"
       }
     },
     {
-      name: "James Anderson",
-      title: "Tech Entrepreneur",
-      bio: "Founder of multiple AI-powered startups and platforms.",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
-      fullBio: "James Anderson is a serial entrepreneur who has founded multiple successful AI-powered startups, transforming industries through innovative technology solutions.",
+      name: "Kristian Downer",
+      title: "AI Trainer & Marketing Strategist",
+      bio: "Founder of DowSocial, running practical AI workshops for business owners.",
+      image: "https://festivalof.ai/wp-content/uploads/2025/05/KristianDowner.png",
+      fullBio: "Kristian runs practical AI workshops and training sessions designed to help business owners cut through the hype and take action. He's a trainer for Enterprise Nation's Google Digital Garage programme, where he has supported thousands of UK SMEs. His jargon-free approach focuses on helping businesses define their real challenges and match them with the right AI tools, believing that asking better questions leads to better results.",
+      years: [2025],
       social: {
-        linkedin: "https://linkedin.com",
-        website: "https://jamesanderson.com"
+        linkedin: "https://linkedin.com"
       }
     },
     {
-      name: "Emily Rodriguez",
-      title: "Data Science Expert",
-      bio: "Specializing in AI strategy and implementation for enterprises.",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
-      fullBio: "Emily Rodriguez specializes in helping enterprises develop and execute AI strategies that drive real business value and competitive advantage.",
+      name: "Andrew George",
+      title: "E-commerce Strategist & Automation Expert",
+      bio: "Founder of APG Personalised and co-creator of Product Growth Lab.",
+      image: "https://festivalof.ai/wp-content/uploads/2025/05/Andrew-George.png",
+      fullBio: "Andrew George is an e-commerce strategist and automation expert who helps product-based business owners simplify their marketing, grow their audience, and sell more, without burning out. He's the founder of APG Personalised, a premium gift brand, and the co-creator of Product Growth Lab. With deep expertise in Klaviyo, Shopify, and AI tools like ChatGPT, Andrew is known for turning tech overwhelm into practical, real-world action.",
+      years: [2025],
+      social: {
+        linkedin: "https://linkedin.com",
+        website: "https://apgpersonalised.com"
+      }
+    },
+    {
+      name: "Chantelle Davison",
+      title: "Six-Figure Copywriter & Messaging Expert",
+      bio: "Teaching copywriters and business owners how to leverage AI as a creative partner.",
+      image: "https://festivalof.ai/wp-content/uploads/2025/05/Chantelle-Davison.png",
+      fullBio: "Chantelle Davison is a six-figure copywriter and messaging expert, trusted by some of the biggest 6- and 7-figure entrepreneurs in the online space. Today, Chantelle teaches copywriters and small business owners how to leverage AI not as their default setting, but as their competitive edge, uncovering deep psychological insights and emotional motivations in their audience.",
+      years: [2025],
       social: {
         linkedin: "https://linkedin.com",
         twitter: "https://twitter.com"
       }
     },
     {
-      name: "Michael Park",
-      title: "AI Product Designer",
-      bio: "Creating user-friendly AI interfaces and experiences.",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
-      fullBio: "Michael Park is dedicated to creating intuitive and accessible AI-powered interfaces that put users first while leveraging the power of artificial intelligence.",
+      name: "Gemma Went",
+      title: "Multi-Award Winning Online Business Mentor",
+      bio: "Founder of The Lighthouse®, blending corporate experience with innovative AI frameworks.",
+      image: "https://festivalof.ai/wp-content/uploads/2025/05/Gemma-Went.png",
+      fullBio: "Gemma Went is the Founder of The Lighthouse®, The Conscious Consultant Certification®, and The Conscious Energy Clearing Certification®. A multi-award winning Online Business Mentor, Strategist, Energy Practitioner and Certified Mindset Coach, she has 3 decades of experience. Gemma blends corporate, brand and agency experience with all she's learned from scaling two of her own businesses to create tried and tested frameworks that helped her clients get to six, multi-six and seven figures over the last twelve years in the online space.",
+      years: [2025],
       social: {
-        linkedin: "https://linkedin.com",
-        website: "https://michaelpark.design"
+        linkedin: "https://linkedin.com"
       }
     },
     {
-      name: "Lisa Thompson",
-      title: "Business AI Consultant",
-      bio: "Helping companies transform their operations with AI.",
-      image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=400&fit=crop",
-      fullBio: "Lisa Thompson works with companies across industries to identify opportunities for AI-driven transformation and guide them through successful implementation.",
+      name: "Hayley Brown",
+      title: "Founder & CEO, AllIn1.app",
+      bio: "AI Strategist and Automation Architect specializing in AI-powered business automation.",
+      image: "https://festivalof.ai/wp-content/uploads/2025/05/Hayley-Brown.png",
+      fullBio: "Hayley Brown is the founder and CEO of AllIn1.app, a UK-based agency specialising in AI-powered business automation for growth-focused entrepreneurs and enterprises. With a reputation for simplifying the complex, Hayley helps businesses systemise operations, scale with fewer staff, and stay ahead in the age of intelligent automation. She's the creator of 'AI for the Tech Shy,' a growing community and knowledge hub empowering non-technical business owners to confidently adopt AI.",
+      years: [2025],
       social: {
         linkedin: "https://linkedin.com",
-        twitter: "https://twitter.com"
+        website: "https://allin1.app"
+      }
+    },
+    {
+      name: "Laura Goodsell",
+      title: "Canva Creator & Canvassador",
+      bio: "Helping small business owners use Canva with confidence for branding and marketing.",
+      image: "https://festivalof.ai/wp-content/uploads/2025/05/Laura-Goodsell.png",
+      fullBio: "I'm Laura —a Canva Creator, and Canvassador, I help small business owners use Canva with confidence—to create visuals that support their branding, marketing, and everyday content. Through my memberships, courses, and YouTube tutorials, I teach simple, effective design skills that help businesses save time, show up professionally, and connect with their audience in a more visual, impactful way.",
+      years: [2025],
+      social: {
+        linkedin: "https://linkedin.com",
+        website: "https://lauragoodsell.com"
+      }
+    },
+    {
+      name: "Rick Dubidat",
+      title: "Business Growth Strategist & AI Consultant",
+      bio: "Certified coach helping entrepreneurs build high-performance businesses with AI and automation.",
+      image: "https://festivalof.ai/wp-content/uploads/2025/05/Rick-Dubidat-1.png",
+      fullBio: "Rick Dubidat is a sought-after business coach and growth strategist who helps entrepreneurs build high-performance businesses without sacrificing their sanity, family time, or freedom. With decades of leadership experience and a powerful blend of coaching qualifications, AI expertise, and marketing strategy, Rick is the go-to mentor for small business owners ready to scale with confidence. A certified business coach trained under Tony Robbins' coaching methodologies, an AI consultant, and a 2x World Champion martial artist.",
+      years: [2025],
+      social: {
+        linkedin: "https://linkedin.com"
+      }
+    },
+    {
+      name: "Chase Buckner",
+      title: "Director of Product Marketing at HighLevel",
+      bio: "Host of Release Radars, helping entrepreneurs use automation and AI to grow smarter.",
+      image: "https://festivalof.ai/wp-content/uploads/2025/10/ChaseB.png",
+      fullBio: "Chase Buckner is the Director of Product Marketing at HighLevel and host of Release Radars. Before joining HighLevel, he co-founded and scaled a seven-figure agency, which became one of HighLevel's first customers. Chase helps entrepreneurs and agencies use automation and AI to grow smarter, simplify processes, and achieve real results, bringing both product expertise and hands-on business experience to his presentations.",
+      years: [2025],
+      social: {
+        linkedin: "https://linkedin.com",
+        website: "https://gohighlevel.com"
       }
     },
   ];
+
+  const filteredSpeakers = speakers.filter(speaker => {
+    if (yearFilter === "all") return true;
+    return speaker.years.includes(parseInt(yearFilter));
+  });
 
   return (
     <div className="min-h-screen relative">
@@ -89,7 +147,7 @@ const Speakers = () => {
       <main className="pt-32 pb-20 relative z-10">
         <div className="container mx-auto px-4">
           {/* Header */}
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
               Our <span className="text-accent">Speakers</span>
             </h1>
@@ -99,15 +157,55 @@ const Speakers = () => {
             </p>
           </div>
 
+          {/* Year Filter */}
+          <div className="flex justify-center mb-12">
+            <div className="inline-flex gap-2 p-2 bg-card/50 backdrop-blur-sm rounded-xl border border-border">
+              <Button
+                onClick={() => setYearFilter("all")}
+                variant={yearFilter === "all" ? "default" : "ghost"}
+                className={yearFilter === "all" ? "bg-primary text-primary-foreground" : ""}
+              >
+                All Speakers
+              </Button>
+              <Button
+                onClick={() => setYearFilter("2025")}
+                variant={yearFilter === "2025" ? "default" : "ghost"}
+                className={yearFilter === "2025" ? "bg-primary text-primary-foreground" : ""}
+              >
+                2025 Speakers
+              </Button>
+              <Button
+                onClick={() => setYearFilter("2026")}
+                variant={yearFilter === "2026" ? "default" : "ghost"}
+                className={yearFilter === "2026" ? "bg-primary text-primary-foreground" : ""}
+              >
+                2026 Speakers
+              </Button>
+            </div>
+          </div>
+
           {/* Speakers Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            {speakers.map((speaker, index) => (
+            {filteredSpeakers.map((speaker, index) => (
               <Card
                 key={index}
                 className="bg-card/50 backdrop-blur-sm border-border hover:border-primary transition-all duration-300 hover:scale-105 group cursor-pointer"
                 onClick={() => setSelectedSpeaker(speaker)}
               >
                 <CardContent className="p-6">
+                  {/* Year Badges */}
+                  <div className="flex gap-2 mb-4">
+                    {speaker.years.map((year) => (
+                      <Badge
+                        key={year}
+                        variant={year === 2026 ? "default" : "secondary"}
+                        className={year === 2026 ? "bg-accent text-accent-foreground" : ""}
+                      >
+                        {year}
+                      </Badge>
+                    ))}
+                  </div>
+                  
                   <div className="relative mb-4 overflow-hidden rounded-lg">
                     <img
                       src={speaker.image}
