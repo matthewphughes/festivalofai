@@ -156,10 +156,10 @@ const Admin = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-4">
-                    View registered users and manage their access.
+                    View registered users and manage their access and roles.
                   </p>
-                  <Button variant="outline" className="w-full" disabled>
-                    Coming Soon
+                  <Button onClick={() => navigate("/admin/users")} className="w-full">
+                    Manage Users
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </CardContent>

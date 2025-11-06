@@ -15,6 +15,7 @@ import Dashboard from "./pages/Dashboard";
 import Replays from "./pages/Replays";
 import Admin from "./pages/Admin";
 import AdminReplays from "./pages/AdminReplays";
+import AdminUsers from "./pages/AdminUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/replays" element={<Replays />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/replays" element={<AdminReplays />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
