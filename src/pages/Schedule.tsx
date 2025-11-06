@@ -3,11 +3,10 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import StarField from "@/components/StarField";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, Users } from "lucide-react";
+import { Clock, Users, Calendar } from "lucide-react";
 
 const Schedule = () => {
-  const [selectedTrack, setSelectedTrack] = useState<"beginner" | "advanced">("beginner");
+  const [selectedDay, setSelectedDay] = useState<"day1" | "day2">("day2");
 
   const day1Workshops = [
     {
@@ -27,7 +26,7 @@ const Schedule = () => {
   ];
 
   const day2Schedule = {
-    shared: [
+    opening: [
       {
         time: "08:00 - 09:00",
         title: "Registration & Breakfast",
@@ -42,100 +41,82 @@ const Schedule = () => {
         type: "keynote",
       },
     ],
-    beginner: [
+    tracks: [
       {
         time: "10:00 - 11:00",
-        title: "Session Title TBC",
-        description: "Session details coming soon",
-        speaker: "Speaker TBC",
-        type: "session",
+        beginner: {
+          title: "Session Title TBC",
+          description: "Session details coming soon",
+          speaker: "Speaker TBC",
+        },
+        advanced: {
+          title: "Session Title TBC",
+          description: "Session details coming soon",
+          speaker: "Speaker TBC",
+        },
       },
       {
         time: "11:00 - 11:30",
-        title: "Coffee Break",
-        description: "Network and recharge",
-        type: "break",
+        shared: {
+          title: "Coffee Break",
+          description: "Network and recharge",
+          type: "break",
+        },
       },
       {
         time: "11:30 - 12:30",
-        title: "Session Title TBC",
-        description: "Session details coming soon",
-        speaker: "Speaker TBC",
-        type: "session",
+        beginner: {
+          title: "Session Title TBC",
+          description: "Session details coming soon",
+          speaker: "Speaker TBC",
+        },
+        advanced: {
+          title: "Session Title TBC",
+          description: "Session details coming soon",
+          speaker: "Speaker TBC",
+        },
       },
       {
         time: "12:30 - 13:30",
-        title: "Lunch & Networking",
-        description: "Enjoy lunch while connecting with speakers and attendees",
-        type: "break",
+        shared: {
+          title: "Lunch & Networking",
+          description: "Enjoy lunch while connecting with speakers and attendees",
+          type: "break",
+        },
       },
       {
         time: "13:30 - 14:30",
-        title: "Session Title TBC",
-        description: "Session details coming soon",
-        speaker: "Speaker TBC",
-        type: "session",
+        beginner: {
+          title: "Session Title TBC",
+          description: "Session details coming soon",
+          speaker: "Speaker TBC",
+        },
+        advanced: {
+          title: "Session Title TBC",
+          description: "Session details coming soon",
+          speaker: "Speaker TBC",
+        },
       },
       {
         time: "14:30 - 15:30",
-        title: "Session Title TBC",
-        description: "Session details coming soon",
-        speaker: "Speaker TBC",
-        type: "session",
+        beginner: {
+          title: "Session Title TBC",
+          description: "Session details coming soon",
+          speaker: "Speaker TBC",
+        },
+        advanced: {
+          title: "Session Title TBC",
+          description: "Session details coming soon",
+          speaker: "Speaker TBC",
+        },
       },
       {
         time: "15:30 - 16:00",
-        title: "Afternoon Break",
-        description: "Refreshments and networking",
-        type: "break",
-      },
-    ],
-    advanced: [
-      {
-        time: "10:00 - 11:00",
-        title: "Session Title TBC",
-        description: "Session details coming soon",
-        speaker: "Speaker TBC",
-        type: "session",
-      },
-      {
-        time: "11:00 - 11:30",
-        title: "Coffee Break",
-        description: "Network and recharge",
-        type: "break",
-      },
-      {
-        time: "11:30 - 12:30",
-        title: "Session Title TBC",
-        description: "Session details coming soon",
-        speaker: "Speaker TBC",
-        type: "session",
-      },
-      {
-        time: "12:30 - 13:30",
-        title: "Lunch & Networking",
-        description: "Enjoy lunch while connecting with speakers and attendees",
-        type: "break",
-      },
-      {
-        time: "13:30 - 14:30",
-        title: "Session Title TBC",
-        description: "Session details coming soon",
-        speaker: "Speaker TBC",
-        type: "session",
-      },
-      {
-        time: "14:30 - 15:30",
-        title: "Session Title TBC",
-        description: "Session details coming soon",
-        speaker: "Speaker TBC",
-        type: "session",
-      },
-      {
-        time: "15:30 - 16:00",
-        title: "Afternoon Break",
-        description: "Refreshments and networking",
-        type: "break",
+        shared: {
+          title: "Afternoon Break",
+          description: "Refreshments and networking",
+          type: "break",
+        },
       },
     ],
     closing: [
@@ -176,7 +157,7 @@ const Schedule = () => {
       <Navigation />
 
       <main className="pt-32 pb-20 relative z-10">
-        <div className="container mx-auto px-4 max-w-5xl">
+        <div className="container mx-auto px-4 max-w-6xl">
           {/* Header */}
           <div className="text-center mb-16">
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
@@ -187,22 +168,46 @@ const Schedule = () => {
             </p>
           </div>
 
-          {/* Day Tabs */}
-          <Tabs defaultValue="day2" className="w-full">
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-12 bg-card/50 backdrop-blur-sm">
-              <TabsTrigger value="day1" className="text-base">
-                Day 1 - Workshops
-              </TabsTrigger>
-              <TabsTrigger value="day2" className="text-base">
-                Day 2 - Conference
-              </TabsTrigger>
-            </TabsList>
+          {/* Day Selector */}
+          <div className="flex justify-center mb-12">
+            <div className="inline-flex gap-4 p-2 bg-card/50 backdrop-blur-sm rounded-xl border border-border">
+              <button
+                onClick={() => setSelectedDay("day1")}
+                className={`flex items-center gap-3 px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 ${
+                  selectedDay === "day1"
+                    ? "bg-primary text-primary-foreground shadow-lg scale-105"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                }`}
+              >
+                <Calendar className="w-5 h-5" />
+                <div className="text-left">
+                  <div className="text-sm opacity-80">Day 1</div>
+                  <div>Workshops</div>
+                </div>
+              </button>
+              <button
+                onClick={() => setSelectedDay("day2")}
+                className={`flex items-center gap-3 px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 ${
+                  selectedDay === "day2"
+                    ? "bg-primary text-primary-foreground shadow-lg scale-105"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                }`}
+              >
+                <Calendar className="w-5 h-5" />
+                <div className="text-left">
+                  <div className="text-sm opacity-80">Day 2</div>
+                  <div>Conference</div>
+                </div>
+              </button>
+            </div>
+          </div>
 
-            {/* Day 1 - Workshops */}
-            <TabsContent value="day1" className="space-y-8">
+          {/* Day 1 - Workshops */}
+          {selectedDay === "day1" && (
+            <div className="space-y-8">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold mb-3">
-                  Workshop Day - <span className="text-accent">October 15th</span>
+                  Workshop Day - <span className="text-accent">October 15th, 2026</span>
                 </h2>
                 <p className="text-muted-foreground">
                   Choose your track: Beginner or Advanced
@@ -213,7 +218,7 @@ const Schedule = () => {
                 {day1Workshops.map((workshop, index) => (
                   <Card
                     key={index}
-                    className={`backdrop-blur-sm border-primary bg-primary/10 hover:scale-102 transition-all duration-300`}
+                    className="backdrop-blur-sm border-primary bg-primary/10 hover:scale-102 transition-all duration-300"
                   >
                     <CardContent className="p-6">
                       <div className="mb-4">
@@ -235,138 +240,148 @@ const Schedule = () => {
                   </Card>
                 ))}
               </div>
-            </TabsContent>
+            </div>
+          )}
 
-            {/* Day 2 - Conference */}
-            <TabsContent value="day2" className="space-y-8">
+          {/* Day 2 - Conference */}
+          {selectedDay === "day2" && (
+            <div className="space-y-6">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold mb-3">
-                  Conference Day - <span className="text-accent">October 16th</span>
+                  Conference Day - <span className="text-accent">October 16th, 2026</span>
                 </h2>
-                <p className="text-muted-foreground mb-6">
-                  Select your track for breakout sessions
+                <p className="text-muted-foreground">
+                  Dual track sessions with shared keynotes and networking
                 </p>
-
-                {/* Track Selector */}
-                <div className="inline-flex items-center gap-2 p-1 bg-card/50 backdrop-blur-sm rounded-lg border border-border">
-                  <button
-                    onClick={() => setSelectedTrack("beginner")}
-                    className={`px-6 py-2 rounded-md font-semibold transition-all duration-300 ${
-                      selectedTrack === "beginner"
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    Beginner Track
-                  </button>
-                  <button
-                    onClick={() => setSelectedTrack("advanced")}
-                    className={`px-6 py-2 rounded-md font-semibold transition-all duration-300 ${
-                      selectedTrack === "advanced"
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    Advanced Track
-                  </button>
-                </div>
               </div>
 
-              <div className="space-y-4">
-                {/* Shared Sessions (Opening) */}
-                {day2Schedule.shared.map((item, index) => (
-                  <Card
-                    key={`shared-${index}`}
-                    className={`backdrop-blur-sm transition-all duration-300 hover:scale-102 ${getTypeColor(
-                      item.type
-                    )}`}
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex flex-col md:flex-row md:items-start gap-4">
-                        <div className="flex items-center gap-2 text-accent font-bold min-w-[140px]">
-                          <Clock className="w-5 h-5" />
-                          {item.time}
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                          {item.speaker && (
-                            <p className="text-accent font-semibold mb-2">
-                              {item.speaker}
-                            </p>
-                          )}
-                          <p className="text-muted-foreground">{item.description}</p>
-                        </div>
+              {/* Opening Sessions (Full Width) */}
+              {day2Schedule.opening.map((item, index) => (
+                <Card
+                  key={`opening-${index}`}
+                  className={`backdrop-blur-sm transition-all duration-300 hover:scale-102 ${getTypeColor(
+                    item.type
+                  )}`}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row md:items-start gap-4">
+                      <div className="flex items-center gap-2 text-accent font-bold min-w-[140px]">
+                        <Clock className="w-5 h-5" />
+                        {item.time}
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                        {item.speaker && (
+                          <p className="text-accent font-semibold mb-2">
+                            {item.speaker}
+                          </p>
+                        )}
+                        <p className="text-muted-foreground">{item.description}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
 
-                {/* Track-Specific Sessions */}
-                <div className="py-4">
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary/20 text-primary rounded-full font-bold">
-                      <Users className="w-4 h-4" />
-                      {selectedTrack === "beginner" ? "Beginner Track" : "Advanced Track"}
-                    </span>
-                  </div>
-                  {day2Schedule[selectedTrack].map((item, index) => (
+              {/* Track Sessions */}
+              {day2Schedule.tracks.map((timeSlot, index) => (
+                <div key={`slot-${index}`}>
+                  {timeSlot.shared ? (
+                    // Full Width Shared Session (Breaks)
                     <Card
-                      key={`track-${index}`}
-                      className={`backdrop-blur-sm transition-all duration-300 hover:scale-102 mb-4 ${getTypeColor(
-                        item.type
+                      className={`backdrop-blur-sm transition-all duration-300 hover:scale-102 ${getTypeColor(
+                        timeSlot.shared.type
                       )}`}
                     >
                       <CardContent className="p-6">
                         <div className="flex flex-col md:flex-row md:items-start gap-4">
                           <div className="flex items-center gap-2 text-accent font-bold min-w-[140px]">
                             <Clock className="w-5 h-5" />
-                            {item.time}
+                            {timeSlot.time}
                           </div>
                           <div className="flex-1">
-                            <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                            {item.speaker && (
-                              <p className="text-accent font-semibold mb-2">
-                                {item.speaker}
-                              </p>
-                            )}
-                            <p className="text-muted-foreground">{item.description}</p>
+                            <h3 className="text-xl font-bold mb-2">{timeSlot.shared.title}</h3>
+                            <p className="text-muted-foreground">{timeSlot.shared.description}</p>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
-                </div>
-
-                {/* Shared Sessions (Closing) */}
-                {day2Schedule.closing.map((item, index) => (
-                  <Card
-                    key={`closing-${index}`}
-                    className={`backdrop-blur-sm transition-all duration-300 hover:scale-102 ${getTypeColor(
-                      item.type
-                    )}`}
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex flex-col md:flex-row md:items-start gap-4">
-                        <div className="flex items-center gap-2 text-accent font-bold min-w-[140px]">
-                          <Clock className="w-5 h-5" />
-                          {item.time}
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                          {item.speaker && (
-                            <p className="text-accent font-semibold mb-2">
-                              {item.speaker}
-                            </p>
-                          )}
-                          <p className="text-muted-foreground">{item.description}</p>
-                        </div>
+                  ) : (
+                    // Side-by-side Track Sessions
+                    <div>
+                      <div className="flex items-center gap-2 text-accent font-bold mb-3 px-2">
+                        <Clock className="w-5 h-5" />
+                        {timeSlot.time}
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Beginner Track */}
+                        <Card className="backdrop-blur-sm border-border bg-card/50 hover:scale-102 transition-all duration-300">
+                          <CardContent className="p-6">
+                            <div className="mb-4">
+                              <span className="inline-flex items-center gap-2 text-sm font-bold text-primary">
+                                <Users className="w-4 h-4" />
+                                Beginner Track
+                              </span>
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">{timeSlot.beginner.title}</h3>
+                            <p className="text-accent font-semibold mb-2">
+                              {timeSlot.beginner.speaker}
+                            </p>
+                            <p className="text-muted-foreground">{timeSlot.beginner.description}</p>
+                          </CardContent>
+                        </Card>
+
+                        {/* Advanced Track */}
+                        <Card className="backdrop-blur-sm border-border bg-card/50 hover:scale-102 transition-all duration-300">
+                          <CardContent className="p-6">
+                            <div className="mb-4">
+                              <span className="inline-flex items-center gap-2 text-sm font-bold text-secondary">
+                                <Users className="w-4 h-4" />
+                                Advanced Track
+                              </span>
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">{timeSlot.advanced.title}</h3>
+                            <p className="text-accent font-semibold mb-2">
+                              {timeSlot.advanced.speaker}
+                            </p>
+                            <p className="text-muted-foreground">{timeSlot.advanced.description}</p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Closing Sessions (Full Width) */}
+              {day2Schedule.closing.map((item, index) => (
+                <Card
+                  key={`closing-${index}`}
+                  className={`backdrop-blur-sm transition-all duration-300 hover:scale-102 ${getTypeColor(
+                    item.type
+                  )}`}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row md:items-start gap-4">
+                      <div className="flex items-center gap-2 text-accent font-bold min-w-[140px]">
+                        <Clock className="w-5 h-5" />
+                        {item.time}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                        {item.speaker && (
+                          <p className="text-accent font-semibold mb-2">
+                            {item.speaker}
+                          </p>
+                        )}
+                        <p className="text-muted-foreground">{item.description}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
           {/* Note */}
           <Card className="mt-12 bg-card/50 backdrop-blur-sm border-border">
