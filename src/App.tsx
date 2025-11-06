@@ -10,6 +10,7 @@ import Schedule from "./pages/Schedule";
 import PreviousEvents from "./pages/PreviousEvents";
 import Venue from "./pages/Venue";
 import Tickets from "./pages/Tickets";
+import ThankYou from "./pages/ThankYou";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Replays from "./pages/Replays";
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/previous-events" element={<PreviousEvents />} />
           <Route path="/venue" element={<Venue />} />
           <Route path="/tickets" element={<Tickets />} />
+          <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/replays" element={<Replays />} />
