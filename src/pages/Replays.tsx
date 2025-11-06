@@ -256,14 +256,14 @@ const Replays = () => {
           </div>
           {isEditing ? (
             <Select
-              value={editForm.speaker_id || ""}
-              onValueChange={(value) => setEditForm({ ...editForm, speaker_id: value || null })}
+              value={editForm.speaker_id || "none"}
+              onValueChange={(value) => setEditForm({ ...editForm, speaker_id: value === "none" ? null : value })}
             >
               <SelectTrigger className="mb-2">
                 <SelectValue placeholder="Select Speaker" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">No Speaker</SelectItem>
+              <SelectContent className="bg-popover z-50">
+                <SelectItem value="none">No Speaker</SelectItem>
                 {speakers.map((speaker) => (
                   <SelectItem key={speaker.id} value={speaker.id}>
                     {speaker.name}
