@@ -96,19 +96,90 @@ const AdminSpeakers = () => {
     setLoading(false);
   };
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const optimizeImage = async (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        img.src = e.target?.result as string;
+      };
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Failed to get canvas context'));
+          return;
+        }
+
+        // Calculate new dimensions (max 800x800, maintain aspect ratio)
+        let width = img.width;
+        let height = img.height;
+        const maxDimension = 800;
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = (height / width) * maxDimension;
+            width = maxDimension;
+          } else {
+            width = (width / height) * maxDimension;
+            height = maxDimension;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw and compress
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error('Failed to optimize image'));
+              return;
+            }
+            const optimizedFile = new File([blob], `${Date.now()}.webp`, {
+              type: 'image/webp',
+            });
+            resolve(optimizedFile);
+          },
+          'image/webp',
+          0.85 // Quality setting
+        );
+      };
+
+      img.onerror = () => reject(new Error('Failed to load image'));
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image must be less than 5MB");
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("Image must be less than 10MB");
         return;
       }
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+
+      try {
+        toast.info("Optimizing image...");
+        const optimizedFile = await optimizeImage(file);
+        setImageFile(optimizedFile);
+        
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result as string);
+        };
+        reader.readAsDataURL(optimizedFile);
+        
+        toast.success("Image optimized and ready to upload");
+      } catch (error) {
+        toast.error("Failed to optimize image");
+        console.error(error);
+      }
     }
   };
 
@@ -117,13 +188,14 @@ const AdminSpeakers = () => {
 
     setUploading(true);
     try {
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.webp`;
       const filePath = `${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('speaker-images')
-        .upload(filePath, imageFile);
+        .upload(filePath, imageFile, {
+          contentType: 'image/webp',
+        });
 
       if (uploadError) throw uploadError;
 
@@ -446,7 +518,7 @@ const AdminSpeakers = () => {
                       {uploading ? "Uploading..." : "Upload Image"}
                     </Button>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Max 5MB. JPG, PNG, or WEBP
+                      Max 10MB. Auto-optimized to WebP
                     </p>
                   </div>
                 </div>
