@@ -287,7 +287,7 @@ const Tickets = () => {
                     What is your refund policy?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    We offer a full refund if you cancel more than 30 days before the event (by September 16, 2026). Cancellations made 15-30 days before the event receive a 50% refund. Unfortunately, we cannot offer refunds for cancellations made less than 15 days before the event date. All refund requests must be submitted in writing to our support team.
+                    We offer a full, no-questions-asked refund if you cancel up to 3 months before the event (by July 16, 2026). After this date, we cannot offer refunds. We encourage you to book with confidence knowing you have plenty of time to adjust your plans if needed.
                   </AccordionContent>
                 </AccordionItem>
 
