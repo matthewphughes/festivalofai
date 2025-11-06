@@ -11,6 +11,7 @@ import PreviousEvents from "./pages/PreviousEvents";
 import Venue from "./pages/Venue";
 import Tickets from "./pages/Tickets";
 import Auth from "./pages/Auth";
+import Dashboard from "./pages/Dashboard";
 import Replays from "./pages/Replays";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/venue" element={<Venue />} />
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/replays" element={<Replays />} />
           <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
