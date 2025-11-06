@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -567,13 +568,18 @@ const AdminSpeakers = () => {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="year">Year</Label>
-                  <Input
-                    id="year"
-                    type="number"
+                  <Select
                     value={formData.year}
-                    onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                    placeholder="e.g., 2025"
-                  />
+                    onValueChange={(value) => setFormData({ ...formData, year: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2025">2025</SelectItem>
+                      <SelectItem value="2026">2026</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
