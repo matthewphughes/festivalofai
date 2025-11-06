@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Pencil, Trash2, Plus, Upload, Linkedin, Twitter, Globe, Youtube } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Plus, Upload, Linkedin, Twitter, Globe, Youtube, Instagram } from "lucide-react";
 import { toast } from "sonner";
 
 interface Speaker {
@@ -25,6 +25,7 @@ interface Speaker {
   twitter_url: string | null;
   youtube_url: string | null;
   tiktok_url: string | null;
+  instagram_url: string | null;
   website_url: string | null;
 }
 
@@ -48,6 +49,7 @@ const AdminSpeakers = () => {
     twitter_url: "",
     youtube_url: "",
     tiktok_url: "",
+    instagram_url: "",
     website_url: "",
   });
 
@@ -149,6 +151,7 @@ const AdminSpeakers = () => {
       twitter_url: "",
       youtube_url: "",
       tiktok_url: "",
+      instagram_url: "",
       website_url: "",
     });
     setImagePreview(null);
@@ -167,6 +170,7 @@ const AdminSpeakers = () => {
       twitter_url: speaker.twitter_url || "",
       youtube_url: speaker.youtube_url || "",
       tiktok_url: speaker.tiktok_url || "",
+      instagram_url: speaker.instagram_url || "",
       website_url: speaker.website_url || "",
     });
     setImagePreview(speaker.image_url);
@@ -213,6 +217,7 @@ const AdminSpeakers = () => {
         twitter_url: formData.twitter_url || null,
         youtube_url: formData.youtube_url || null,
         tiktok_url: formData.tiktok_url || null,
+        instagram_url: formData.instagram_url || null,
         website_url: formData.website_url || null,
       };
 
@@ -353,6 +358,11 @@ const AdminSpeakers = () => {
                           {speaker.youtube_url && (
                             <a href={speaker.youtube_url} target="_blank" rel="noopener noreferrer">
                               <Youtube className="h-4 w-4 text-muted-foreground hover:text-accent" />
+                            </a>
+                          )}
+                          {speaker.instagram_url && (
+                            <a href={speaker.instagram_url} target="_blank" rel="noopener noreferrer">
+                              <Instagram className="h-4 w-4 text-muted-foreground hover:text-accent" />
                             </a>
                           )}
                           {speaker.tiktok_url && (
@@ -527,6 +537,17 @@ const AdminSpeakers = () => {
                   value={formData.tiktok_url}
                   onChange={(e) => setFormData({ ...formData, tiktok_url: e.target.value })}
                   placeholder="https://tiktok.com/@..."
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="instagram">Instagram URL</Label>
+                <Input
+                  id="instagram"
+                  type="url"
+                  value={formData.instagram_url}
+                  onChange={(e) => setFormData({ ...formData, instagram_url: e.target.value })}
+                  placeholder="https://instagram.com/..."
                 />
               </div>
 

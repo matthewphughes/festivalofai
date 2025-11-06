@@ -98,6 +98,7 @@ export type Database = {
           created_at: string | null
           id: string
           image_url: string | null
+          instagram_url: string | null
           linkedin_url: string | null
           name: string
           tiktok_url: string | null
@@ -113,6 +114,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           image_url?: string | null
+          instagram_url?: string | null
           linkedin_url?: string | null
           name: string
           tiktok_url?: string | null
@@ -128,6 +130,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           image_url?: string | null
+          instagram_url?: string | null
           linkedin_url?: string | null
           name?: string
           tiktok_url?: string | null
