@@ -132,7 +132,7 @@ const Admin = () => {
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle>Event Replays</CardTitle>
@@ -160,6 +160,22 @@ const Admin = () => {
                   </p>
                   <Button onClick={() => navigate("/admin/users")} className="w-full">
                     Manage Users
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Speaker Management</CardTitle>
+                  <CardDescription>Manage event speakers</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Add, edit, and manage speaker profiles and their details.
+                  </p>
+                  <Button onClick={() => navigate("/admin/speakers")} className="w-full">
+                    Manage Speakers
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </CardContent>
