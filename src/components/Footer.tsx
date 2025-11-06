@@ -84,7 +84,7 @@ const Footer = () => {
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors"
             >
               <LogIn size={16} />
-              <span>Login to Event Replays</span>
+              <span>Login</span>
             </Link>
           </div>
         </div>
