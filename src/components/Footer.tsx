@@ -55,19 +55,47 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-bold mb-4">Follow Us</h3>
             <div className="flex gap-4">
-              <a href="#" className="text-muted-foreground hover:text-accent transition-colors" aria-label="Facebook">
+              <a 
+                href="https://facebook.com/festivalofai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-accent transition-colors" 
+                aria-label="Facebook - @festivalofai"
+              >
                 <Facebook size={20} />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-accent transition-colors" aria-label="Twitter">
+              <a 
+                href="https://twitter.com/festivalofai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-accent transition-colors" 
+                aria-label="Twitter - @festivalofai"
+              >
                 <Twitter size={20} />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-accent transition-colors" aria-label="LinkedIn">
+              <a 
+                href="https://linkedin.com/company/festivalofai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-accent transition-colors" 
+                aria-label="LinkedIn - @festivalofai"
+              >
                 <Linkedin size={20} />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-accent transition-colors" aria-label="Instagram">
+              <a 
+                href="https://instagram.com/festivalofai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-accent transition-colors" 
+                aria-label="Instagram - @festivalofai"
+              >
                 <Instagram size={20} />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-accent transition-colors" aria-label="Email">
+              <a 
+                href="mailto:hello@festivalofai.com" 
+                className="text-muted-foreground hover:text-accent transition-colors" 
+                aria-label="Email - hello@festivalofai.com"
+              >
                 <Mail size={20} />
               </a>
             </div>
