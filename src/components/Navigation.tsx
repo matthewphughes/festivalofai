@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-import logo from "@/assets/logo.png";
+import logoDark from "@/assets/logo-dark.png";
+import logoLight from "@/assets/logo-light.png";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,10 +23,16 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <img src={logo} alt="Festival of AI" className="h-10 w-10 transition-transform group-hover:scale-110" />
-            <span className="text-xl font-bold tracking-tight">
-              Festival of <span className="text-accent">AI</span>
-            </span>
+            <img 
+              src={logoDark} 
+              alt="Festival of AI" 
+              className="h-12 w-auto transition-transform group-hover:scale-105 dark:hidden" 
+            />
+            <img 
+              src={logoLight} 
+              alt="Festival of AI" 
+              className="h-12 w-auto transition-transform group-hover:scale-105 hidden dark:block" 
+            />
           </Link>
 
           {/* Desktop Navigation */}
