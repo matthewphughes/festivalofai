@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Linkedin, Instagram, Mail, LogIn } from "lucide-react";
+import { Facebook, Twitter, Linkedin, Instagram, Youtube, LogIn } from "lucide-react";
+import { SiTiktok } from "react-icons/si";
 
 const Footer = () => {
   return (
@@ -92,11 +93,22 @@ const Footer = () => {
                 <Instagram size={20} />
               </a>
               <a 
-                href="mailto:hello@festivalofai.com" 
+                href="https://tiktok.com/@festivalofai" 
+                target="_blank" 
+                rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-accent transition-colors" 
-                aria-label="Email - hello@festivalofai.com"
+                aria-label="TikTok - @festivalofai"
               >
-                <Mail size={20} />
+                <SiTiktok size={20} />
+              </a>
+              <a 
+                href="https://youtube.com/@festivalofai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-accent transition-colors" 
+                aria-label="YouTube - @festivalofai"
+              >
+                <Youtube size={20} />
               </a>
             </div>
           </div>
