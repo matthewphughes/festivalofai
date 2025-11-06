@@ -1,11 +1,21 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import StarField from "@/components/StarField";
+import CountdownTimer from "@/components/CountdownTimer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { Check, CreditCard, Calendar } from "lucide-react";
+import { addDays, nextMonday, set } from "date-fns";
 
 const Tickets = () => {
+  // Calculate next Monday at 12:00 PM (lunchtime)
+  const getNextMondayLunchtime = () => {
+    const now = new Date();
+    const monday = nextMonday(now);
+    return set(monday, { hours: 12, minutes: 0, seconds: 0, milliseconds: 0 });
+  };
+
+  const superEarlyBirdEndDate = getNextMondayLunchtime();
   const ticketTiers = [
     {
       name: "Standard",
@@ -78,11 +88,22 @@ const Tickets = () => {
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
               Get Your <span className="text-accent">Tickets</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-4">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
               Secure your spot at Festival of AI 2026 - October 16th at the National Space Center, Leicester
             </p>
-            <div className="inline-block bg-accent/20 text-accent border border-accent/50 px-4 py-2 rounded-full text-sm font-bold">
-              🎉 SUPER EARLY BIRD PRICING - Limited Time Only!
+            
+            {/* Countdown Timer */}
+            <div className="max-w-2xl mx-auto mb-8">
+              <div className="bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/30 rounded-2xl p-8">
+                <div className="text-center mb-6">
+                  <div className="inline-block bg-accent/20 text-accent border border-accent/50 px-4 py-2 rounded-full text-sm font-bold mb-4">
+                    🎉 SUPER EARLY BIRD PRICING - Limited Time Only!
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Offer Ends In:</h3>
+                  <p className="text-sm text-muted-foreground">Monday at Lunchtime</p>
+                </div>
+                <CountdownTimer targetDate={superEarlyBirdEndDate} />
+              </div>
             </div>
           </div>
 
@@ -125,14 +146,27 @@ const Tickets = () => {
                     ))}
                   </ul>
                   <Button
-                    className={`w-full ${
+                    className={`w-full mb-3 ${
                       tier.highlighted
                         ? "bg-accent text-accent-foreground hover:bg-accent/90"
                         : "bg-primary hover:bg-primary/90"
                     }`}
                     size="lg"
                   >
-                    Book Now
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Pay in Full
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className={`w-full ${
+                      tier.highlighted
+                        ? "border-accent text-accent hover:bg-accent/10"
+                        : "border-primary text-primary hover:bg-primary/10"
+                    }`}
+                    size="lg"
+                  >
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Pay Monthly
                   </Button>
                 </CardContent>
               </Card>
