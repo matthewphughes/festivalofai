@@ -3,6 +3,10 @@ import Footer from "@/components/Footer";
 import StarField from "@/components/StarField";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Train, Car, Plane, Hotel } from "lucide-react";
+import venueRockets from "@/assets/venue-rockets.jpg";
+import venueExterior from "@/assets/venue-exterior.jpg";
+import venuePlanetarium from "@/assets/venue-planetarium.jpg";
+import venueEventSpace from "@/assets/venue-event-space.jpg";
 
 const Venue = () => {
   return (
@@ -20,6 +24,65 @@ const Venue = () => {
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               An inspiring location for an inspiring event
             </p>
+          </div>
+
+          {/* Venue Photo Gallery */}
+          <div className="mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Main hero image - Rockets */}
+              <div className="md:col-span-2 relative overflow-hidden rounded-lg aspect-[21/9] group">
+                <img 
+                  src={venueRockets} 
+                  alt="PGM 17 THOR rocket display at National Space Center" 
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent flex items-end p-8">
+                  <div>
+                    <h3 className="text-3xl font-bold mb-2">Iconic Space Exhibits</h3>
+                    <p className="text-lg text-foreground/80">Experience world-class space exploration displays</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Exterior */}
+              <div className="relative overflow-hidden rounded-lg aspect-video group">
+                <img 
+                  src={venueExterior} 
+                  alt="National Space Center exterior building" 
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                  <p className="text-lg font-semibold">UK's Largest Space Attraction</p>
+                </div>
+              </div>
+
+              {/* Planetarium */}
+              <div className="relative overflow-hidden rounded-lg aspect-video group">
+                <img 
+                  src={venuePlanetarium} 
+                  alt="Planetarium theater at National Space Center" 
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                  <p className="text-lg font-semibold">Immersive Planetarium Experience</p>
+                </div>
+              </div>
+
+              {/* Event Space */}
+              <div className="md:col-span-2 relative overflow-hidden rounded-lg aspect-[21/9] group">
+                <img 
+                  src={venueEventSpace} 
+                  alt="Event space at National Space Center featuring Innovation Challenge" 
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent flex items-end p-8">
+                  <div>
+                    <h3 className="text-3xl font-bold mb-2">World-Class Event Facilities</h3>
+                    <p className="text-lg text-foreground/80">Flexible spaces for presentations, networking, and innovation</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Venue Info */}
