@@ -113,10 +113,10 @@ const AdminSpeakers = () => {
           return;
         }
 
-        // Calculate new dimensions (max 800x800, maintain aspect ratio)
+        // Calculate new dimensions (max 1200x1200, maintain aspect ratio)
         let width = img.width;
         let height = img.height;
-        const maxDimension = 800;
+        const maxDimension = 1200;
 
         if (width > maxDimension || height > maxDimension) {
           if (width > height) {
