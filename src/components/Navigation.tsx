@@ -24,12 +24,12 @@ const Navigation = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
             <img 
-              src={logoDark} 
+              src={logoLight} 
               alt="Festival of AI" 
               className="h-12 w-auto transition-transform group-hover:scale-105 dark:hidden" 
             />
             <img 
-              src={logoLight} 
+              src={logoDark} 
               alt="Festival of AI" 
               className="h-12 w-auto transition-transform group-hover:scale-105 hidden dark:block" 
             />
