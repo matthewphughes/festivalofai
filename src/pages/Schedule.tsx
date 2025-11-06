@@ -34,7 +34,7 @@ const Schedule = () => {
         type: "break",
       },
       {
-        time: "09:00 - 10:00",
+        time: "09:00 - 09:45",
         title: "Opening Keynote",
         description: "Session details coming soon",
         speaker: "Speaker TBC",
@@ -43,7 +43,7 @@ const Schedule = () => {
     ],
     tracks: [
       {
-        time: "10:00 - 11:00",
+        time: "09:45 - 10:30",
         beginner: {
           title: "Session Title TBC",
           description: "Session details coming soon",
@@ -56,7 +56,7 @@ const Schedule = () => {
         },
       },
       {
-        time: "11:00 - 11:30",
+        time: "10:30 - 11:00",
         shared: {
           title: "Coffee Break",
           description: "Network and recharge",
@@ -64,7 +64,20 @@ const Schedule = () => {
         },
       },
       {
-        time: "11:30 - 12:30",
+        time: "11:00 - 11:45",
+        beginner: {
+          title: "Session Title TBC",
+          description: "Session details coming soon",
+          speaker: "Speaker TBC",
+        },
+        advanced: {
+          title: "Session Title TBC",
+          description: "Session details coming soon",
+          speaker: "Speaker TBC",
+        },
+      },
+      {
+        time: "11:45 - 12:30",
         beginner: {
           title: "Session Title TBC",
           description: "Session details coming soon",
@@ -85,7 +98,7 @@ const Schedule = () => {
         },
       },
       {
-        time: "13:30 - 14:30",
+        time: "13:30 - 14:15",
         beginner: {
           title: "Session Title TBC",
           description: "Session details coming soon",
@@ -98,7 +111,7 @@ const Schedule = () => {
         },
       },
       {
-        time: "14:30 - 15:30",
+        time: "14:15 - 15:00",
         beginner: {
           title: "Session Title TBC",
           description: "Session details coming soon",
@@ -111,17 +124,30 @@ const Schedule = () => {
         },
       },
       {
-        time: "15:30 - 16:00",
+        time: "15:00 - 15:30",
         shared: {
           title: "Afternoon Break",
           description: "Refreshments and networking",
           type: "break",
         },
       },
+      {
+        time: "15:30 - 16:15",
+        beginner: {
+          title: "Session Title TBC",
+          description: "Session details coming soon",
+          speaker: "Speaker TBC",
+        },
+        advanced: {
+          title: "Session Title TBC",
+          description: "Session details coming soon",
+          speaker: "Speaker TBC",
+        },
+      },
     ],
     closing: [
       {
-        time: "16:00 - 17:00",
+        time: "16:15 - 17:00",
         title: "Closing Q&A in the Planetarium",
         description: "Session details coming soon",
         speaker: "Speaker TBC",
@@ -332,7 +358,7 @@ const Schedule = () => {
                         </Card>
 
                         {/* Advanced Track */}
-                        <Card className="backdrop-blur-sm border-border bg-card/50 hover:scale-102 transition-all duration-300">
+                        <Card className="backdrop-blur-sm border-secondary bg-secondary/20 hover:scale-102 transition-all duration-300">
                           <CardContent className="p-6">
                             <div className="mb-4">
                               <span className="inline-flex items-center gap-2 text-sm font-bold text-secondary">
