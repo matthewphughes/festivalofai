@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import StarField from "@/components/StarField";
@@ -33,6 +34,41 @@ const Index = () => {
       title: "Hands-On Workshops",
       description: "Interactive sessions to get you started with AI tools and technologies.",
     },
+  ];
+
+  const faqs = [
+    {
+      question: "Is this a pitchfest?",
+      answer: "At the Festival of AI we are committed to making sure you get the best tips, tricks and strategies for growing your business using AI. This event is not a pitch fest, we're not trying to sell you onto a mastermind, a high ticket programme or something else, instead the speakers will provide true value."
+    },
+    {
+      question: "What is the refund policy?",
+      answer: "We're big believers in being good humans and so, if you need a refund before June 30th, you can drop us an email and we will issue a full refund with no questions asked. However, you can sell / transfer your ticket to another person free of charge at any time."
+    },
+    {
+      question: "Will I have access to the speakers?",
+      answer: "Our speakers are some of the most friendly people I've ever met. You will find them hanging around at the breaks, lunch and at the happy hour."
+    },
+    {
+      question: "What are the best hotels?",
+      answer: "Please check out the accommodation page for more information on hotels. We have a limited amount of spaces at the conference hotel so contact us for more information."
+    },
+    {
+      question: "Are the sessions recorded?",
+      answer: "Yes all sessions are recorded and every attendee will receive lifetime access to them via our online portal."
+    },
+    {
+      question: "Is the venue accessible?",
+      answer: "Yes the venue is on the second floor with lifts and wheelchair access and all rooms are accessible, we are doing our upmost to make the event accessible and inclusive, please contact us if you have any specific requirements that you feel we may have missed."
+    },
+    {
+      question: "What are the closest transport links?",
+      answer: "Please check out our travel and accommodation page for more information."
+    },
+    {
+      question: "What if the event gets cancelled?",
+      answer: "We are confident that the event will go ahead, however, if for any reason the event gets cancelled we will issue a full refund."
+    }
   ];
 
   return (
@@ -176,6 +212,34 @@ const Index = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 relative z-10">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
+            Frequently Asked <span className="text-accent">Questions</span>
+          </h2>
+          <p className="text-xl text-center mb-12 text-muted-foreground">
+            Everything you need to know about Festival of AI
+          </p>
+          <Accordion type="single" collapsible className="w-full space-y-4">
+            {faqs.map((faq, index) => (
+              <AccordionItem 
+                key={index} 
+                value={`item-${index}`}
+                className="bg-card/50 backdrop-blur-sm border border-border rounded-lg px-6"
+              >
+                <AccordionTrigger className="text-left text-lg font-semibold hover:text-accent">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
 
