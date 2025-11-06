@@ -396,6 +396,7 @@ const AdminSpeakers = () => {
                   <TableRow>
                     <TableHead>Speaker</TableHead>
                     <TableHead>Title & Company</TableHead>
+                    <TableHead>Year</TableHead>
                     <TableHead>Social Links</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -418,6 +419,11 @@ const AdminSpeakers = () => {
                         <div className="text-sm">
                           {speaker.title && <div>{speaker.title}</div>}
                           {speaker.company && <div className="text-muted-foreground">{speaker.company}</div>}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm font-medium">
+                          {speaker.year || <span className="text-muted-foreground">-</span>}
                         </div>
                       </TableCell>
                       <TableCell>
