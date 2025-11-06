@@ -100,10 +100,12 @@ export type Database = {
           image_url: string | null
           linkedin_url: string | null
           name: string
+          tiktok_url: string | null
           title: string | null
           twitter_url: string | null
           updated_at: string | null
           website_url: string | null
+          youtube_url: string | null
         }
         Insert: {
           bio?: string | null
@@ -113,10 +115,12 @@ export type Database = {
           image_url?: string | null
           linkedin_url?: string | null
           name: string
+          tiktok_url?: string | null
           title?: string | null
           twitter_url?: string | null
           updated_at?: string | null
           website_url?: string | null
+          youtube_url?: string | null
         }
         Update: {
           bio?: string | null
@@ -126,10 +130,12 @@ export type Database = {
           image_url?: string | null
           linkedin_url?: string | null
           name?: string
+          tiktok_url?: string | null
           title?: string | null
           twitter_url?: string | null
           updated_at?: string | null
           website_url?: string | null
+          youtube_url?: string | null
         }
         Relationships: []
       }

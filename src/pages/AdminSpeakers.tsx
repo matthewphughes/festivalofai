@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Pencil, Trash2, Plus, Upload, Linkedin, Twitter, Globe } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Plus, Upload, Linkedin, Twitter, Globe, Youtube } from "lucide-react";
 import { toast } from "sonner";
 
 interface Speaker {
@@ -23,6 +23,8 @@ interface Speaker {
   image_url: string | null;
   linkedin_url: string | null;
   twitter_url: string | null;
+  youtube_url: string | null;
+  tiktok_url: string | null;
   website_url: string | null;
 }
 
@@ -44,6 +46,8 @@ const AdminSpeakers = () => {
     bio: "",
     linkedin_url: "",
     twitter_url: "",
+    youtube_url: "",
+    tiktok_url: "",
     website_url: "",
   });
 
@@ -143,6 +147,8 @@ const AdminSpeakers = () => {
       bio: "",
       linkedin_url: "",
       twitter_url: "",
+      youtube_url: "",
+      tiktok_url: "",
       website_url: "",
     });
     setImagePreview(null);
@@ -159,6 +165,8 @@ const AdminSpeakers = () => {
       bio: speaker.bio || "",
       linkedin_url: speaker.linkedin_url || "",
       twitter_url: speaker.twitter_url || "",
+      youtube_url: speaker.youtube_url || "",
+      tiktok_url: speaker.tiktok_url || "",
       website_url: speaker.website_url || "",
     });
     setImagePreview(speaker.image_url);
@@ -203,6 +211,8 @@ const AdminSpeakers = () => {
         image_url: imageUrl,
         linkedin_url: formData.linkedin_url || null,
         twitter_url: formData.twitter_url || null,
+        youtube_url: formData.youtube_url || null,
+        tiktok_url: formData.tiktok_url || null,
         website_url: formData.website_url || null,
       };
 
@@ -338,6 +348,18 @@ const AdminSpeakers = () => {
                           {speaker.twitter_url && (
                             <a href={speaker.twitter_url} target="_blank" rel="noopener noreferrer">
                               <Twitter className="h-4 w-4 text-muted-foreground hover:text-accent" />
+                            </a>
+                          )}
+                          {speaker.youtube_url && (
+                            <a href={speaker.youtube_url} target="_blank" rel="noopener noreferrer">
+                              <Youtube className="h-4 w-4 text-muted-foreground hover:text-accent" />
+                            </a>
+                          )}
+                          {speaker.tiktok_url && (
+                            <a href={speaker.tiktok_url} target="_blank" rel="noopener noreferrer">
+                              <svg className="h-4 w-4 text-muted-foreground hover:text-accent" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                              </svg>
                             </a>
                           )}
                           {speaker.website_url && (
@@ -483,6 +505,28 @@ const AdminSpeakers = () => {
                   value={formData.twitter_url}
                   onChange={(e) => setFormData({ ...formData, twitter_url: e.target.value })}
                   placeholder="https://twitter.com/..."
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="youtube">YouTube URL</Label>
+                <Input
+                  id="youtube"
+                  type="url"
+                  value={formData.youtube_url}
+                  onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
+                  placeholder="https://youtube.com/@..."
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="tiktok">TikTok URL</Label>
+                <Input
+                  id="tiktok"
+                  type="url"
+                  value={formData.tiktok_url}
+                  onChange={(e) => setFormData({ ...formData, tiktok_url: e.target.value })}
+                  placeholder="https://tiktok.com/@..."
                 />
               </div>
 
