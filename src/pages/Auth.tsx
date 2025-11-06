@@ -8,6 +8,19 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Rocket } from "lucide-react";
+import { z } from "zod";
+
+// Input validation schemas
+const signInSchema = z.object({
+  email: z.string().trim().email({ message: "Invalid email address" }).max(255, { message: "Email must be less than 255 characters" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(100, { message: "Password must be less than 100 characters" }),
+});
+
+const signUpSchema = z.object({
+  fullName: z.string().trim().min(1, { message: "Full name is required" }).max(100, { message: "Full name must be less than 100 characters" }),
+  email: z.string().trim().email({ message: "Invalid email address" }).max(255, { message: "Email must be less than 255 characters" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(100, { message: "Password must be less than 100 characters" }),
+});
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 
@@ -41,9 +54,18 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Validate inputs
+      const validationResult = signInSchema.safeParse({ email, password });
+      if (!validationResult.success) {
+        const firstError = validationResult.error.errors[0];
+        toast.error(firstError.message);
+        setLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: validationResult.data.email,
+        password: validationResult.data.password,
       });
 
       if (error) {
@@ -67,13 +89,22 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Validate inputs
+      const validationResult = signUpSchema.safeParse({ fullName, email, password });
+      if (!validationResult.success) {
+        const firstError = validationResult.error.errors[0];
+        toast.error(firstError.message);
+        setLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: validationResult.data.email,
+        password: validationResult.data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/replays`,
           data: {
-            full_name: fullName,
+            full_name: validationResult.data.fullName,
           },
         },
       });
