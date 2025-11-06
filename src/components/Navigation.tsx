@@ -15,7 +15,6 @@ const Navigation = () => {
     { name: "Schedule", path: "/schedule" },
     { name: "Previous Events", path: "/previous-events" },
     { name: "Venue", path: "/venue" },
-    { name: "Event Replays", path: "/auth" },
   ];
 
   return (

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Linkedin, Instagram, Mail } from "lucide-react";
+import { Facebook, Twitter, Linkedin, Instagram, Mail, LogIn } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -74,8 +74,19 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Festival of AI. All rights reserved.</p>
+        <div className="mt-8 pt-8 border-t border-border">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-muted-foreground">
+              &copy; {new Date().getFullYear()} Festival of AI. All rights reserved.
+            </p>
+            <Link 
+              to="/auth" 
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors"
+            >
+              <LogIn size={16} />
+              <span>Login to Event Replays</span>
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
