@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Play, Clock, LogOut, Shield, ArrowLeft, Edit, Save, X } from "lucide-react";
 import { toast } from "sonner";
@@ -30,18 +32,30 @@ interface Replay {
   thumbnail_url: string | null;
   event_year: number;
   speaker_name: string | null;
+  speaker_id: string | null;
   duration_minutes: number | null;
   published: boolean;
+}
+
+interface Speaker {
+  id: string;
+  name: string;
+  bio: string | null;
+  title: string | null;
+  company: string | null;
+  image_url: string | null;
 }
 
 const Replays = () => {
   const navigate = useNavigate();
   const [replays, setReplays] = useState<Replay[]>([]);
+  const [speakers, setSpeakers] = useState<Speaker[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Replay>>({});
+  const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -66,22 +80,43 @@ const Replays = () => {
     const isUserAdmin = roles?.some(r => r.role === "admin") || false;
     setIsAdmin(isUserAdmin);
 
-    // Fetch replays
-    await fetchReplays();
+    // Fetch replays and speakers
+    await Promise.all([fetchReplays(), fetchSpeakers()]);
+  };
+
+  const fetchSpeakers = async () => {
+    const { data, error } = await supabase
+      .from("speakers")
+      .select("*")
+      .order("name");
+
+    if (error) {
+      console.error("Failed to load speakers", error);
+    } else {
+      setSpeakers(data || []);
+    }
   };
 
   const fetchReplays = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("event_replays")
-      .select("*")
+      .select(`
+        *,
+        speaker:speakers(id, name, bio, title, company, image_url)
+      `)
       .order("event_year", { ascending: false });
 
     if (error) {
       toast.error("Failed to load replays");
       console.error(error);
     } else {
-      setReplays(data || []);
+      // Flatten speaker data
+      const formattedReplays = (data || []).map((replay: any) => ({
+        ...replay,
+        speaker_name: replay.speaker?.name || replay.speaker_name,
+      }));
+      setReplays(formattedReplays);
     }
     setLoading(false);
   };
@@ -101,7 +136,7 @@ const Replays = () => {
     setEditingId(replay.id);
     setEditForm({
       title: replay.title,
-      speaker_name: replay.speaker_name,
+      speaker_id: replay.speaker_id,
       description: replay.description,
       duration_minutes: replay.duration_minutes,
       published: replay.published,
@@ -133,7 +168,7 @@ const Replays = () => {
         .from("event_replays")
         .update({
           title: validationResult.data.title,
-          speaker_name: validationResult.data.speaker_name,
+          speaker_id: editForm.speaker_id || null,
           description: validationResult.data.description,
           duration_minutes: validationResult.data.duration_minutes,
           published: editForm.published,
@@ -175,6 +210,15 @@ const Replays = () => {
   const replays2025 = replays.filter(r => r.event_year === 2025);
   const replays2026 = replays.filter(r => r.event_year === 2026);
 
+  const handleSpeakerClick = async (speakerId: string | null) => {
+    if (!speakerId) return;
+    
+    const speaker = speakers.find(s => s.id === speakerId);
+    if (speaker) {
+      setSelectedSpeaker(speaker);
+    }
+  };
+
   const ReplayCard = ({ replay }: { replay: Replay }) => {
     const isEditing = editingId === replay.id;
 
@@ -211,15 +255,30 @@ const Replays = () => {
             </div>
           </div>
           {isEditing ? (
-            <Input
-              value={editForm.speaker_name || ""}
-              onChange={(e) => setEditForm({ ...editForm, speaker_name: e.target.value })}
-              placeholder="Speaker Name"
-              className="mb-2"
-            />
+            <Select
+              value={editForm.speaker_id || ""}
+              onValueChange={(value) => setEditForm({ ...editForm, speaker_id: value || null })}
+            >
+              <SelectTrigger className="mb-2">
+                <SelectValue placeholder="Select Speaker" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">No Speaker</SelectItem>
+                {speakers.map((speaker) => (
+                  <SelectItem key={speaker.id} value={speaker.id}>
+                    {speaker.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           ) : (
             replay.speaker_name && (
-              <p className="text-sm font-medium text-muted-foreground">by {replay.speaker_name}</p>
+              <button
+                onClick={() => handleSpeakerClick(replay.speaker_id)}
+                className="text-sm font-medium text-primary hover:underline cursor-pointer text-left"
+              >
+                by {replay.speaker_name}
+              </button>
             )
           )}
           {isEditing ? (
@@ -387,6 +446,47 @@ const Replays = () => {
       </main>
 
       <Footer />
+
+      {/* Speaker Profile Dialog */}
+      <Dialog open={!!selectedSpeaker} onOpenChange={() => setSelectedSpeaker(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-3xl font-bold mb-4">
+              {selectedSpeaker?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedSpeaker && (
+            <div className="space-y-6">
+              <div className="flex flex-col md:flex-row gap-6">
+                {selectedSpeaker.image_url && (
+                  <img
+                    src={selectedSpeaker.image_url}
+                    alt={selectedSpeaker.name}
+                    className="w-full md:w-48 h-48 object-cover rounded-lg"
+                  />
+                )}
+                <div className="flex-1">
+                  {selectedSpeaker.title && (
+                    <p className="text-accent font-semibold text-xl mb-2">
+                      {selectedSpeaker.title}
+                    </p>
+                  )}
+                  {selectedSpeaker.company && (
+                    <p className="text-muted-foreground mb-4">
+                      {selectedSpeaker.company}
+                    </p>
+                  )}
+                  {selectedSpeaker.bio && (
+                    <p className="text-muted-foreground leading-relaxed">
+                      {selectedSpeaker.bio}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

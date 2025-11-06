@@ -22,6 +22,7 @@ export type Database = {
           event_year: number
           id: string
           published: boolean | null
+          speaker_id: string | null
           speaker_name: string | null
           thumbnail_url: string | null
           title: string
@@ -35,6 +36,7 @@ export type Database = {
           event_year: number
           id?: string
           published?: boolean | null
+          speaker_id?: string | null
           speaker_name?: string | null
           thumbnail_url?: string | null
           title: string
@@ -48,13 +50,22 @@ export type Database = {
           event_year?: number
           id?: string
           published?: boolean | null
+          speaker_id?: string | null
           speaker_name?: string | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
           video_url?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "event_replays_speaker_id_fkey"
+            columns: ["speaker_id"]
+            isOneToOne: false
+            referencedRelation: "speakers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -77,6 +88,48 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      speakers: {
+        Row: {
+          bio: string | null
+          company: string | null
+          created_at: string | null
+          id: string
+          image_url: string | null
+          linkedin_url: string | null
+          name: string
+          title: string | null
+          twitter_url: string | null
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          bio?: string | null
+          company?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          linkedin_url?: string | null
+          name: string
+          title?: string | null
+          twitter_url?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          bio?: string | null
+          company?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          linkedin_url?: string | null
+          name?: string
+          title?: string | null
+          twitter_url?: string | null
+          updated_at?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }
