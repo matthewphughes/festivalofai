@@ -17,6 +17,7 @@ interface Speaker {
   company: string | null;
   bio: string | null;
   image_url: string | null;
+  year: number | null;
   linkedin_url: string | null;
   twitter_url: string | null;
   youtube_url: string | null;
@@ -51,7 +52,9 @@ const Speakers = () => {
     setLoading(false);
   };
 
-  const filteredSpeakers = speakers;
+  const filteredSpeakers = yearFilter === "all" 
+    ? speakers 
+    : speakers.filter(s => s.year === parseInt(yearFilter));
 
   return (
     <div className="min-h-screen relative">
@@ -71,8 +74,8 @@ const Speakers = () => {
             </p>
           </div>
 
-          {/* Year Filter - Hidden for now since speakers don't have year data */}
-          {/* <div className="flex justify-center mb-12">
+          {/* Year Filter */}
+          <div className="flex justify-center mb-12">
             <div className="inline-flex gap-2 p-2 bg-card/50 backdrop-blur-sm rounded-xl border border-border">
               <Button
                 onClick={() => setYearFilter("all")}
@@ -96,7 +99,7 @@ const Speakers = () => {
                 2026 Speakers
               </Button>
             </div>
-          </div> */}
+          </div>
 
           {/* Speakers Grid */}
           {loading ? (

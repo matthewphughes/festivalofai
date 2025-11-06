@@ -21,6 +21,7 @@ interface Speaker {
   company: string | null;
   bio: string | null;
   image_url: string | null;
+  year: number | null;
   linkedin_url: string | null;
   twitter_url: string | null;
   youtube_url: string | null;
@@ -45,6 +46,7 @@ const AdminSpeakers = () => {
     title: "",
     company: "",
     bio: "",
+    year: "",
     linkedin_url: "",
     twitter_url: "",
     youtube_url: "",
@@ -219,6 +221,7 @@ const AdminSpeakers = () => {
       title: "",
       company: "",
       bio: "",
+      year: "",
       linkedin_url: "",
       twitter_url: "",
       youtube_url: "",
@@ -238,6 +241,7 @@ const AdminSpeakers = () => {
       title: speaker.title || "",
       company: speaker.company || "",
       bio: speaker.bio || "",
+      year: speaker.year?.toString() || "",
       linkedin_url: speaker.linkedin_url || "",
       twitter_url: speaker.twitter_url || "",
       youtube_url: speaker.youtube_url || "",
@@ -284,6 +288,7 @@ const AdminSpeakers = () => {
         title: formData.title || null,
         company: formData.company || null,
         bio: formData.bio || null,
+        year: formData.year ? parseInt(formData.year) : null,
         image_url: imageUrl,
         linkedin_url: formData.linkedin_url || null,
         twitter_url: formData.twitter_url || null,
@@ -535,7 +540,7 @@ const AdminSpeakers = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="title">Title</Label>
                   <Input
@@ -552,6 +557,16 @@ const AdminSpeakers = () => {
                     value={formData.company}
                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                     placeholder="e.g., Acme Corp"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="year">Year</Label>
+                  <Input
+                    id="year"
+                    type="number"
+                    value={formData.year}
+                    onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                    placeholder="e.g., 2025"
                   />
                 </div>
               </div>
