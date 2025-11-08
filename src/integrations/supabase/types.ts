@@ -91,6 +91,30 @@ export type Database = {
         }
         Relationships: []
       }
+      replay_purchases: {
+        Row: {
+          event_year: number
+          id: string
+          purchased_at: string
+          stripe_payment_intent: string | null
+          user_id: string
+        }
+        Insert: {
+          event_year: number
+          id?: string
+          purchased_at?: string
+          stripe_payment_intent?: string | null
+          user_id: string
+        }
+        Update: {
+          event_year?: number
+          id?: string
+          purchased_at?: string
+          stripe_payment_intent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       speakers: {
         Row: {
           bio: string | null

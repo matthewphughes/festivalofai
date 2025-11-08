@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -49,6 +49,7 @@ interface Speaker {
 
 const Replays = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [replays, setReplays] = useState<Replay[]>([]);
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,16 +58,25 @@ const Replays = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Replay>>({});
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
+  const [purchasedYears, setPurchasedYears] = useState<number[]>([]);
+  const [verifyingPurchase, setVerifyingPurchase] = useState(false);
 
   useEffect(() => {
     checkAuth();
   }, []);
 
+  useEffect(() => {
+    const sessionId = searchParams.get("session_id");
+    if (sessionId) {
+      verifyPurchase(sessionId);
+    }
+  }, [searchParams]);
+
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
-      navigate("/auth");
+      navigate("/auth?redirect=/replays");
       return;
     }
 
@@ -81,8 +91,50 @@ const Replays = () => {
     const isUserAdmin = roles?.some(r => r.role === "admin") || false;
     setIsAdmin(isUserAdmin);
 
+    // Fetch purchased years
+    await checkPurchasedYears();
+
     // Fetch replays and speakers
     await Promise.all([fetchReplays(), fetchSpeakers()]);
+  };
+
+  const checkPurchasedYears = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const { data, error } = await supabase
+      .from("replay_purchases")
+      .select("event_year")
+      .eq("user_id", session.user.id);
+
+    if (error) {
+      console.error("Error fetching purchases:", error);
+      return;
+    }
+
+    setPurchasedYears(data?.map(p => p.event_year) || []);
+  };
+
+  const verifyPurchase = async (sessionId: string) => {
+    setVerifyingPurchase(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("verify-purchase", {
+        body: { session_id: sessionId },
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast.success("Purchase successful! You now have access to the replays.");
+        await checkPurchasedYears();
+        navigate("/replays", { replace: true });
+      }
+    } catch (error) {
+      console.error("Error verifying purchase:", error);
+      toast.error("Failed to verify purchase. Please contact support.");
+    } finally {
+      setVerifyingPurchase(false);
+    }
   };
 
   const fetchSpeakers = async () => {
@@ -100,13 +152,30 @@ const Replays = () => {
 
   const fetchReplays = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    
+    // Admins see all, regular users only see published
+    const query = supabase
       .from("event_replays")
       .select(`
         *,
         speaker:speakers(id, name, bio, title, company, image_url)
       `)
       .order("event_year", { ascending: false });
+
+    // Non-admins only see published replays
+    const { data: { session } } = await supabase.auth.getSession();
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", session?.user?.id || "");
+    
+    const isUserAdmin = roles?.some(r => r.role === "admin") || false;
+    
+    if (!isUserAdmin) {
+      query.eq("published", true);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       toast.error("Failed to load replays");
@@ -208,8 +277,19 @@ const Replays = () => {
   };
 
 
-  const replays2025 = useMemo(() => replays.filter(r => r.event_year === 2025), [replays]);
-  const replays2026 = useMemo(() => replays.filter(r => r.event_year === 2026), [replays]);
+  const replays2025 = useMemo(() => {
+    const yearReplays = replays.filter(r => r.event_year === 2025);
+    // Filter based on purchase status for non-admins
+    if (isAdmin) return yearReplays;
+    return purchasedYears.includes(2025) ? yearReplays : [];
+  }, [replays, isAdmin, purchasedYears]);
+  
+  const replays2026 = useMemo(() => {
+    const yearReplays = replays.filter(r => r.event_year === 2026);
+    // Filter based on purchase status for non-admins
+    if (isAdmin) return yearReplays;
+    return purchasedYears.includes(2026) ? yearReplays : [];
+  }, [replays, isAdmin, purchasedYears]);
 
   const handleSpeakerClick = useCallback((speakerId: string | null) => {
     if (!speakerId) return;
@@ -229,6 +309,12 @@ const Replays = () => {
       <Navigation />
       
       <main className="container mx-auto px-4 py-24">
+        {verifyingPurchase && (
+          <div className="mb-6 p-4 bg-primary/10 border border-primary/20 rounded-lg text-center">
+            <p className="text-primary font-medium">Verifying your purchase...</p>
+          </div>
+        )}
+        
         <div className="flex justify-between items-center mb-8">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -275,7 +361,18 @@ const Replays = () => {
             </TabsList>
 
             <TabsContent value="2025" className="mt-6">
-              {replays2025.length === 0 ? (
+              {!isAdmin && !purchasedYears.includes(2025) ? (
+                <Card>
+                  <CardContent className="py-12 text-center space-y-4">
+                    <Play className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-lg font-semibold">Purchase access to 2025 replays</p>
+                    <p className="text-muted-foreground">Get unlimited access to all 2025 event sessions</p>
+                    <Button onClick={() => navigate("/watch-replays")} size="lg">
+                      View & Purchase Replays
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : replays2025.length === 0 ? (
                 <Card>
                   <CardContent className="py-12 text-center">
                     <Play className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -306,7 +403,18 @@ const Replays = () => {
             </TabsContent>
 
             <TabsContent value="2026" className="mt-6">
-              {replays2026.length === 0 ? (
+              {!isAdmin && !purchasedYears.includes(2026) ? (
+                <Card>
+                  <CardContent className="py-12 text-center space-y-4">
+                    <Play className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-lg font-semibold">Purchase access to 2026 replays</p>
+                    <p className="text-muted-foreground">Get unlimited access to all 2026 event sessions</p>
+                    <Button onClick={() => navigate("/watch-replays")} size="lg">
+                      View & Purchase Replays
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : replays2026.length === 0 ? (
                 <Card>
                   <CardContent className="py-12 text-center">
                     <Play className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />

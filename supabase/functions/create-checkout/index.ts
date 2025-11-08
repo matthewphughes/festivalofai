@@ -51,14 +51,14 @@ serve(async (req) => {
 
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    // Get the price_id from the request body
-    const { price_id } = await req.json();
+    // Get the price_id and optional product_type from request body
+    const { price_id, product_type, event_year } = await req.json();
     if (!price_id) {
       logStep("ERROR: No price_id provided");
       throw new Error("price_id is required");
     }
 
-    logStep("Price ID received", { price_id });
+    logStep("Price ID received", { price_id, product_type, event_year });
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -76,6 +76,16 @@ serve(async (req) => {
       logStep("No existing Stripe customer found");
     }
 
+    // Determine success URL based on product type
+    const isReplayPurchase = product_type === "replay";
+    const successUrl = isReplayPurchase 
+      ? `${req.headers.get("origin")}/replays?session_id={CHECKOUT_SESSION_ID}`
+      : `${req.headers.get("origin")}/thank-you?session_id={CHECKOUT_SESSION_ID}`;
+    
+    const cancelUrl = isReplayPurchase
+      ? `${req.headers.get("origin")}/watch-replays?canceled=true`
+      : `${req.headers.get("origin")}/tickets?canceled=true`;
+
     // Create a one-time payment session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -87,8 +97,13 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: `${req.headers.get("origin")}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/tickets?canceled=true`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      metadata: {
+        product_type: product_type || "ticket",
+        event_year: event_year?.toString() || "",
+        user_id: user.id,
+      },
     });
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });

@@ -1,1 +1,13 @@
 project_id = "ppvgibvylsxdybsxufxm"
+
+[functions.delete-user]
+verify_jwt = true
+
+[functions.verify-replay-access]
+verify_jwt = false
+
+[functions.verify-purchase]
+verify_jwt = true
+
+[functions.create-checkout]
+verify_jwt = true
