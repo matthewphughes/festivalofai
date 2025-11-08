@@ -24,6 +24,7 @@ interface Speaker {
   tiktok_url: string | null;
   instagram_url: string | null;
   website_url: string | null;
+  slug: string;
 }
 
 
@@ -208,106 +209,119 @@ const Speakers = () => {
 
           {/* Speaker Profile Dialog */}
           <Dialog open={!!selectedSpeaker} onOpenChange={() => setSelectedSpeaker(null)}>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-lg">
               <DialogHeader>
-                <DialogTitle className="text-3xl font-bold mb-4">
-                  {selectedSpeaker?.name}
-                </DialogTitle>
-              </DialogHeader>
-              {selectedSpeaker && (
-                <div className="space-y-6">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <img
-                      src={selectedSpeaker.image_url || "https://via.placeholder.com/400x400?text=No+Image"}
-                      alt={selectedSpeaker.name}
-                      className="w-full md:w-48 h-48 object-cover rounded-lg"
-                    />
-                    <div className="flex-1">
-                      {selectedSpeaker.title && (
-                        <p className="text-accent font-semibold text-xl mb-2">
-                          {selectedSpeaker.title}
-                        </p>
-                      )}
-                      
-                      {/* Year Badges in Dialog */}
-                      {selectedSpeaker.years && selectedSpeaker.years.length > 0 && (
-                        <div className="flex gap-2 mb-4">
-                          {selectedSpeaker.years.map((year) => (
-                            <Badge key={year} variant="secondary" className="bg-primary/20 text-primary border-primary/30">
-                              {year}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {selectedSpeaker.bio && (
-                        <p className="text-muted-foreground leading-relaxed">
-                          {selectedSpeaker.bio}
-                        </p>
-                      )}
-                    </div>
+                <div className="flex items-center gap-4 mb-4">
+                  <img
+                    src={selectedSpeaker?.image_url || "/placeholder.svg"}
+                    alt={selectedSpeaker?.name}
+                    className="w-24 h-24 rounded-full object-cover"
+                  />
+                  <div>
+                    <DialogTitle className="text-2xl">{selectedSpeaker?.name}</DialogTitle>
+                    {selectedSpeaker?.title && (
+                      <p className="text-muted-foreground">{selectedSpeaker.title}</p>
+                    )}
+                    {selectedSpeaker?.company && (
+                      <p className="text-sm text-muted-foreground">{selectedSpeaker.company}</p>
+                    )}
                   </div>
-                  
-                  {/* Social Links */}
-                  <div className="flex gap-4 pt-4 border-t border-border">
-                    {selectedSpeaker.linkedin_url && (
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                {/* Years */}
+                {selectedSpeaker?.years && selectedSpeaker.years.length > 0 && (
+                  <div className="flex gap-2">
+                    {selectedSpeaker.years.sort().map((year) => (
+                      <Badge key={year} variant="secondary">
+                        {year}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
+                {/* Social Links */}
+                <div>
+                  <h3 className="font-semibold mb-3">Connect</h3>
+                  <div className="flex gap-4">
+                    {selectedSpeaker?.linkedin_url && (
                       <a
                         href={selectedSpeaker.linkedin_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+                        className="text-muted-foreground hover:text-primary transition-colors"
                       >
-                        <Linkedin className="w-5 h-5" />
-                        <span>LinkedIn</span>
+                        <Linkedin className="h-6 w-6" />
                       </a>
                     )}
-                    {selectedSpeaker.twitter_url && (
+                    {selectedSpeaker?.twitter_url && (
                       <a
                         href={selectedSpeaker.twitter_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+                        className="text-muted-foreground hover:text-primary transition-colors"
                       >
-                        <Twitter className="w-5 h-5" />
-                        <span>Twitter</span>
+                        <Twitter className="h-6 w-6" />
                       </a>
                     )}
-                    {selectedSpeaker.youtube_url && (
+                    {selectedSpeaker?.youtube_url && (
                       <a
                         href={selectedSpeaker.youtube_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+                        className="text-muted-foreground hover:text-primary transition-colors"
                       >
-                        <Youtube className="w-5 h-5" />
-                        <span>YouTube</span>
+                        <Youtube className="h-6 w-6" />
                       </a>
                     )}
-                    {selectedSpeaker.instagram_url && (
+                    {selectedSpeaker?.instagram_url && (
                       <a
                         href={selectedSpeaker.instagram_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+                        className="text-muted-foreground hover:text-primary transition-colors"
                       >
-                        <Instagram className="w-5 h-5" />
-                        <span>Instagram</span>
+                        <Instagram className="h-6 w-6" />
                       </a>
                     )}
-                    {selectedSpeaker.website_url && (
+                    {selectedSpeaker?.tiktok_url && (
+                      <a
+                        href={selectedSpeaker.tiktok_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                        </svg>
+                      </a>
+                    )}
+                    {selectedSpeaker?.website_url && (
                       <a
                         href={selectedSpeaker.website_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+                        className="text-muted-foreground hover:text-primary transition-colors"
                       >
-                        <Globe className="w-5 h-5" />
-                        <span>Website</span>
+                        <Globe className="h-6 w-6" />
                       </a>
                     )}
                   </div>
                 </div>
-              )}
+
+                {/* View Full Profile Button */}
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    if (selectedSpeaker?.slug) {
+                      window.location.href = `/speakers/${selectedSpeaker.slug}`;
+                    }
+                  }}
+                >
+                  View Full Profile
+                </Button>
+              </div>
             </DialogContent>
           </Dialog>
 

@@ -101,6 +101,7 @@ export type Database = {
           instagram_url: string | null
           linkedin_url: string | null
           name: string
+          slug: string
           tiktok_url: string | null
           title: string | null
           twitter_url: string | null
@@ -118,6 +119,7 @@ export type Database = {
           instagram_url?: string | null
           linkedin_url?: string | null
           name: string
+          slug: string
           tiktok_url?: string | null
           title?: string | null
           twitter_url?: string | null
@@ -135,6 +137,7 @@ export type Database = {
           instagram_url?: string | null
           linkedin_url?: string | null
           name?: string
+          slug?: string
           tiktok_url?: string | null
           title?: string | null
           twitter_url?: string | null
@@ -171,6 +174,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_speaker_slug: { Args: { speaker_name: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

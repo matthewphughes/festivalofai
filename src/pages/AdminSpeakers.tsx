@@ -29,6 +29,7 @@ interface Speaker {
   tiktok_url: string | null;
   instagram_url: string | null;
   website_url: string | null;
+  slug: string;
 }
 
 const AdminSpeakers = () => {
@@ -54,6 +55,7 @@ const AdminSpeakers = () => {
     tiktok_url: "",
     instagram_url: "",
     website_url: "",
+    slug: "",
   });
 
   useEffect(() => {
@@ -215,6 +217,15 @@ const AdminSpeakers = () => {
     }
   };
 
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+  };
+
   const handleAddNew = () => {
     setSelectedSpeaker(null);
     setFormData({
@@ -229,6 +240,7 @@ const AdminSpeakers = () => {
       tiktok_url: "",
       instagram_url: "",
       website_url: "",
+      slug: "",
     });
     setImagePreview(null);
     setImageFile(null);
@@ -249,6 +261,7 @@ const AdminSpeakers = () => {
       tiktok_url: speaker.tiktok_url || "",
       instagram_url: speaker.instagram_url || "",
       website_url: speaker.website_url || "",
+      slug: speaker.slug || "",
     });
     setImagePreview(speaker.image_url);
     setImageFile(null);
@@ -284,6 +297,8 @@ const AdminSpeakers = () => {
         }
       }
 
+      const finalSlug = formData.slug || generateSlug(formData.name);
+
       const speakerData = {
         name: formData.name,
         title: formData.title || null,
@@ -297,6 +312,7 @@ const AdminSpeakers = () => {
         tiktok_url: formData.tiktok_url || null,
         instagram_url: formData.instagram_url || null,
         website_url: formData.website_url || null,
+        slug: finalSlug,
       };
 
       if (selectedSpeaker) {
@@ -544,9 +560,30 @@ const AdminSpeakers = () => {
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => {
+                    const newName = e.target.value;
+                    setFormData({ 
+                      ...formData, 
+                      name: newName,
+                      slug: formData.slug || generateSlug(newName)
+                    });
+                  }}
                   required
                 />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="slug">URL Slug *</Label>
+                <Input
+                  id="slug"
+                  value={formData.slug}
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                  placeholder="e.g., matthew-hughes"
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  This will be used in the URL: festivalof.ai/speakers/{formData.slug || 'slug'}
+                </p>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
