@@ -191,7 +191,7 @@ const Navigation = () => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/buy-replays" className="cursor-pointer">
+                    <Link to="/replays" className="cursor-pointer">
                       <Video className="mr-2 h-4 w-4" />
                       Replays
                     </Link>
