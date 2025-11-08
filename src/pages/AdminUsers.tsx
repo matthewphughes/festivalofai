@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
@@ -14,6 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Pencil, Trash2, Shield, User, Mic, Users, Video } from "lucide-react";
 import { toast } from "sonner";
+import { UserFilters } from "@/components/admin/UserFilters";
+import { BulkActionsBar } from "@/components/admin/BulkActionsBar";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 interface UserProfile {
   id: string;
@@ -37,6 +40,7 @@ interface ReplayAccess {
 
 const AdminUsers = () => {
   const navigate = useNavigate();
+  const { logAction } = useAuditLog();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -49,6 +53,11 @@ const AdminUsers = () => {
   const [replays, setReplays] = useState<EventReplay[]>([]);
   const [userAccess, setUserAccess] = useState<ReplayAccess[]>([]);
   const [accessDialogOpen, setAccessDialogOpen] = useState(false);
+  
+  // New states for search, filtering, and bulk actions
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     checkAdminAccess();
@@ -142,6 +151,9 @@ const AdminUsers = () => {
     if (!selectedUser) return;
 
     try {
+      const oldName = selectedUser.full_name;
+      const oldRoles = selectedUser.roles;
+
       // Update profile name
       const { error: profileError } = await supabase
         .from("profiles")
@@ -169,6 +181,14 @@ const AdminUsers = () => {
 
         if (insertRoleError) throw insertRoleError;
       }
+
+      // Log the action
+      await logAction("update_user", selectedUser.id, {
+        old_name: oldName,
+        new_name: editForm.full_name,
+        old_roles: oldRoles,
+        new_roles: editForm.roles,
+      });
 
       toast.success("User updated successfully");
       setEditDialogOpen(false);
@@ -218,6 +238,12 @@ const AdminUsers = () => {
         setUserAccess(prev => prev.filter(
           a => !(a.replay_id === replayId && a.event_year === eventYear)
         ));
+
+        // Log the action
+        await logAction("revoke_replay_access", selectedUser.id, {
+          replay_id: replayId,
+          event_year: eventYear,
+        });
       } else {
         // Grant access
         const { error } = await supabase
@@ -232,6 +258,12 @@ const AdminUsers = () => {
         if (error) throw error;
 
         setUserAccess(prev => [...prev, { replay_id: replayId, event_year: eventYear, is_admin_grant: true }]);
+
+        // Log the action
+        await logAction("grant_replay_access", selectedUser.id, {
+          replay_id: replayId,
+          event_year: eventYear,
+        });
       }
 
       toast.success(hasAccess ? "Access revoked" : "Access granted");
@@ -278,11 +310,99 @@ const AdminUsers = () => {
         throw new Error(data.error || 'Failed to delete user');
       }
 
+      // Log the action
+      await logAction("delete_user", selectedUser.id, {
+        email: selectedUser.email,
+        full_name: selectedUser.full_name,
+      });
+
       toast.success("User deleted successfully");
       setDeleteDialogOpen(false);
       await fetchUsers();
     } catch (error: any) {
       toast.error(error.message || "Failed to delete user");
+    }
+  };
+
+  // Filter and search users
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      // Search filter
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch = 
+        user.full_name?.toLowerCase().includes(searchLower) ||
+        user.email.toLowerCase().includes(searchLower);
+
+      // Role filter
+      const matchesRole = 
+        roleFilter === "all" || 
+        user.roles.includes(roleFilter);
+
+      return matchesSearch && matchesRole;
+    });
+  }, [users, searchTerm, roleFilter]);
+
+  // Bulk selection handlers
+  const toggleUserSelection = (userId: string) => {
+    setSelectedUserIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(userId)) {
+        newSet.delete(userId);
+      } else {
+        newSet.add(userId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleAllUsers = () => {
+    if (selectedUserIds.size === filteredUsers.length) {
+      setSelectedUserIds(new Set());
+    } else {
+      setSelectedUserIds(new Set(filteredUsers.map(u => u.id)));
+    }
+  };
+
+  const clearSelection = () => {
+    setSelectedUserIds(new Set());
+  };
+
+  // Bulk role assignment
+  const handleBulkRoleAssign = async (role: string) => {
+    if (selectedUserIds.size === 0) return;
+
+    try {
+      const userIds = Array.from(selectedUserIds);
+      
+      // Add role to all selected users
+      const { error } = await supabase
+        .from("user_roles")
+        .insert(
+          userIds.map(userId => ({
+            user_id: userId,
+            role: role as "admin" | "user" | "speaker" | "attendee"
+          }))
+        );
+
+      if (error) {
+        // Ignore duplicate key errors (user already has role)
+        if (!error.message.includes("duplicate key")) {
+          throw error;
+        }
+      }
+
+      // Log the action
+      await logAction("bulk_assign_role", null, {
+        role,
+        user_count: userIds.length,
+        user_ids: userIds,
+      });
+
+      toast.success(`${role} role assigned to ${userIds.length} user${userIds.length !== 1 ? 's' : ''}`);
+      clearSelection();
+      await fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to assign roles");
     }
   };
 
@@ -308,14 +428,29 @@ const AdminUsers = () => {
             <CardDescription>Registered user accounts and their roles</CardDescription>
           </CardHeader>
           <CardContent>
+            <UserFilters
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              roleFilter={roleFilter}
+              setRoleFilter={setRoleFilter}
+            />
+
             {loading ? (
               <p className="text-center py-8 text-muted-foreground">Loading...</p>
-            ) : users.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">No users found</p>
+            ) : filteredUsers.length === 0 ? (
+              <p className="text-center py-8 text-muted-foreground">
+                {users.length === 0 ? "No users found" : "No users match your filters"}
+              </p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={selectedUserIds.size === filteredUsers.length}
+                        onCheckedChange={toggleAllUsers}
+                      />
+                    </TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Role</TableHead>
@@ -324,8 +459,14 @@ const AdminUsers = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user) => (
+                  {filteredUsers.map((user) => (
                     <TableRow key={user.id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedUserIds.has(user.id)}
+                          onCheckedChange={() => toggleUserSelection(user.id)}
+                        />
+                      </TableCell>
                       <TableCell className="font-medium">{user.full_name || "—"}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
@@ -372,6 +513,12 @@ const AdminUsers = () => {
             )}
           </CardContent>
         </Card>
+
+        <BulkActionsBar
+          selectedCount={selectedUserIds.size}
+          onClearSelection={clearSelection}
+          onBulkRoleAssign={handleBulkRoleAssign}
+        />
       </main>
 
       {/* Edit User Dialog */}
