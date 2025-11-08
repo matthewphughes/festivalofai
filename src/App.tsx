@@ -24,6 +24,7 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminSpeakers from "./pages/AdminSpeakers";
 import NotFound from "./pages/NotFound";
 import Accommodation from "./pages/Accommodation";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/previous-events" element={<PreviousEvents />} />
           <Route path="/venue" element={<Venue />} />
           <Route path="/accommodation" element={<Accommodation />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/auth" element={<Auth />} />

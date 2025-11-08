@@ -8,26 +8,26 @@ import { ExternalLink } from "lucide-react";
 const hotels = [
   {
     name: "Novotel Leicester",
-    description: "A new hotel in the heart of the city, this hotel is 5 minutes walk from the venue, slightly higher priced than the others but a more modern and luxurious experience too.",
+    description: "A new hotel in the heart of the city, slightly higher priced than the others but a more modern and luxurious experience too.",
     image: "https://festivalof.ai/wp-content/uploads/2025/07/a9p4_ho_00_p_2048x1536-1024x768.jpg",
     bookingUrl: "https://www.novotelleicester.com/",
-    distance: "5 minutes walk",
+    distance: "Less than 10 minutes by taxi",
     category: "Premium"
   },
   {
     name: "Holiday Inn Leicester by IHG",
-    description: "A modern Leicester hotel near the city centre with an open lobby, meeting facilities and spacious bedrooms. There's parking next door to this hotel and it sits 5 minutes walk from the venue.",
+    description: "A modern Leicester hotel near the city centre with an open lobby, meeting facilities and spacious bedrooms. There's parking available next door to this hotel.",
     image: "https://festivalof.ai/wp-content/uploads/2025/07/2024-07-17.jpg",
     bookingUrl: "https://www.ihg.com/holidayinn/hotels/gb/en/leicester/lctuk/hoteldetail",
-    distance: "5 minutes walk",
+    distance: "Less than 10 minutes by taxi",
     category: "Mid-Range"
   },
   {
     name: "Travelodge Leicester Central",
-    description: "Travelodge are a staple hotel chain in the UK's cities, these are standard, straight to the point, cheap and cheerful hotels. 5 minutes walk from the venue and right in the heart of the city.",
+    description: "Travelodge are a staple hotel chain in the UK's cities, these are standard, straight to the point, cheap and cheerful hotels right in the heart of the city.",
     image: "https://festivalof.ai/wp-content/uploads/2025/07/2021-07-05.jpg",
     bookingUrl: "https://www.travelodge.co.uk/hotels/261/Leicester-Central-hotel",
-    distance: "5 minutes walk",
+    distance: "Less than 10 minutes by taxi",
     category: "Budget"
   }
 ];
@@ -52,7 +52,7 @@ const Accommodation = () => {
                   Hotels & Accommodation
                 </h1>
                 <p className="text-xl text-muted-foreground mb-8">
-                  Stay close to the action with our recommended hotels, all within 5 minutes walk of the venue in the heart of Leicester.
+                  Stay close to the action with our recommended hotels, all a short taxi ride from the venue in Leicester.
                 </p>
               </div>
             </div>
