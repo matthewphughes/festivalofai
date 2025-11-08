@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Play, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 interface Replay {
   id: string;
@@ -127,8 +127,6 @@ const PublicReplays = () => {
     }
   };
 
-  const replays2025 = replays.filter(r => r.event_year === 2025);
-  const replays2026 = replays.filter(r => r.event_year === 2026);
 
   return (
     <div className="min-h-screen bg-background">
@@ -165,122 +163,49 @@ const PublicReplays = () => {
             </CardContent>
           </Card>
         ) : (
-          <Tabs defaultValue="2026" className="w-full">
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
-              <TabsTrigger value="2026">2026 Replays ({replays2026.length})</TabsTrigger>
-              <TabsTrigger value="2025">2025 Replays ({replays2025.length})</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="2026" className="mt-6">
-              {replays2026.length === 0 ? (
-                <Card>
-                  <CardContent className="py-12 text-center">
-                    <Play className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground">No 2026 replays available yet.</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {replays2026.map((replay) => (
-                    <Card
-                      key={replay.id}
-                      className="group cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden"
-                      onClick={() => setSelectedReplay(replay)}
-                    >
-                      <div className="relative aspect-video bg-muted">
-                        {replay.thumbnail_url ? (
-                          <img
-                            src={replay.thumbnail_url}
-                            alt={replay.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
-                            <Play className="h-16 w-16 text-muted-foreground" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
-                            <Play className="h-8 w-8 text-primary-foreground ml-1" fill="currentColor" />
-                          </div>
-                        </div>
-                        {replay.duration_minutes && (
-                          <Badge className="absolute bottom-2 right-2 bg-black/70">
-                            <Clock className="h-3 w-3 mr-1" />
-                            {replay.duration_minutes} min
-                          </Badge>
-                        )}
-                      </div>
-                      <CardContent className="p-4">
-                        <h3 className="font-bold text-lg mb-2 line-clamp-2">{replay.title}</h3>
-                        {replay.speaker_name && (
-                          <p className="text-sm text-muted-foreground mb-2">{replay.speaker_name}</p>
-                        )}
-                        {replay.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">{replay.description}</p>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {replays.map((replay) => (
+              <Card
+                key={replay.id}
+                className="group cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden"
+                onClick={() => setSelectedReplay(replay)}
+              >
+                <div className="relative aspect-video bg-muted">
+                  {replay.thumbnail_url ? (
+                    <img
+                      src={replay.thumbnail_url}
+                      alt={replay.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
+                      <Play className="h-16 w-16 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
+                      <Play className="h-8 w-8 text-primary-foreground ml-1" fill="currentColor" />
+                    </div>
+                  </div>
+                  {replay.duration_minutes && (
+                    <Badge className="absolute bottom-2 right-2 bg-black/70">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {replay.duration_minutes} min
+                    </Badge>
+                  )}
                 </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="2025" className="mt-6">
-              {replays2025.length === 0 ? (
-                <Card>
-                  <CardContent className="py-12 text-center">
-                    <Play className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground">No 2025 replays available yet.</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {replays2025.map((replay) => (
-                    <Card
-                      key={replay.id}
-                      className="group cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden"
-                      onClick={() => setSelectedReplay(replay)}
-                    >
-                      <div className="relative aspect-video bg-muted">
-                        {replay.thumbnail_url ? (
-                          <img
-                            src={replay.thumbnail_url}
-                            alt={replay.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
-                            <Play className="h-16 w-16 text-muted-foreground" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
-                            <Play className="h-8 w-8 text-primary-foreground ml-1" fill="currentColor" />
-                          </div>
-                        </div>
-                        {replay.duration_minutes && (
-                          <Badge className="absolute bottom-2 right-2 bg-black/70">
-                            <Clock className="h-3 w-3 mr-1" />
-                            {replay.duration_minutes} min
-                          </Badge>
-                        )}
-                      </div>
-                      <CardContent className="p-4">
-                        <h3 className="font-bold text-lg mb-2 line-clamp-2">{replay.title}</h3>
-                        {replay.speaker_name && (
-                          <p className="text-sm text-muted-foreground mb-2">{replay.speaker_name}</p>
-                        )}
-                        {replay.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">{replay.description}</p>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+                <CardContent className="p-4">
+                  <h3 className="font-bold text-lg mb-2 line-clamp-2">{replay.title}</h3>
+                  {replay.speaker_name && (
+                    <p className="text-sm text-muted-foreground mb-2">{replay.speaker_name}</p>
+                  )}
+                  {replay.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">{replay.description}</p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         )}
       </main>
 
