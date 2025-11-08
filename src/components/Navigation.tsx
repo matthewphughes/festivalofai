@@ -58,16 +58,12 @@ const Navigation = () => {
   };
 
   const eventLinks = [
-    { name: "Speakers", path: "/speakers" },
-    { name: "Schedule", path: "/schedule" },
     { name: "Venue", path: "/venue" },
     { name: "Accommodation", path: "/accommodation" },
-    { name: "Sponsors", path: "/sponsors" },
   ];
 
   const archiveLinks = [
     { name: "Replays", path: "/buy-replays" },
-    { name: "Previous Events", path: "/previous-events" },
   ];
 
   return (
@@ -95,6 +91,24 @@ const Navigation = () => {
                 <NavigationMenuItem>
                   <Link to="/" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
                     Home
+                  </Link>
+                </NavigationMenuItem>
+                
+                <NavigationMenuItem>
+                  <Link to="/speakers" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
+                    Speakers
+                  </Link>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <Link to="/schedule" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
+                    Schedule
+                  </Link>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <Link to="/sponsors" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
+                    Sponsors
                   </Link>
                 </NavigationMenuItem>
                 
@@ -219,6 +233,30 @@ const Navigation = () => {
                 onClick={() => setIsOpen(false)}
               >
                 Home
+              </Link>
+              
+              <Link
+                to="/speakers"
+                className="text-foreground/80 hover:text-accent transition-colors font-medium py-2"
+                onClick={() => setIsOpen(false)}
+              >
+                Speakers
+              </Link>
+
+              <Link
+                to="/schedule"
+                className="text-foreground/80 hover:text-accent transition-colors font-medium py-2"
+                onClick={() => setIsOpen(false)}
+              >
+                Schedule
+              </Link>
+
+              <Link
+                to="/sponsors"
+                className="text-foreground/80 hover:text-accent transition-colors font-medium py-2"
+                onClick={() => setIsOpen(false)}
+              >
+                Sponsors
               </Link>
               
               <div className="flex flex-col gap-2">
