@@ -95,6 +95,7 @@ export type Database = {
         Row: {
           event_year: number
           id: string
+          is_admin_grant: boolean | null
           purchased_at: string
           replay_id: string | null
           stripe_payment_intent: string | null
@@ -103,6 +104,7 @@ export type Database = {
         Insert: {
           event_year: number
           id?: string
+          is_admin_grant?: boolean | null
           purchased_at?: string
           replay_id?: string | null
           stripe_payment_intent?: string | null
@@ -111,6 +113,7 @@ export type Database = {
         Update: {
           event_year?: number
           id?: string
+          is_admin_grant?: boolean | null
           purchased_at?: string
           replay_id?: string | null
           stripe_payment_intent?: string | null
@@ -219,7 +222,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "speaker" | "attendee"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -347,7 +350,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "speaker", "attendee"],
     },
   },
 } as const

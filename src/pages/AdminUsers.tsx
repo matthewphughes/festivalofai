@@ -11,7 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Pencil, Trash2, Shield, User } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowLeft, Pencil, Trash2, Shield, User, Mic, Users, Video } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserProfile {
@@ -20,6 +21,18 @@ interface UserProfile {
   full_name: string | null;
   created_at: string;
   roles: string[];
+}
+
+interface EventReplay {
+  id: string;
+  title: string;
+  event_year: number;
+}
+
+interface ReplayAccess {
+  replay_id: string | null;
+  event_year: number;
+  is_admin_grant: boolean;
 }
 
 const AdminUsers = () => {
@@ -31,8 +44,11 @@ const AdminUsers = () => {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [editForm, setEditForm] = useState({
     full_name: "",
-    role: "",
+    roles: [] as string[],
   });
+  const [replays, setReplays] = useState<EventReplay[]>([]);
+  const [userAccess, setUserAccess] = useState<ReplayAccess[]>([]);
+  const [accessDialogOpen, setAccessDialogOpen] = useState(false);
 
   useEffect(() => {
     checkAdminAccess();
@@ -98,12 +114,27 @@ const AdminUsers = () => {
     setLoading(false);
   };
 
-  const handleEdit = (user: UserProfile) => {
+  const handleEdit = async (user: UserProfile) => {
     setSelectedUser(user);
     setEditForm({
       full_name: user.full_name || "",
-      role: user.roles.includes("admin") ? "admin" : "user",
+      roles: user.roles,
     });
+
+    // Fetch replays
+    const { data: replaysData } = await supabase
+      .from("event_replays")
+      .select("id, title, event_year")
+      .order("event_year", { ascending: false });
+    setReplays(replaysData || []);
+
+    // Fetch user's replay access
+    const { data: accessData } = await supabase
+      .from("replay_purchases")
+      .select("replay_id, event_year, is_admin_grant")
+      .eq("user_id", user.id);
+    setUserAccess(accessData || []);
+
     setEditDialogOpen(true);
   };
 
@@ -127,12 +158,17 @@ const AdminUsers = () => {
 
       if (deleteRolesError) throw deleteRolesError;
 
-      // Add the new role
-      const { error: insertRoleError } = await supabase
-        .from("user_roles")
-        .insert([{ user_id: selectedUser.id, role: editForm.role as "admin" | "user" }]);
+      // Add the new roles
+      if (editForm.roles.length > 0) {
+        const { error: insertRoleError } = await supabase
+          .from("user_roles")
+          .insert(editForm.roles.map(role => ({ 
+            user_id: selectedUser.id, 
+            role: role as "admin" | "user" | "speaker" | "attendee"
+          })));
 
-      if (insertRoleError) throw insertRoleError;
+        if (insertRoleError) throw insertRoleError;
+      }
 
       toast.success("User updated successfully");
       setEditDialogOpen(false);
@@ -140,6 +176,68 @@ const AdminUsers = () => {
     } catch (error: any) {
       toast.error(error.message || "Failed to update user");
     }
+  };
+
+  const toggleRole = (role: string) => {
+    setEditForm(prev => ({
+      ...prev,
+      roles: prev.roles.includes(role)
+        ? prev.roles.filter(r => r !== role)
+        : [...prev.roles, role]
+    }));
+  };
+
+  const handleGrantAccess = async (replayId: string | null, eventYear: number) => {
+    if (!selectedUser) return;
+
+    try {
+      // Check if access already exists
+      const hasAccess = userAccess.some(
+        a => a.replay_id === replayId && a.event_year === eventYear
+      );
+
+      if (hasAccess) {
+        // Remove access
+        const { error } = await supabase
+          .from("replay_purchases")
+          .delete()
+          .eq("user_id", selectedUser.id)
+          .eq("event_year", eventYear)
+          .eq("replay_id", replayId);
+
+        if (error) throw error;
+
+        setUserAccess(prev => prev.filter(
+          a => !(a.replay_id === replayId && a.event_year === eventYear)
+        ));
+      } else {
+        // Grant access
+        const { error } = await supabase
+          .from("replay_purchases")
+          .insert({
+            user_id: selectedUser.id,
+            replay_id: replayId,
+            event_year: eventYear,
+            is_admin_grant: true
+          });
+
+        if (error) throw error;
+
+        setUserAccess(prev => [...prev, { replay_id: replayId, event_year: eventYear, is_admin_grant: true }]);
+      }
+
+      toast.success(hasAccess ? "Access revoked" : "Access granted");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update access");
+    }
+  };
+
+  const hasReplayAccess = (replayId: string) => {
+    return userAccess.some(a => a.replay_id === replayId);
+  };
+
+  const hasYearBundleAccess = (year: number) => {
+    return userAccess.some(a => a.replay_id === null && a.event_year === year);
   };
 
   const handleDeleteClick = (user: UserProfile) => {
@@ -223,7 +321,7 @@ const AdminUsers = () => {
                       <TableCell className="font-medium">{user.full_name || "—"}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
-                        <div className="flex gap-1">
+                        <div className="flex flex-wrap gap-1">
                           {user.roles.map((role) => (
                             <Badge
                               key={role}
@@ -231,6 +329,8 @@ const AdminUsers = () => {
                             >
                               {role === "admin" && <Shield className="mr-1 h-3 w-3" />}
                               {role === "user" && <User className="mr-1 h-3 w-3" />}
+                              {role === "speaker" && <Mic className="mr-1 h-3 w-3" />}
+                              {role === "attendee" && <Users className="mr-1 h-3 w-3" />}
                               {role}
                             </Badge>
                           ))}
@@ -275,7 +375,7 @@ const AdminUsers = () => {
               Update user information and role
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-6 py-4">
             <div className="grid gap-2">
               <Label htmlFor="full_name">Full Name</Label>
               <Input
@@ -284,20 +384,70 @@ const AdminUsers = () => {
                 onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="role">Role</Label>
-              <Select
-                value={editForm.role}
-                onValueChange={(value) => setEditForm({ ...editForm, role: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">User</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
+            
+            <div className="grid gap-3">
+              <Label>Roles</Label>
+              <div className="flex flex-col gap-2">
+                {["admin", "user", "speaker", "attendee"].map((role) => (
+                  <div key={role} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`role-${role}`}
+                      checked={editForm.roles.includes(role)}
+                      onCheckedChange={() => toggleRole(role)}
+                    />
+                    <Label htmlFor={`role-${role}`} className="text-sm font-normal cursor-pointer">
+                      {role === "admin" && <Shield className="inline mr-1 h-3 w-3" />}
+                      {role === "user" && <User className="inline mr-1 h-3 w-3" />}
+                      {role === "speaker" && <Mic className="inline mr-1 h-3 w-3" />}
+                      {role === "attendee" && <Users className="inline mr-1 h-3 w-3" />}
+                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-3">
+              <div className="flex items-center justify-between">
+                <Label>Replay Access</Label>
+                <Button variant="outline" size="sm" type="button">
+                  <Video className="mr-2 h-4 w-4" />
+                  Manage Access
+                </Button>
+              </div>
+              <div className="max-h-48 overflow-y-auto border rounded-md p-3 space-y-3">
+                {/* Year bundles */}
+                {Array.from(new Set(replays.map(r => r.event_year))).sort((a, b) => b - a).map(year => (
+                  <div key={`year-${year}`} className="space-y-2">
+                    <div className="flex items-center space-x-2 font-medium">
+                      <Checkbox
+                        id={`year-${year}`}
+                        checked={hasYearBundleAccess(year)}
+                        onCheckedChange={() => handleGrantAccess(null, year)}
+                      />
+                      <Label htmlFor={`year-${year}`} className="cursor-pointer">
+                        Full {year} Bundle
+                      </Label>
+                    </div>
+                    
+                    {/* Individual replays for this year */}
+                    <div className="ml-6 space-y-1">
+                      {replays.filter(r => r.event_year === year).map(replay => (
+                        <div key={replay.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`replay-${replay.id}`}
+                            checked={hasReplayAccess(replay.id)}
+                            onCheckedChange={() => handleGrantAccess(replay.id, year)}
+                          />
+                          <Label htmlFor={`replay-${replay.id}`} className="text-sm font-normal cursor-pointer">
+                            {replay.title}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
           <DialogFooter>
