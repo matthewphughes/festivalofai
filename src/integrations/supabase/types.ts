@@ -96,6 +96,7 @@ export type Database = {
           event_year: number
           id: string
           purchased_at: string
+          replay_id: string | null
           stripe_payment_intent: string | null
           user_id: string
         }
@@ -103,6 +104,7 @@ export type Database = {
           event_year: number
           id?: string
           purchased_at?: string
+          replay_id?: string | null
           stripe_payment_intent?: string | null
           user_id: string
         }
@@ -110,10 +112,19 @@ export type Database = {
           event_year?: number
           id?: string
           purchased_at?: string
+          replay_id?: string | null
           stripe_payment_intent?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "replay_purchases_replay_id_fkey"
+            columns: ["replay_id"]
+            isOneToOne: false
+            referencedRelation: "event_replays"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       speakers: {
         Row: {

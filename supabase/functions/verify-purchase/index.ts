@@ -72,52 +72,104 @@ serve(async (req) => {
     // Check if this is a replay purchase
     const productType = session.metadata?.product_type;
     const eventYear = session.metadata?.event_year;
+    const replayId = session.metadata?.replay_id;
 
-    if (productType === "replay" && eventYear) {
-      logStep("Processing replay purchase", { eventYear });
+    if (productType === "replay") {
+      logStep("Processing replay purchase", { eventYear, replayId });
 
-      // Check if purchase already recorded
-      const { data: existingPurchase } = await supabaseClient
-        .from("replay_purchases")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("event_year", parseInt(eventYear))
-        .maybeSingle();
+      // For individual replay purchase
+      if (replayId) {
+        // Check if purchase already recorded
+        const { data: existingPurchase } = await supabaseClient
+          .from("replay_purchases")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("replay_id", replayId)
+          .maybeSingle();
 
-      if (existingPurchase) {
-        logStep("Purchase already recorded");
+        if (existingPurchase) {
+          logStep("Individual replay purchase already recorded");
+          return new Response(JSON.stringify({ 
+            success: true, 
+            already_recorded: true 
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
+        }
+
+        // Record the individual replay purchase
+        const { error: insertError } = await supabaseClient
+          .from("replay_purchases")
+          .insert({
+            user_id: userId,
+            event_year: parseInt(eventYear),
+            replay_id: replayId,
+            stripe_payment_intent: session.payment_intent as string,
+          });
+
+        if (insertError) {
+          logStep("Error recording individual replay purchase", { error: insertError.message });
+          throw new Error("Failed to record purchase");
+        }
+
+        logStep("Individual replay purchase recorded successfully");
+
         return new Response(JSON.stringify({ 
-          success: true, 
-          already_recorded: true 
+          success: true,
+          replay_id: replayId
         }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 200,
         });
       }
 
-      // Record the purchase
-      const { error: insertError } = await supabaseClient
-        .from("replay_purchases")
-        .insert({
-          user_id: userId,
-          event_year: parseInt(eventYear),
-          stripe_payment_intent: session.payment_intent as string,
+      // For year bundle purchase
+      if (eventYear) {
+        // Check if purchase already recorded
+        const { data: existingPurchase } = await supabaseClient
+          .from("replay_purchases")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("event_year", parseInt(eventYear))
+          .is("replay_id", null)
+          .maybeSingle();
+
+        if (existingPurchase) {
+          logStep("Year bundle purchase already recorded");
+          return new Response(JSON.stringify({ 
+            success: true, 
+            already_recorded: true 
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
+        }
+
+        // Record the year bundle purchase
+        const { error: insertError } = await supabaseClient
+          .from("replay_purchases")
+          .insert({
+            user_id: userId,
+            event_year: parseInt(eventYear),
+            stripe_payment_intent: session.payment_intent as string,
+          });
+
+        if (insertError) {
+          logStep("Error recording year bundle purchase", { error: insertError.message });
+          throw new Error("Failed to record purchase");
+        }
+
+        logStep("Year bundle purchase recorded successfully");
+
+        return new Response(JSON.stringify({ 
+          success: true,
+          event_year: parseInt(eventYear)
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
         });
-
-      if (insertError) {
-        logStep("Error recording purchase", { error: insertError.message });
-        throw new Error("Failed to record purchase");
       }
-
-      logStep("Purchase recorded successfully");
-
-      return new Response(JSON.stringify({ 
-        success: true,
-        event_year: parseInt(eventYear)
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
     }
 
     // Not a replay purchase, just confirm payment success

@@ -104,7 +104,7 @@ const Replays = () => {
 
     const { data, error } = await supabase
       .from("replay_purchases")
-      .select("event_year")
+      .select("event_year, replay_id")
       .eq("user_id", session.user.id);
 
     if (error) {
@@ -112,7 +112,13 @@ const Replays = () => {
       return;
     }
 
-    setPurchasedYears(data?.map(p => p.event_year) || []);
+    // Get years from bundle purchases (where replay_id is null)
+    const bundleYears = data
+      ?.filter(p => p.replay_id === null)
+      .map(p => p.event_year) || [];
+    
+    const years = [...new Set(bundleYears)];
+    setPurchasedYears(years);
   };
 
   const verifyPurchase = async (sessionId: string) => {

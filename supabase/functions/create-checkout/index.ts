@@ -52,13 +52,13 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     // Get the price_id and optional product_type from request body
-    const { price_id, product_type, event_year } = await req.json();
+    const { price_id, product_type, event_year, replay_id } = await req.json();
     if (!price_id) {
       logStep("ERROR: No price_id provided");
       throw new Error("price_id is required");
     }
 
-    logStep("Price ID received", { price_id, product_type, event_year });
+    logStep("Price ID received", { price_id, product_type, event_year, replay_id });
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -102,6 +102,7 @@ serve(async (req) => {
       metadata: {
         product_type: product_type || "ticket",
         event_year: event_year?.toString() || "",
+        replay_id: replay_id || "",
         user_id: user.id,
       },
     });

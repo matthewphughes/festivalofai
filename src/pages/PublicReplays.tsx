@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Play, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
@@ -22,13 +24,22 @@ interface Replay {
 }
 
 const PublicReplays = () => {
+  const navigate = useNavigate();
   const [replays, setReplays] = useState<Replay[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReplay, setSelectedReplay] = useState<Replay | null>(null);
+  const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+  const [purchaseLoading, setPurchaseLoading] = useState(false);
 
   useEffect(() => {
     fetchReplays();
   }, []);
+
+  useEffect(() => {
+    if (selectedReplay) {
+      setPurchaseDialogOpen(true);
+    }
+  }, [selectedReplay]);
 
   const fetchReplays = async () => {
     setLoading(true);
@@ -47,9 +58,73 @@ const PublicReplays = () => {
     setLoading(false);
   };
 
-  const getYouTubeEmbedUrl = (url: string) => {
-    const videoId = url.split('v=')[1]?.split('&')[0];
-    return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+  const handlePurchase = async (eventYear: number, replayId?: string) => {
+    try {
+      setPurchaseLoading(true);
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please sign in to purchase replays");
+        navigate("/auth");
+        return;
+      }
+
+      let priceId: string;
+
+      // Individual replay purchase
+      if (replayId) {
+        // Map replay IDs to price IDs for individual purchases
+        const individualPriceIds: { [key: string]: string } = {
+          "71069a53-fc6c-401b-a59b-e9bc0c190d20": "price_1SRGqVEFw97UKMysD1m7vbJz", // AI Agents
+          "86b57135-c65d-4b75-830c-75c3406fb66a": "price_1SRGqWEFw97UKMysebRMJ0bs", // AI For Six Figure Success
+          "3bb799b9-e878-4685-8939-2e31719e0f2f": "price_1SRGqYEFw97UKMysDoqfvnWh", // All Speaker Q & A
+          "abbe186e-9f98-4a3f-b524-b6b09ccb7086": "price_1SRGqZEFw97UKMysehqDpL2D", // An AI Powered Super Day
+          "a0a3ebe8-ecd5-4bc2-b954-53b381318231": "price_1SRGqaEFw97UKMysVTjSiNyA", // Building A Success Mindset
+          "84600d95-d5bc-42e2-909d-cf17a8345ac1": "price_1SRGqbEFw97UKMysnCW9bw0e", // Digital Dominance with AI
+          "d4710e51-8981-489f-ada9-58d97d4d069a": "price_1SRGqcEFw97UKMysqlyO5Gs5", // Smarter Design with Canva AI
+          "42e8285c-7ad2-4942-ae97-acc40cd1eb06": "price_1SRGqdEFw97UKMyspQ18Ndq9", // The Empathy Engine
+          "b7a6c74d-734b-4ea6-854b-278ca4748062": "price_1SRGqfEFw97UKMyse39YIzuV", // Why AI Replacing You Isn't A Bad Thing
+        };
+
+        priceId = individualPriceIds[replayId];
+        if (!priceId) {
+          toast.error("Invalid replay selection");
+          return;
+        }
+      } else {
+        // Year bundle purchase
+        const bundlePriceIds: { [key: number]: string } = {
+          2025: "price_1SRFvHEFw97UKMyskr6hX5xc", // 2025 Replays Bundle
+          2026: "price_1SRFvaEFw97UKMysELPzJJDX", // 2026 Replays Bundle
+        };
+
+        priceId = bundlePriceIds[eventYear];
+        if (!priceId) {
+          toast.error("Invalid event year");
+          return;
+        }
+      }
+
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { 
+          price_id: priceId,
+          product_type: "replay",
+          event_year: eventYear,
+          replay_id: replayId
+        },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error: any) {
+      console.error("Purchase error:", error);
+      toast.error(error.message || "Failed to create checkout session");
+    } finally {
+      setPurchaseLoading(false);
+      setPurchaseDialogOpen(false);
+    }
   };
 
   const replays2025 = replays.filter(r => r.event_year === 2025);
@@ -63,7 +138,7 @@ const PublicReplays = () => {
         <meta property="og:title" content="Event Replays - Festival of AI" />
         <meta property="og:description" content="Watch sessions from previous Festival of AI events" />
         <meta property="og:type" content="website" />
-        <link rel="canonical" href="https://festivalof.ai/replays" />
+        <link rel="canonical" href="https://festivalof.ai/watch-replays" />
       </Helmet>
 
       <Navigation />
@@ -74,7 +149,7 @@ const PublicReplays = () => {
             Event <span className="text-accent">Replays</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Watch sessions from previous Festival of AI events. Access expert talks and insights from industry leaders.
+            Purchase access to expert sessions from Festival of AI. Choose individual replays or full year bundles.
           </p>
         </div>
 
@@ -211,30 +286,82 @@ const PublicReplays = () => {
 
       <Footer />
 
-      {/* Video Player Dialog */}
-      <Dialog open={!!selectedReplay} onOpenChange={() => setSelectedReplay(null)}>
-        <DialogContent className="max-w-4xl p-0">
+      {/* Purchase Dialog */}
+      <Dialog open={purchaseDialogOpen} onOpenChange={(open) => {
+        setPurchaseDialogOpen(open);
+        if (!open) setSelectedReplay(null);
+      }}>
+        <DialogContent className="max-w-lg">
           {selectedReplay && (
-            <div>
-              <div className="aspect-video">
-                <iframe
-                  src={getYouTubeEmbedUrl(selectedReplay.video_url)}
-                  title={selectedReplay.title}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-              <div className="p-6">
-                <h2 className="text-2xl font-bold mb-2">{selectedReplay.title}</h2>
-                {selectedReplay.speaker_name && (
-                  <p className="text-accent font-semibold mb-4">{selectedReplay.speaker_name}</p>
-                )}
-                {selectedReplay.description && (
-                  <p className="text-muted-foreground">{selectedReplay.description}</p>
-                )}
-              </div>
-            </div>
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-2xl">{selectedReplay.title}</DialogTitle>
+              </DialogHeader>
+              <DialogDescription className="space-y-4">
+                <div>
+                  <p className="text-base mb-2">
+                    <span className="font-semibold">{selectedReplay.speaker_name}</span>
+                    {selectedReplay.duration_minutes && (
+                      <span className="text-muted-foreground ml-2">
+                        {selectedReplay.duration_minutes} minutes
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedReplay.description || "Full session replay from Festival of AI"}
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="bg-primary/5 border border-primary/20 p-4 rounded-lg">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h4 className="font-semibold text-base">Single Replay</h4>
+                        <p className="text-xs text-muted-foreground">This session only</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold">£47</div>
+                        <div className="text-xs text-muted-foreground">one-time</div>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={() => handlePurchase(selectedReplay.event_year, selectedReplay.id)}
+                      disabled={purchaseLoading}
+                      className="w-full mt-2"
+                      size="sm"
+                    >
+                      {purchaseLoading ? "Processing..." : "Buy This Replay"}
+                    </Button>
+                  </div>
+
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h4 className="font-semibold text-base">Full Year Bundle</h4>
+                        <p className="text-xs text-muted-foreground">All {selectedReplay.event_year} replays</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold">£99</div>
+                        <div className="text-xs text-muted-foreground">one-time</div>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={() => handlePurchase(selectedReplay.event_year)}
+                      disabled={purchaseLoading}
+                      variant="outline"
+                      className="w-full mt-2"
+                      size="sm"
+                    >
+                      {purchaseLoading ? "Processing..." : "Buy Full Bundle"}
+                    </Button>
+                  </div>
+                </div>
+
+                <p className="text-xs text-muted-foreground text-center">
+                  Already purchased? <button onClick={() => navigate("/auth")} className="underline hover:text-foreground">Sign in</button> to watch
+                </p>
+              </DialogDescription>
+            </>
           )}
         </DialogContent>
       </Dialog>

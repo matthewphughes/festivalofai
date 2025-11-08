@@ -65,29 +65,62 @@ serve(async (req) => {
       });
     }
 
-    // Parse request body to get event_year
-    const { event_year } = await req.json();
-    logStep("Checking access for year", { event_year });
+    // Parse request body to get replay_id and/or event_year
+    const { replay_id, event_year } = await req.json();
+    logStep("Checking access", { replay_id, event_year });
 
-    if (!event_year) {
+    if (!replay_id && !event_year) {
       return new Response(JSON.stringify({ has_access: false, is_admin: false }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    // Check if user has purchased access to this year
-    const { data: purchaseData } = await supabaseClient
-      .from("replay_purchases")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("event_year", event_year)
-      .maybeSingle();
+    // Check if user has purchased:
+    // 1. This specific replay (individual purchase)
+    // 2. The year bundle (null replay_id for that year)
+    
+    const conditions = [];
+    
+    // Check for individual replay purchase
+    if (replay_id) {
+      const { data: individualPurchase } = await supabaseClient
+        .from("replay_purchases")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("replay_id", replay_id)
+        .maybeSingle();
+      
+      if (individualPurchase) {
+        logStep("Individual replay access granted");
+        return new Response(JSON.stringify({ has_access: true, is_admin: false }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+    }
+    
+    // Check for year bundle purchase
+    if (event_year) {
+      const { data: bundlePurchase } = await supabaseClient
+        .from("replay_purchases")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("event_year", event_year)
+        .is("replay_id", null)
+        .maybeSingle();
 
-    const hasAccess = !!purchaseData;
-    logStep("Purchase check", { hasAccess, event_year });
+      if (bundlePurchase) {
+        logStep("Bundle access granted");
+        return new Response(JSON.stringify({ has_access: true, is_admin: false }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+    }
 
-    return new Response(JSON.stringify({ has_access: hasAccess, is_admin: false }), {
+    logStep("No access found");
+    return new Response(JSON.stringify({ has_access: false, is_admin: false }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
