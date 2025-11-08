@@ -176,7 +176,7 @@ const Tickets = () => {
           </div>
 
           {/* Ticket Tiers */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 max-w-4xl mx-auto">
             {ticketTiers.map((tier, index) => (
               <Card
                 key={index}
