@@ -161,6 +161,12 @@ const SpeakerProfile = () => {
               </div>
             )}
 
+            {speaker.bio && (
+              <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed mb-6">
+                {speaker.bio}
+              </p>
+            )}
+
             {/* Social Links */}
             <div className="flex gap-4">
               {speaker.linkedin_url && (
@@ -234,16 +240,6 @@ const SpeakerProfile = () => {
             </div>
           </div>
         </div>
-
-        {/* Bio Section */}
-        {speaker.bio && (
-          <Card className="p-8 mb-12">
-            <h2 className="text-2xl font-bold mb-4">About</h2>
-            <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
-              {speaker.bio}
-            </p>
-          </Card>
-        )}
 
         {/* CTA Section */}
         <Card className="bg-primary/5 p-8 text-center">
