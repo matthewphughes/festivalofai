@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
+
 import { Menu, X, User, Video, LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
 import logoDark from "@/assets/logo-dark.png";
 import logoLight from "@/assets/logo-light.png";
@@ -86,83 +86,52 @@ const Navigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <Link to="/" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
-                    Home
-                  </Link>
-                </NavigationMenuItem>
-                
-                <NavigationMenuItem>
-                  <Link to="/speakers" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
-                    Speakers
-                  </Link>
-                </NavigationMenuItem>
+            <div className="flex items-center gap-4">
+              <Link to="/" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
+                Home
+              </Link>
 
-                <NavigationMenuItem>
-                  <Link to="/schedule" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
-                    Schedule
-                  </Link>
-                </NavigationMenuItem>
+              <Link to="/speakers" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
+                Speakers
+              </Link>
 
-                <NavigationMenuItem>
-                  <Link to="/sponsors" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
-                    Sponsors
-                  </Link>
-                </NavigationMenuItem>
-                
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="text-foreground/80 hover:text-accent transition-colors font-medium">
-                    Event
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <ul className="grid w-48 gap-1 p-2 bg-background border border-border rounded-md shadow-lg">
-                      {eventLinks.map((link) => (
-                        <li key={link.path}>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to={link.path}
-                              className="block px-3 py-2 text-sm text-foreground/80 hover:text-accent hover:bg-accent/10 rounded transition-colors"
-                            >
-                              {link.name}
-                            </Link>
-                          </NavigationMenuLink>
-                        </li>
-                      ))}
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
+              <Link to="/schedule" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
+                Schedule
+              </Link>
 
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="text-foreground/80 hover:text-accent transition-colors font-medium">
-                    2025
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <ul className="grid w-48 gap-1 p-2 bg-background border border-border rounded-md shadow-lg">
-                      {archiveLinks.map((link) => (
-                        <li key={link.path}>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to={link.path}
-                              className="block px-3 py-2 text-sm text-foreground/80 hover:text-accent hover:bg-accent/10 rounded transition-colors"
-                            >
-                              {link.name}
-                            </Link>
-                          </NavigationMenuLink>
-                        </li>
-                      ))}
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
+              <Link to="/sponsors" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
+                Sponsors
+              </Link>
 
-                <NavigationMenuItem>
-                  <Link to="/contact" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
-                    Contact
-                  </Link>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="px-2 py-2 font-medium text-foreground/80 hover:text-accent focus:outline-none inline-flex items-center">
+                  Event <ChevronDown className="ml-1 h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56 bg-background border border-border rounded-md shadow-lg z-50">
+                  <DropdownMenuItem asChild>
+                    <Link to="/venue" className="cursor-pointer">Venue</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/accommodation" className="cursor-pointer">Accommodation</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger className="px-2 py-2 font-medium text-foreground/80 hover:text-accent focus:outline-none inline-flex items-center">
+                  2025 <ChevronDown className="ml-1 h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56 bg-background border border-border rounded-md shadow-lg z-50">
+                  <DropdownMenuItem asChild>
+                    <Link to="/buy-replays" className="cursor-pointer">Replays</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Link to="/contact" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
+                Contact
+              </Link>
+            </div>
 
             <Button asChild variant="default" className="bg-primary hover:bg-primary/90 ml-2">
               <Link to="/tickets">Get Tickets</Link>
