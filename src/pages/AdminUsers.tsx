@@ -198,12 +198,20 @@ const AdminUsers = () => {
 
       if (hasAccess) {
         // Remove access
-        const { error } = await supabase
+        let query = supabase
           .from("replay_purchases")
           .delete()
           .eq("user_id", selectedUser.id)
-          .eq("event_year", eventYear)
-          .eq("replay_id", replayId);
+          .eq("event_year", eventYear);
+
+        // Handle NULL replay_id for year bundles
+        if (replayId === null) {
+          query = query.is("replay_id", null);
+        } else {
+          query = query.eq("replay_id", replayId);
+        }
+
+        const { error } = await query;
 
         if (error) throw error;
 
