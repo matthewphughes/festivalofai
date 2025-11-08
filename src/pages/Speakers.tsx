@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -7,8 +8,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Linkedin, Twitter, Globe, Youtube, Instagram } from "lucide-react";
+import { Linkedin, Twitter, Globe, Youtube, Instagram, Play, Clock, Lock } from "lucide-react";
 import { toast } from "sonner";
+
+interface Replay {
+  id: string;
+  title: string;
+  description: string;
+  video_url: string;
+  thumbnail_url: string | null;
+  event_year: number;
+  duration_minutes: number | null;
+  published: boolean;
+}
 
 interface Speaker {
   id: string;
@@ -25,32 +37,115 @@ interface Speaker {
   instagram_url: string | null;
   website_url: string | null;
   slug: string;
+  replays?: Replay[];
 }
 
 
 const Speakers = () => {
+  const navigate = useNavigate();
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
   const [yearFilter, setYearFilter] = useState<"all" | "2025" | "2026">("all");
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [purchasedYears, setPurchasedYears] = useState<number[]>([]);
+  const [purchasedReplayIds, setPurchasedReplayIds] = useState<string[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    fetchSpeakers();
+    checkAuthAndFetch();
   }, []);
+
+  const checkAuthAndFetch = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setIsAuthenticated(!!session);
+
+    if (session) {
+      await checkPurchasedYears();
+    }
+
+    await fetchSpeakers();
+  };
+
+  const checkPurchasedYears = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const { data, error } = await supabase
+      .from("replay_purchases")
+      .select("event_year, replay_id")
+      .eq("user_id", session.user.id);
+
+    if (error) {
+      console.error("Error fetching purchases:", error);
+      return;
+    }
+
+    // Get years from bundle purchases (where replay_id is null)
+    const bundleYears = data
+      ?.filter(p => p.replay_id === null)
+      .map(p => p.event_year) || [];
+    
+    // Get individual replay IDs
+    const individualReplayIds = data
+      ?.filter(p => p.replay_id !== null)
+      .map(p => p.replay_id as string) || [];
+    
+    const years = [...new Set(bundleYears)];
+    setPurchasedYears(years);
+    setPurchasedReplayIds(individualReplayIds);
+  };
 
   const fetchSpeakers = async () => {
     setLoading(true);
+    
+    // Fetch speakers with their replays
     const { data, error } = await supabase
       .from("speakers")
-      .select("*")
+      .select(`
+        *,
+        replays:event_replays(
+          id,
+          title,
+          description,
+          video_url,
+          thumbnail_url,
+          event_year,
+          duration_minutes,
+          published
+        )
+      `)
       .order("name", { ascending: true });
 
     if (error) {
       toast.error("Failed to load speakers");
     } else {
-      setSpeakers(data || []);
+      // Filter to only show published replays for non-authenticated users
+      const processedSpeakers = (data || []).map(speaker => ({
+        ...speaker,
+        replays: (speaker.replays || []).filter((replay: Replay) => replay.published)
+      }));
+      setSpeakers(processedSpeakers);
     }
     setLoading(false);
+  };
+
+  const hasAccessToReplay = (replay: Replay) => {
+    // Check if user has purchased the year bundle or the individual replay
+    return purchasedYears.includes(replay.event_year) || 
+           purchasedReplayIds.includes(replay.id);
+  };
+
+  const handleBuyReplay = () => {
+    if (!isAuthenticated) {
+      navigate("/auth?redirect=/speakers");
+    } else {
+      navigate("/buy-replays");
+    }
+  };
+
+  const getYouTubeEmbedUrl = (url: string) => {
+    const videoId = url.split('v=')[1]?.split('&')[0];
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
   };
 
   const filteredSpeakers = yearFilter === "all" 
@@ -241,9 +336,82 @@ const Speakers = () => {
                 )}
 
                 {selectedSpeaker?.bio && (
-                  <p className="text-sm text-muted-foreground">
-                    {selectedSpeaker.bio}
-                  </p>
+                  <div>
+                    <h3 className="font-semibold mb-2">About</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedSpeaker.bio}
+                    </p>
+                  </div>
+                )}
+
+                {/* Replays Section */}
+                {selectedSpeaker?.replays && selectedSpeaker.replays.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold mb-3">Session Replays ({selectedSpeaker.replays.length})</h3>
+                    <div className="space-y-3">
+                      {selectedSpeaker.replays.map((replay) => {
+                        const hasAccess = hasAccessToReplay(replay);
+                        return (
+                          <Card key={replay.id} className="bg-muted/50">
+                            <CardContent className="p-4">
+                              <div className="flex gap-3">
+                                {replay.thumbnail_url && (
+                                  <div className="relative flex-shrink-0 w-24 h-16 rounded overflow-hidden">
+                                    <img 
+                                      src={replay.thumbnail_url} 
+                                      alt={replay.title}
+                                      className="w-full h-full object-cover"
+                                    />
+                                    {!hasAccess && (
+                                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                        <Lock className="w-5 h-5 text-white" />
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-medium text-sm mb-1 line-clamp-1">
+                                    {replay.title}
+                                  </h4>
+                                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                    <Badge variant="outline" className="text-xs">
+                                      {replay.event_year}
+                                    </Badge>
+                                    {replay.duration_minutes && (
+                                      <span className="flex items-center gap-1">
+                                        <Clock className="w-3 h-3" />
+                                        {replay.duration_minutes}m
+                                      </span>
+                                    )}
+                                  </div>
+                                  {hasAccess ? (
+                                    <Button 
+                                      size="sm" 
+                                      className="mt-2"
+                                      onClick={() => navigate("/replays")}
+                                    >
+                                      <Play className="w-3 h-3 mr-1" />
+                                      Watch Now
+                                    </Button>
+                                  ) : (
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      className="mt-2"
+                                      onClick={handleBuyReplay}
+                                    >
+                                      <Lock className="w-3 h-3 mr-1" />
+                                      Purchase Access
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </div>
                 )}
 
                 {/* Social Links */}
