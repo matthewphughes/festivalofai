@@ -37,17 +37,13 @@ const Navigation = () => {
     toast.success("Signed out successfully");
   };
 
-  const festivalLinks = [
+  const eventLinks = [
     { name: "Speakers", path: "/speakers" },
     { name: "Schedule", path: "/schedule" },
     { name: "Venue", path: "/venue" },
     { name: "Accommodation", path: "/accommodation" },
+    { name: "Sponsors", path: "/sponsors" },
     { name: "Get Tickets", path: "/tickets" },
-  ];
-
-  const archiveLinks = [
-    { name: "2025 Event", path: "/previous-events" },
-    { name: "All Past Festivals", path: "/previous-events" },
   ];
 
   return (
@@ -80,33 +76,11 @@ const Navigation = () => {
                 
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="text-foreground/80 hover:text-accent transition-colors font-medium">
-                    Festival 2026
+                    Event
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="grid w-48 gap-1 p-2 bg-background border border-border rounded-md shadow-lg">
-                      {festivalLinks.map((link) => (
-                        <li key={link.path}>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to={link.path}
-                              className="block px-3 py-2 text-sm text-foreground/80 hover:text-accent hover:bg-accent/10 rounded transition-colors"
-                            >
-                              {link.name}
-                            </Link>
-                          </NavigationMenuLink>
-                        </li>
-                      ))}
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="text-foreground/80 hover:text-accent transition-colors font-medium">
-                    Archives
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <ul className="grid w-48 gap-1 p-2 bg-background border border-border rounded-md shadow-lg">
-                      {archiveLinks.map((link) => (
+                      {eventLinks.map((link) => (
                         <li key={link.path}>
                           <NavigationMenuLink asChild>
                             <Link
@@ -129,8 +103,8 @@ const Navigation = () => {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <Link to="/sponsors" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
-                    Sponsors
+                  <Link to="/previous-events" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
+                    2025
                   </Link>
                 </NavigationMenuItem>
 
@@ -203,22 +177,8 @@ const Navigation = () => {
               </Link>
               
               <div className="flex flex-col gap-2">
-                <div className="text-foreground font-semibold py-2">Festival 2026</div>
-                {festivalLinks.map((link) => (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    className="text-foreground/80 hover:text-accent transition-colors font-medium py-2 pl-4"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {link.name}
-                  </Link>
-                ))}
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <div className="text-foreground font-semibold py-2">Archives</div>
-                {archiveLinks.map((link) => (
+                <div className="text-foreground font-semibold py-2">Event</div>
+                {eventLinks.map((link) => (
                   <Link
                     key={link.path}
                     to={link.path}
@@ -239,11 +199,11 @@ const Navigation = () => {
               </Link>
 
               <Link
-                to="/sponsors"
+                to="/previous-events"
                 className="text-foreground/80 hover:text-accent transition-colors font-medium py-2"
                 onClick={() => setIsOpen(false)}
               >
-                Sponsors
+                2025
               </Link>
 
               <Link
