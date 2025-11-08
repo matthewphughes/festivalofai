@@ -23,6 +23,7 @@ import AdminReplays from "./pages/AdminReplays";
 import AdminUsers from "./pages/AdminUsers";
 import AdminSpeakers from "./pages/AdminSpeakers";
 import NotFound from "./pages/NotFound";
+import Accommodation from "./pages/Accommodation";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/previous-events" element={<PreviousEvents />} />
           <Route path="/venue" element={<Venue />} />
+          <Route path="/accommodation" element={<Accommodation />} />
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/auth" element={<Auth />} />
