@@ -59,6 +59,7 @@ const Replays = () => {
   const [editForm, setEditForm] = useState<Partial<Replay>>({});
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
   const [purchasedYears, setPurchasedYears] = useState<number[]>([]);
+  const [purchasedReplayIds, setPurchasedReplayIds] = useState<string[]>([]);
   const [verifyingPurchase, setVerifyingPurchase] = useState(false);
 
   useEffect(() => {
@@ -117,8 +118,14 @@ const Replays = () => {
       ?.filter(p => p.replay_id === null)
       .map(p => p.event_year) || [];
     
+    // Get individual replay IDs
+    const individualReplayIds = data
+      ?.filter(p => p.replay_id !== null)
+      .map(p => p.replay_id as string) || [];
+    
     const years = [...new Set(bundleYears)];
     setPurchasedYears(years);
+    setPurchasedReplayIds(individualReplayIds);
   };
 
   const verifyPurchase = async (sessionId: string) => {
@@ -285,17 +292,23 @@ const Replays = () => {
 
   const replays2025 = useMemo(() => {
     const yearReplays = replays.filter(r => r.event_year === 2025);
-    // Filter based on purchase status for non-admins
+    // Admins see all
     if (isAdmin) return yearReplays;
-    return purchasedYears.includes(2025) ? yearReplays : [];
-  }, [replays, isAdmin, purchasedYears]);
+    // Users with year bundle see all for that year
+    if (purchasedYears.includes(2025)) return yearReplays;
+    // Otherwise only show individually purchased replays
+    return yearReplays.filter(r => purchasedReplayIds.includes(r.id));
+  }, [replays, isAdmin, purchasedYears, purchasedReplayIds]);
   
   const replays2026 = useMemo(() => {
     const yearReplays = replays.filter(r => r.event_year === 2026);
-    // Filter based on purchase status for non-admins
+    // Admins see all
     if (isAdmin) return yearReplays;
-    return purchasedYears.includes(2026) ? yearReplays : [];
-  }, [replays, isAdmin, purchasedYears]);
+    // Users with year bundle see all for that year
+    if (purchasedYears.includes(2026)) return yearReplays;
+    // Otherwise only show individually purchased replays
+    return yearReplays.filter(r => purchasedReplayIds.includes(r.id));
+  }, [replays, isAdmin, purchasedYears, purchasedReplayIds]);
 
   const handleSpeakerClick = useCallback((speakerId: string | null) => {
     if (!speakerId) return;
@@ -367,12 +380,12 @@ const Replays = () => {
             </TabsList>
 
             <TabsContent value="2025" className="mt-6">
-              {!isAdmin && !purchasedYears.includes(2025) ? (
+              {!isAdmin && !purchasedYears.includes(2025) && replays2025.length === 0 ? (
                 <Card>
                   <CardContent className="py-12 text-center space-y-4">
                     <Play className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-lg font-semibold">Purchase access to 2025 replays</p>
-                    <p className="text-muted-foreground">Get unlimited access to all 2025 event sessions</p>
+                    <p className="text-lg font-semibold">No 2025 replays available</p>
+                    <p className="text-muted-foreground">Purchase individual replays or the full year bundle</p>
                     <Button onClick={() => navigate("/watch-replays")} size="lg">
                       View & Purchase Replays
                     </Button>
@@ -409,12 +422,12 @@ const Replays = () => {
             </TabsContent>
 
             <TabsContent value="2026" className="mt-6">
-              {!isAdmin && !purchasedYears.includes(2026) ? (
+              {!isAdmin && !purchasedYears.includes(2026) && replays2026.length === 0 ? (
                 <Card>
                   <CardContent className="py-12 text-center space-y-4">
                     <Play className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-lg font-semibold">Purchase access to 2026 replays</p>
-                    <p className="text-muted-foreground">Get unlimited access to all 2026 event sessions</p>
+                    <p className="text-lg font-semibold">No 2026 replays available</p>
+                    <p className="text-muted-foreground">Purchase individual replays or the full year bundle</p>
                     <Button onClick={() => navigate("/watch-replays")} size="lg">
                       View & Purchase Replays
                     </Button>
