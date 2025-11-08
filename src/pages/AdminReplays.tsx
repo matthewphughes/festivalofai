@@ -48,6 +48,7 @@ const AdminReplays = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingReplay, setEditingReplay] = useState<Replay | null>(null);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -101,6 +102,52 @@ const AdminReplays = () => {
     }
     setLoading(false);
   };
+
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be less than 5MB');
+      return;
+    }
+
+    setUploadingThumbnail(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `replay-thumbnails/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('event-assets')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('event-assets')
+        .getPublicUrl(filePath);
+
+      setFormData({ ...formData, thumbnail_url: publicUrl });
+      toast.success('Thumbnail uploaded successfully');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload thumbnail');
+    } finally {
+      setUploadingThumbnail(false);
+    }
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -311,14 +358,26 @@ const AdminReplays = () => {
                         />
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="thumbnail">Thumbnail URL</Label>
+                        <Label htmlFor="thumbnail">Thumbnail Image</Label>
                         <Input
-                          id="thumbnail"
-                          type="url"
-                          value={formData.thumbnail_url}
-                          onChange={(e) => setFormData({ ...formData, thumbnail_url: e.target.value })}
-                          placeholder="https://..."
+                          id="thumbnail-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleThumbnailUpload}
+                          disabled={uploadingThumbnail}
                         />
+                        {uploadingThumbnail && (
+                          <p className="text-sm text-muted-foreground">Uploading...</p>
+                        )}
+                        {formData.thumbnail_url && (
+                          <div className="mt-2">
+                            <img 
+                              src={formData.thumbnail_url} 
+                              alt="Thumbnail preview" 
+                              className="w-full max-w-sm rounded-lg border"
+                            />
+                          </div>
+                        )}
                       </div>
                       <div className="grid gap-2">
                         <Label htmlFor="duration">Duration (minutes)</Label>

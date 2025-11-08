@@ -16,6 +16,7 @@ import ThankYou from "./pages/ThankYou";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Replays from "./pages/Replays";
+import PublicReplays from "./pages/PublicReplays";
 import Admin from "./pages/Admin";
 import AdminReplays from "./pages/AdminReplays";
 import AdminUsers from "./pages/AdminUsers";
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/watch-replays" element={<PublicReplays />} />
           <Route path="/replays" element={<Replays />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/replays" element={<AdminReplays />} />
