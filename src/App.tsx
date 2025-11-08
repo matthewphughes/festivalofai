@@ -54,7 +54,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/my-account" element={<MyAccount />} />
-          <Route path="/watch-replays" element={<PublicReplays />} />
+          <Route path="/buy-replays" element={<PublicReplays />} />
           <Route path="/replays" element={<Replays />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/replays" element={<AdminReplays />} />

@@ -136,7 +136,7 @@ const PublicReplays = () => {
         <meta property="og:title" content="Event Replays - Festival of AI" />
         <meta property="og:description" content="Watch sessions from previous Festival of AI events" />
         <meta property="og:type" content="website" />
-        <link rel="canonical" href="https://festivalof.ai/watch-replays" />
+        <link rel="canonical" href="https://festivalof.ai/buy-replays" />
       </Helmet>
 
       <Navigation />

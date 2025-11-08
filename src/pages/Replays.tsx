@@ -386,7 +386,7 @@ const Replays = () => {
                     <Play className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                     <p className="text-lg font-semibold">No 2025 replays available</p>
                     <p className="text-muted-foreground">Purchase individual replays or the full year bundle</p>
-                    <Button onClick={() => navigate("/watch-replays")} size="lg">
+                    <Button onClick={() => navigate("/buy-replays")} size="lg">
                       View & Purchase Replays
                     </Button>
                   </CardContent>
@@ -428,7 +428,7 @@ const Replays = () => {
                     <Play className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                     <p className="text-lg font-semibold">No 2026 replays available</p>
                     <p className="text-muted-foreground">Purchase individual replays or the full year bundle</p>
-                    <Button onClick={() => navigate("/watch-replays")} size="lg">
+                    <Button onClick={() => navigate("/buy-replays")} size="lg">
                       View & Purchase Replays
                     </Button>
                   </CardContent>

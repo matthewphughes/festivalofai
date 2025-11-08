@@ -426,7 +426,7 @@ const MyAccount = () => {
                 <div className="text-center py-8">
                   <CreditCard className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground mb-4">No purchase history yet</p>
-                  <Button onClick={() => navigate("/watch-replays")} variant="outline">
+                  <Button onClick={() => navigate("/buy-replays")} variant="outline">
                     Browse Replays
                   </Button>
                 </div>
@@ -473,7 +473,7 @@ const MyAccount = () => {
                 <div className="text-center py-8">
                   <Video className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground mb-4">No replay access yet</p>
-                  <Button onClick={() => navigate("/watch-replays")} variant="outline">
+                  <Button onClick={() => navigate("/buy-replays")} variant="outline">
                     Browse Replays
                   </Button>
                 </div>
