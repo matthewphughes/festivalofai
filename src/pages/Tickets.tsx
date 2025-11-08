@@ -105,21 +105,7 @@ const Tickets = () => {
         "12 months access to Practical AI",
       ],
       highlighted: false,
-    },
-    {
-      name: "Virtual",
-      price: "£147",
-      originalPrice: "£497",
-      discount: "70%",
-      description: "Join us online from anywhere",
-      priceId: TICKET_PRICE_IDS.virtual,
-      features: [
-        "Full day virtual access to all sessions",
-        "Digital gift bag",
-        "Digital workbook",
-        "12 months access to Practical AI",
-      ],
-      highlighted: false,
+      footerNote: "Switch between virtual and in-person at any time",
     },
     {
       name: "Workshop",
@@ -257,6 +243,11 @@ const Tickets = () => {
                     <Calendar className="w-4 h-4 mr-2" />
                     Pay Monthly
                   </Button>
+                  {tier.footerNote && (
+                    <p className="text-xs text-muted-foreground text-center mt-3 italic">
+                      {tier.footerNote}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             ))}
