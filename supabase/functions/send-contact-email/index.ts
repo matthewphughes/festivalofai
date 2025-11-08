@@ -65,7 +65,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email to admin
     const adminEmail = await resend.emails.send({
-      from: "Festival of AI <onboarding@resend.dev>",
+      from: "Festival of AI <noreply@festivalof.ai>",
       to: [primaryEmail],
       cc: [ccEmail],
       subject: "Festival of AI Website Contact Form",
@@ -80,7 +80,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation to user
     const confirmationEmail = await resend.emails.send({
-      from: "Festival of AI <onboarding@resend.dev>",
+      from: "Festival of AI <noreply@festivalof.ai>",
       to: [email],
       subject: "We received your message - Festival of AI",
       html: `
