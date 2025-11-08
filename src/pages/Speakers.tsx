@@ -130,7 +130,6 @@ const Speakers = () => {
                     </div>
                     <h3 className="text-2xl font-bold mb-2">{speaker.name}</h3>
                     {speaker.title && <p className="text-accent font-semibold mb-3">{speaker.title}</p>}
-                    {speaker.bio && <p className="text-muted-foreground mb-4 line-clamp-3">{speaker.bio}</p>}
                     
                     {/* Year Badges */}
                     {speaker.years && speaker.years.length > 0 && (
@@ -241,9 +240,14 @@ const Speakers = () => {
                   </div>
                 )}
 
+                {selectedSpeaker?.bio && (
+                  <p className="text-sm text-muted-foreground">
+                    {selectedSpeaker.bio}
+                  </p>
+                )}
+
                 {/* Social Links */}
                 <div>
-                  <h3 className="font-semibold mb-3">Connect</h3>
                   <div className="flex gap-4">
                     {selectedSpeaker?.linkedin_url && (
                       <a
