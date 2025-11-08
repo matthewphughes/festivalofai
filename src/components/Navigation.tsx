@@ -1,12 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Menu, X, User, Video, LogOut, LayoutDashboard } from "lucide-react";
 import logoDark from "@/assets/logo-dark.png";
 import logoLight from "@/assets/logo-light.png";
+import { toast } from "sonner";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+
+  useEffect(() => {
+    checkAuth();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+      setUserEmail(session?.user?.email || "");
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setIsLoggedIn(!!session);
+    setUserEmail(session?.user?.email || "");
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast.success("Signed out successfully");
+  };
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -46,9 +73,42 @@ const Navigation = () => {
                 {link.name}
               </Link>
             ))}
-            <Button asChild variant="default" className="bg-primary hover:bg-primary/90">
-              <Link to="/tickets">Get Tickets</Link>
-            </Button>
+            {isLoggedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="rounded-full">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-background z-50">
+                  <div className="px-2 py-1.5 text-sm font-medium">
+                    {userEmail}
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/my-account" className="cursor-pointer">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      My Account
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/replays" className="cursor-pointer">
+                      <Video className="mr-2 h-4 w-4" />
+                      Replays
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild variant="default" className="bg-primary hover:bg-primary/90">
+                <Link to="/tickets">Get Tickets</Link>
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -75,11 +135,41 @@ const Navigation = () => {
                   {link.name}
                 </Link>
               ))}
-              <Button asChild variant="default" className="bg-primary hover:bg-primary/90 mt-2">
-                <Link to="/tickets" onClick={() => setIsOpen(false)}>
-                  Get Tickets
-                </Link>
-              </Button>
+              {isLoggedIn ? (
+                <>
+                  <Link
+                    to="/my-account"
+                    className="text-foreground/80 hover:text-accent transition-colors font-medium py-2"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    My Account
+                  </Link>
+                  <Link
+                    to="/replays"
+                    className="text-foreground/80 hover:text-accent transition-colors font-medium py-2"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Replays
+                  </Link>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      handleSignOut();
+                      setIsOpen(false);
+                    }}
+                    className="mt-2"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <Button asChild variant="default" className="bg-primary hover:bg-primary/90 mt-2">
+                  <Link to="/tickets" onClick={() => setIsOpen(false)}>
+                    Get Tickets
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
         )}
