@@ -43,7 +43,11 @@ const Navigation = () => {
     { name: "Venue", path: "/venue" },
     { name: "Accommodation", path: "/accommodation" },
     { name: "Sponsors", path: "/sponsors" },
-    { name: "Get Tickets", path: "/tickets" },
+  ];
+
+  const archiveLinks = [
+    { name: "Replays", path: "/replays" },
+    { name: "Previous Events", path: "/previous-events" },
   ];
 
   return (
@@ -97,15 +101,25 @@ const Navigation = () => {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <Link to="/replays" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
-                    Replays
-                  </Link>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <Link to="/previous-events" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
+                  <NavigationMenuTrigger className="text-foreground/80 hover:text-accent transition-colors font-medium">
                     2025
-                  </Link>
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-48 gap-1 p-2 bg-background border border-border rounded-md shadow-lg">
+                      {archiveLinks.map((link) => (
+                        <li key={link.path}>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to={link.path}
+                              className="block px-3 py-2 text-sm text-foreground/80 hover:text-accent hover:bg-accent/10 rounded transition-colors"
+                            >
+                              {link.name}
+                            </Link>
+                          </NavigationMenuLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
@@ -116,7 +130,11 @@ const Navigation = () => {
               </NavigationMenuList>
             </NavigationMenu>
 
-            {isLoggedIn ? (
+            <Button asChild variant="default" className="bg-primary hover:bg-primary/90 ml-2">
+              <Link to="/tickets">Get Tickets</Link>
+            </Button>
+
+            {isLoggedIn && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon" className="rounded-full">
@@ -147,10 +165,6 @@ const Navigation = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : (
-              <Button asChild variant="default" className="bg-primary hover:bg-primary/90 ml-2">
-                <Link to="/tickets">Get Tickets</Link>
-              </Button>
             )}
           </div>
 
@@ -190,21 +204,19 @@ const Navigation = () => {
                 ))}
               </div>
 
-              <Link
-                to="/replays"
-                className="text-foreground/80 hover:text-accent transition-colors font-medium py-2"
-                onClick={() => setIsOpen(false)}
-              >
-                Replays
-              </Link>
-
-              <Link
-                to="/previous-events"
-                className="text-foreground/80 hover:text-accent transition-colors font-medium py-2"
-                onClick={() => setIsOpen(false)}
-              >
-                2025
-              </Link>
+              <div className="flex flex-col gap-2">
+                <div className="text-foreground font-semibold py-2">2025</div>
+                {archiveLinks.map((link) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className="text-foreground/80 hover:text-accent transition-colors font-medium py-2 pl-4"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+              </div>
 
               <Link
                 to="/contact"
@@ -214,7 +226,13 @@ const Navigation = () => {
                 Contact
               </Link>
 
-              {isLoggedIn ? (
+              <Button asChild variant="default" className="bg-primary hover:bg-primary/90 mt-2">
+                <Link to="/tickets" onClick={() => setIsOpen(false)}>
+                  Get Tickets
+                </Link>
+              </Button>
+
+              {isLoggedIn && (
                 <>
                   <Link
                     to="/my-account"
@@ -222,13 +240,6 @@ const Navigation = () => {
                     onClick={() => setIsOpen(false)}
                   >
                     My Account
-                  </Link>
-                  <Link
-                    to="/replays"
-                    className="text-foreground/80 hover:text-accent transition-colors font-medium py-2"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Replays
                   </Link>
                   <Button 
                     variant="outline" 
@@ -242,12 +253,6 @@ const Navigation = () => {
                     Sign Out
                   </Button>
                 </>
-              ) : (
-                <Button asChild variant="default" className="bg-primary hover:bg-primary/90 mt-2">
-                  <Link to="/tickets" onClick={() => setIsOpen(false)}>
-                    Get Tickets
-                  </Link>
-                </Button>
               )}
             </div>
           </div>
