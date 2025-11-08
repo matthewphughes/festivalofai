@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -15,6 +15,10 @@ const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [eventDropdownOpen, setEventDropdownOpen] = useState(false);
+  const [archiveDropdownOpen, setArchiveDropdownOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     checkAuth();
@@ -29,7 +33,16 @@ const Navigation = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const checkAuth = async () => {
@@ -65,9 +78,13 @@ const Navigation = () => {
   const archiveLinks = [
     { name: "Replays", path: "/buy-replays" },
   ];
+  
+  const isActive = (path: string) => location.pathname === path;
+  const isEventActive = eventLinks.some(link => location.pathname === link.path);
+  const isArchiveActive = archiveLinks.some(link => location.pathname === link.path);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <nav className={cn("fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border transition-shadow", scrolled && "shadow-lg")}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
@@ -87,27 +104,36 @@ const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
             <div className="flex items-center gap-4">
-              <Link to="/" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
+              <Link to="/" className={cn("text-foreground/80 hover:text-accent transition-colors font-medium px-2", isActive("/") && "text-accent font-semibold")}>
                 Home
               </Link>
 
-              <Link to="/speakers" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
+              <Link to="/speakers" className={cn("text-foreground/80 hover:text-accent transition-colors font-medium px-2", isActive("/speakers") && "text-accent font-semibold")}>
                 Speakers
               </Link>
 
-              <Link to="/schedule" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
+              <Link to="/schedule" className={cn("text-foreground/80 hover:text-accent transition-colors font-medium px-2", isActive("/schedule") && "text-accent font-semibold")}>
                 Schedule
               </Link>
 
-              <Link to="/sponsors" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
+              <Link to="/sponsors" className={cn("text-foreground/80 hover:text-accent transition-colors font-medium px-2", isActive("/sponsors") && "text-accent font-semibold")}>
                 Sponsors
               </Link>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger className="px-2 py-2 font-medium text-foreground/80 hover:text-accent focus:outline-none inline-flex items-center">
+              <DropdownMenu open={eventDropdownOpen} onOpenChange={setEventDropdownOpen}>
+                <DropdownMenuTrigger 
+                  className={cn("px-2 py-2 font-medium text-foreground/80 hover:text-accent focus:outline-none inline-flex items-center", isEventActive && "text-accent font-semibold")}
+                  onMouseEnter={() => setEventDropdownOpen(true)}
+                  onMouseLeave={() => setEventDropdownOpen(false)}
+                >
                   Event <ChevronDown className="ml-1 h-4 w-4" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56 bg-background border border-border rounded-md shadow-lg z-50">
+                <DropdownMenuContent 
+                  align="start" 
+                  className="w-56 bg-background border border-border rounded-md shadow-lg z-50"
+                  onMouseEnter={() => setEventDropdownOpen(true)}
+                  onMouseLeave={() => setEventDropdownOpen(false)}
+                >
                   <DropdownMenuItem asChild>
                     <Link to="/venue" className="cursor-pointer">Venue</Link>
                   </DropdownMenuItem>
@@ -117,18 +143,27 @@ const Navigation = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger className="px-2 py-2 font-medium text-foreground/80 hover:text-accent focus:outline-none inline-flex items-center">
+              <DropdownMenu open={archiveDropdownOpen} onOpenChange={setArchiveDropdownOpen}>
+                <DropdownMenuTrigger 
+                  className={cn("px-2 py-2 font-medium text-foreground/80 hover:text-accent focus:outline-none inline-flex items-center", isArchiveActive && "text-accent font-semibold")}
+                  onMouseEnter={() => setArchiveDropdownOpen(true)}
+                  onMouseLeave={() => setArchiveDropdownOpen(false)}
+                >
                   2025 <ChevronDown className="ml-1 h-4 w-4" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56 bg-background border border-border rounded-md shadow-lg z-50">
+                <DropdownMenuContent 
+                  align="start" 
+                  className="w-56 bg-background border border-border rounded-md shadow-lg z-50"
+                  onMouseEnter={() => setArchiveDropdownOpen(true)}
+                  onMouseLeave={() => setArchiveDropdownOpen(false)}
+                >
                   <DropdownMenuItem asChild>
                     <Link to="/buy-replays" className="cursor-pointer">Replays</Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Link to="/contact" className="text-foreground/80 hover:text-accent transition-colors font-medium px-2">
+              <Link to="/contact" className={cn("text-foreground/80 hover:text-accent transition-colors font-medium px-2", isActive("/contact") && "text-accent font-semibold")}>
                 Contact
               </Link>
             </div>
