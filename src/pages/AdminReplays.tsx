@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
@@ -25,7 +26,7 @@ const replaySchema = z.object({
   ),
   thumbnail_url: z.union([z.string().url("Invalid URL"), z.literal("")]).optional(),
   event_year: z.number().int().min(2020, "Year must be 2020 or later").max(2030, "Year must be 2030 or earlier"),
-  speaker_name: z.string().trim().max(100, "Speaker name must be less than 100 characters").optional(),
+  speaker_id: z.string().uuid().optional(),
   duration_minutes: z.number().int().positive("Duration must be a positive number").max(600, "Duration must be less than 600 minutes").nullable().optional(),
   published: z.boolean(),
 });
@@ -37,6 +38,7 @@ interface Replay {
   video_url: string;
   thumbnail_url: string | null;
   event_year: number;
+  speaker_id: string | null;
   speaker_name: string | null;
   duration_minutes: number | null;
   published: boolean;
@@ -45,6 +47,7 @@ interface Replay {
 const AdminReplays = () => {
   const navigate = useNavigate();
   const [replays, setReplays] = useState<Replay[]>([]);
+  const [speakers, setSpeakers] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingReplay, setEditingReplay] = useState<Replay | null>(null);
@@ -55,7 +58,7 @@ const AdminReplays = () => {
     video_url: "",
     thumbnail_url: "",
     event_year: new Date().getFullYear(),
-    speaker_name: "",
+    speaker_id: "",
     duration_minutes: "",
     published: false,
   });
@@ -85,20 +88,41 @@ const AdminReplays = () => {
       return;
     }
 
-    await fetchReplays();
+    await Promise.all([fetchReplays(), fetchSpeakers()]);
+  };
+
+  const fetchSpeakers = async () => {
+    const { data, error } = await supabase
+      .from("speakers")
+      .select("id, name")
+      .order("name");
+
+    if (error) {
+      console.error("Failed to load speakers", error);
+    } else {
+      setSpeakers(data || []);
+    }
   };
 
   const fetchReplays = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("event_replays")
-      .select("*")
+      .select(`
+        *,
+        speaker:speakers(name)
+      `)
       .order("created_at", { ascending: false });
 
     if (error) {
       toast.error("Failed to load replays");
     } else {
-      setReplays(data || []);
+      // Flatten speaker data
+      const formattedReplays = (data || []).map((replay: any) => ({
+        ...replay,
+        speaker_name: replay.speaker?.name || null,
+      }));
+      setReplays(formattedReplays);
     }
     setLoading(false);
   };
@@ -159,7 +183,7 @@ const AdminReplays = () => {
         video_url: formData.video_url,
         thumbnail_url: formData.thumbnail_url || undefined,
         event_year: formData.event_year,
-        speaker_name: formData.speaker_name || undefined,
+        speaker_id: formData.speaker_id || undefined,
         duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes) : null,
         published: formData.published,
       };
@@ -173,7 +197,7 @@ const AdminReplays = () => {
         video_url: validated.video_url,
         thumbnail_url: validated.thumbnail_url || null,
         event_year: validated.event_year,
-        speaker_name: validated.speaker_name || null,
+        speaker_id: validated.speaker_id || null,
         duration_minutes: validated.duration_minutes ?? null,
         published: validated.published,
       };
@@ -224,7 +248,7 @@ const AdminReplays = () => {
       video_url: replay.video_url,
       thumbnail_url: replay.thumbnail_url || "",
       event_year: replay.event_year,
-      speaker_name: replay.speaker_name || "",
+      speaker_id: replay.speaker_id || "",
       duration_minutes: replay.duration_minutes?.toString() || "",
       published: replay.published,
     });
@@ -254,7 +278,7 @@ const AdminReplays = () => {
       video_url: "",
       thumbnail_url: "",
       event_year: new Date().getFullYear(),
-      speaker_name: "",
+      speaker_id: "",
       duration_minutes: "",
       published: false,
     });
@@ -325,13 +349,22 @@ const AdminReplays = () => {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
-                          <Label htmlFor="speaker">Speaker Name</Label>
-                          <Input
-                            id="speaker"
-                            value={formData.speaker_name}
-                            onChange={(e) => setFormData({ ...formData, speaker_name: e.target.value })}
-                            maxLength={100}
-                          />
+                          <Label htmlFor="speaker">Speaker</Label>
+                          <Select
+                            value={formData.speaker_id}
+                            onValueChange={(value) => setFormData({ ...formData, speaker_id: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select speaker..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {speakers.map((speaker) => (
+                                <SelectItem key={speaker.id} value={speaker.id}>
+                                  {speaker.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="grid gap-2">
                           <Label htmlFor="year">Event Year</Label>
