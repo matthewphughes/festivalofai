@@ -56,10 +56,20 @@ const handler = async (req: Request): Promise<Response> => {
       // Continue with email sending even if database save fails
     }
 
+    // Get email settings
+    const { data: emailSettings } = await supabase
+      .from('email_settings')
+      .select('setting_key, setting_value')
+      .in('setting_key', ['sponsor_primary_email', 'sponsor_cc_email']);
+
+    const primaryEmail = emailSettings?.find(s => s.setting_key === 'sponsor_primary_email')?.setting_value || 'team@festivalof.ai';
+    const ccEmail = emailSettings?.find(s => s.setting_key === 'sponsor_cc_email')?.setting_value || 'team@creatorcompany.co.uk';
+
     // Send email to admin
     const adminEmail = await resend.emails.send({
       from: "Festival of AI <onboarding@resend.dev>",
-      to: ["hello@festivalof.ai"],
+      to: [primaryEmail],
+      cc: [ccEmail],
       subject: `Sponsor Pack Request: ${company_name}`,
       html: `
         <h2>New Sponsor Pack Request</h2>
