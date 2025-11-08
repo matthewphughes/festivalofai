@@ -378,69 +378,94 @@ const SpeakerProfile = () => {
         {speaker.replays && speaker.replays.length > 0 && (
           <div className="mb-12">
             <h2 className="text-3xl font-bold mb-6">Session Replays</h2>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-4">
               {speaker.replays.map((replay) => {
                 const hasAccess = hasAccessToReplay(replay);
                 const isPurchasing = purchasingReplayId === replay.id;
                 
                 return (
                   <Card key={replay.id} className="overflow-hidden">
-                    <div className="relative">
-                      {replay.thumbnail_url ? (
-                        <img 
-                          src={replay.thumbnail_url} 
-                          alt={replay.title}
-                          className="w-full h-48 object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-48 bg-muted flex items-center justify-center">
-                          <Play className="w-12 h-12 text-muted-foreground" />
+                    <CardContent className="p-0">
+                      <div className="flex flex-col md:flex-row gap-0">
+                        {/* Thumbnail */}
+                        <div className="relative md:w-80 flex-shrink-0">
+                          {replay.thumbnail_url ? (
+                            <img 
+                              src={replay.thumbnail_url} 
+                              alt={replay.title}
+                              className="w-full h-48 md:h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-48 md:h-full bg-muted flex items-center justify-center">
+                              <Play className="w-12 h-12 text-muted-foreground" />
+                            </div>
+                          )}
+                          {!hasAccess && (
+                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+                              <Lock className="w-12 h-12 text-white" />
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {!hasAccess && (
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                          <Lock className="w-12 h-12 text-white" />
-                        </div>
-                      )}
-                    </div>
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between gap-4 mb-3">
-                        <h3 className="font-bold text-lg flex-1">{replay.title}</h3>
-                        <Badge variant="outline">{replay.event_year}</Badge>
-                      </div>
-                      
-                      {replay.description && (
-                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                          {replay.description}
-                        </p>
-                      )}
-                      
-                      {replay.duration_minutes && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                          <Clock className="w-4 h-4" />
-                          <span>{replay.duration_minutes} minutes</span>
-                        </div>
-                      )}
 
-                      {hasAccess ? (
-                        <Button 
-                          className="w-full"
-                          onClick={() => navigate("/replays")}
-                        >
-                          <Play className="w-4 h-4 mr-2" />
-                          Watch Now
-                        </Button>
-                      ) : (
-                        <Button 
-                          className="w-full"
-                          variant="default"
-                          onClick={() => handlePurchaseReplay(replay)}
-                          disabled={isPurchasing}
-                        >
-                          <Lock className="w-4 h-4 mr-2" />
-                          {isPurchasing ? "Opening Checkout..." : "Purchase for £47"}
-                        </Button>
-                      )}
+                        {/* Content */}
+                        <div className="flex-1 p-6 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-start justify-between gap-4 mb-3">
+                              <h3 className="font-bold text-xl flex-1">{replay.title}</h3>
+                              <Badge variant="outline" className="flex-shrink-0">
+                                {replay.event_year}
+                              </Badge>
+                            </div>
+                            
+                            {replay.description && (
+                              <p className="text-muted-foreground mb-4">
+                                {replay.description}
+                              </p>
+                            )}
+                            
+                            {replay.duration_minutes && (
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Clock className="w-4 h-4" />
+                                <span>{replay.duration_minutes} minutes</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="mt-6">
+                            {hasAccess ? (
+                              <Button 
+                                size="lg"
+                                className="w-full md:w-auto"
+                                onClick={() => navigate("/replays")}
+                              >
+                                <Play className="w-4 h-4 mr-2" />
+                                Watch Replay
+                              </Button>
+                            ) : (
+                              <div className="flex flex-col sm:flex-row gap-3">
+                                <Button 
+                                  size="lg"
+                                  onClick={() => handlePurchaseReplay(replay)}
+                                  disabled={isPurchasing}
+                                  className="flex-1"
+                                >
+                                  <Lock className="w-4 h-4 mr-2" />
+                                  {isPurchasing ? "Opening Checkout..." : "Purchase Session - £47"}
+                                </Button>
+                                <Button 
+                                  size="lg"
+                                  variant="outline"
+                                  onClick={() => navigate("/buy-replays")}
+                                  className="flex-1"
+                                >
+                                  Purchase {replay.event_year} Session Pack - £99
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 );
