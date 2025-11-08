@@ -14,6 +14,7 @@ const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -21,6 +22,11 @@ const Navigation = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsLoggedIn(!!session);
       setUserEmail(session?.user?.email || "");
+      if (session?.user) {
+        checkAdminStatus(session.user.id);
+      } else {
+        setIsAdmin(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -30,6 +36,20 @@ const Navigation = () => {
     const { data: { session } } = await supabase.auth.getSession();
     setIsLoggedIn(!!session);
     setUserEmail(session?.user?.email || "");
+    if (session?.user) {
+      await checkAdminStatus(session.user.id);
+    }
+  };
+
+  const checkAdminStatus = async (userId: string) => {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .single();
+    
+    setIsAdmin(!!data);
   };
 
   const handleSignOut = async () => {
@@ -158,6 +178,17 @@ const Navigation = () => {
                       Replays
                     </Link>
                   </DropdownMenuItem>
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="cursor-pointer">
+                          <LayoutDashboard className="mr-2 h-4 w-4" />
+                          Admin Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
                     <LogOut className="mr-2 h-4 w-4" />
@@ -241,6 +272,15 @@ const Navigation = () => {
                   >
                     My Account
                   </Link>
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      className="text-foreground/80 hover:text-accent transition-colors font-medium py-2"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
                   <Button 
                     variant="outline" 
                     onClick={() => {
