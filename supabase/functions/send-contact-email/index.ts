@@ -1,7 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,7 +15,7 @@ const corsHeaders = {
 interface ContactEmailRequest {
   name: string;
   email: string;
-  subject: string;
+  phone?: string;
   message: string;
 }
 
@@ -22,12 +25,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { name, email, subject, message }: ContactEmailRequest = await req.json();
+    const { name, email, phone, message }: ContactEmailRequest = await req.json();
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Validate input
-    if (!name || !email || !subject || !message) {
+    if (!name || !email || !message) {
       return new Response(
-        JSON.stringify({ error: "All fields are required" }),
+        JSON.stringify({ error: "Name, email, and message are required" }),
         {
           status: 400,
           headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -35,15 +39,30 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Save to database
+    const { error: dbError } = await supabase
+      .from('contact_submissions')
+      .insert({
+        name,
+        email,
+        phone,
+        message
+      });
+
+    if (dbError) {
+      console.error("Error saving to database:", dbError);
+      // Continue with email sending even if database save fails
+    }
+
     // Send email to admin
     const adminEmail = await resend.emails.send({
       from: "Festival of AI <onboarding@resend.dev>",
       to: ["hello@festivalof.ai"],
-      subject: `Contact Form: ${subject}`,
+      subject: "Festival of AI Website Contact Form",
       html: `
         <h2>New Contact Form Submission</h2>
         <p><strong>From:</strong> ${name} (${email})</p>
-        <p><strong>Subject:</strong> ${subject}</p>
+        ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
         <p><strong>Message:</strong></p>
         <p>${message.replace(/\n/g, '<br>')}</p>
       `,

@@ -17,7 +17,7 @@ import { useState } from "react";
 const contactSchema = z.object({
   name: z.string().trim().min(1, { message: "Name is required" }).max(100, { message: "Name must be less than 100 characters" }),
   email: z.string().trim().email({ message: "Invalid email address" }).max(255, { message: "Email must be less than 255 characters" }),
-  subject: z.string().trim().min(1, { message: "Subject is required" }).max(200, { message: "Subject must be less than 200 characters" }),
+  phone: z.string().trim().max(50, { message: "Phone must be less than 50 characters" }).optional(),
   message: z.string().trim().min(1, { message: "Message is required" }).max(2000, { message: "Message must be less than 2000 characters" })
 });
 
@@ -100,31 +100,33 @@ const Contact = () => {
                       )}
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        {...register("email")}
-                        placeholder="your.email@example.com"
-                        className={errors.email ? "border-destructive" : ""}
-                      />
-                      {errors.email && (
-                        <p className="text-sm text-destructive">{errors.email.message}</p>
-                      )}
-                    </div>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          {...register("email")}
+                          placeholder="your.email@example.com"
+                          className={errors.email ? "border-destructive" : ""}
+                        />
+                        {errors.email && (
+                          <p className="text-sm text-destructive">{errors.email.message}</p>
+                        )}
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="subject">Subject</Label>
-                      <Input
-                        id="subject"
-                        {...register("subject")}
-                        placeholder="What is this regarding?"
-                        className={errors.subject ? "border-destructive" : ""}
-                      />
-                      {errors.subject && (
-                        <p className="text-sm text-destructive">{errors.subject.message}</p>
-                      )}
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone (Optional)</Label>
+                        <Input
+                          id="phone"
+                          {...register("phone")}
+                          placeholder="+44 123 456 7890"
+                          className={errors.phone ? "border-destructive" : ""}
+                        />
+                        {errors.phone && (
+                          <p className="text-sm text-destructive">{errors.phone.message}</p>
+                        )}
+                      </div>
                     </div>
 
                     <div className="space-y-2">

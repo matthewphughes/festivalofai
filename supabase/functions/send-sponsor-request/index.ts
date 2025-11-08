@@ -1,7 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,6 +27,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { company_name, contact_name, email, phone, message }: SponsorRequestData = await req.json();
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Validate required fields
     if (!company_name || !contact_name || !email) {
@@ -34,6 +38,22 @@ const handler = async (req: Request): Promise<Response> => {
           headers: { "Content-Type": "application/json", ...corsHeaders },
         }
       );
+    }
+
+    // Save to database
+    const { error: dbError } = await supabase
+      .from('sponsor_requests')
+      .insert({
+        company_name,
+        contact_name,
+        email,
+        phone,
+        message
+      });
+
+    if (dbError) {
+      console.error("Error saving to database:", dbError);
+      // Continue with email sending even if database save fails
     }
 
     // Send email to admin

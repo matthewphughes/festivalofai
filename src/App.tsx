@@ -26,6 +26,8 @@ import NotFound from "./pages/NotFound";
 import Accommodation from "./pages/Accommodation";
 import Contact from "./pages/Contact";
 import Sponsors from "./pages/Sponsors";
+import AdminContacts from "./pages/AdminContacts";
+import AdminSponsorRequests from "./pages/AdminSponsorRequests";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +60,8 @@ const App = () => (
           <Route path="/admin/replays" element={<AdminReplays />} />
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/admin/speakers" element={<AdminSpeakers />} />
+          <Route path="/admin/contacts" element={<AdminContacts />} />
+          <Route path="/admin/sponsor-requests" element={<AdminSponsorRequests />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

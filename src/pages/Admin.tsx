@@ -180,6 +180,38 @@ const Admin = () => {
                   </Button>
                 </CardContent>
               </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Contact Submissions</CardTitle>
+                  <CardDescription>View contact form messages</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    View and manage contact form submissions from the website.
+                  </p>
+                  <Button onClick={() => navigate("/admin/contacts")} className="w-full">
+                    View Contacts
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Sponsor Requests</CardTitle>
+                  <CardDescription>View sponsor pack requests</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    View and manage sponsor pack requests from potential sponsors.
+                  </p>
+                  <Button onClick={() => navigate("/admin/sponsor-requests")} className="w-full">
+                    View Requests
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
           </>
         )}
