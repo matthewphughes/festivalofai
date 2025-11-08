@@ -336,82 +336,9 @@ const Speakers = () => {
                 )}
 
                 {selectedSpeaker?.bio && (
-                  <div>
-                    <h3 className="font-semibold mb-2">About</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedSpeaker.bio}
-                    </p>
-                  </div>
-                )}
-
-                {/* Replays Section */}
-                {selectedSpeaker?.replays && selectedSpeaker.replays.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold mb-3">Session Replays ({selectedSpeaker.replays.length})</h3>
-                    <div className="space-y-3">
-                      {selectedSpeaker.replays.map((replay) => {
-                        const hasAccess = hasAccessToReplay(replay);
-                        return (
-                          <Card key={replay.id} className="bg-muted/50">
-                            <CardContent className="p-4">
-                              <div className="flex gap-3">
-                                {replay.thumbnail_url && (
-                                  <div className="relative flex-shrink-0 w-24 h-16 rounded overflow-hidden">
-                                    <img 
-                                      src={replay.thumbnail_url} 
-                                      alt={replay.title}
-                                      className="w-full h-full object-cover"
-                                    />
-                                    {!hasAccess && (
-                                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                        <Lock className="w-5 h-5 text-white" />
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-medium text-sm mb-1 line-clamp-1">
-                                    {replay.title}
-                                  </h4>
-                                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                    <Badge variant="outline" className="text-xs">
-                                      {replay.event_year}
-                                    </Badge>
-                                    {replay.duration_minutes && (
-                                      <span className="flex items-center gap-1">
-                                        <Clock className="w-3 h-3" />
-                                        {replay.duration_minutes}m
-                                      </span>
-                                    )}
-                                  </div>
-                                  {hasAccess ? (
-                                    <Button 
-                                      size="sm" 
-                                      className="mt-2"
-                                      onClick={() => navigate("/replays")}
-                                    >
-                                      <Play className="w-3 h-3 mr-1" />
-                                      Watch Now
-                                    </Button>
-                                  ) : (
-                                    <Button 
-                                      size="sm" 
-                                      variant="outline"
-                                      className="mt-2"
-                                      onClick={handleBuyReplay}
-                                    >
-                                      <Lock className="w-3 h-3 mr-1" />
-                                      Purchase Access
-                                    </Button>
-                                  )}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedSpeaker.bio}
+                  </p>
                 )}
 
                 {/* Social Links */}
