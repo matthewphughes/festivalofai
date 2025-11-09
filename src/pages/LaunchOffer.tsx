@@ -396,9 +396,9 @@ const LaunchOffer = () => {
                   )}
                    <CardContent className="p-4 sm:p-6">
                     <h3 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">{ticket.name}</h3>
-                    <div className="flex items-center gap-2 mb-3 sm:mb-4 text-sm text-muted-foreground">
-                      <Calendar className="w-4 h-4 text-accent" />
-                      <span className="font-semibold">{ticket.date}</span>
+                    <div className="flex items-center justify-center gap-2 mb-4 sm:mb-6 p-3 bg-accent/10 rounded-lg border border-accent/30">
+                      <Calendar className="w-5 h-5 text-accent" />
+                      <span className="font-bold text-base sm:text-lg text-accent">{ticket.date}</span>
                     </div>
                     <div className="mb-3 sm:mb-4">
                       <div className="text-muted-foreground line-through text-base sm:text-lg mb-1">
