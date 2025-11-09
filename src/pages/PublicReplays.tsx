@@ -1,15 +1,41 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Play, Clock, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
+
+const sessionSchema = z.object({
+  title: z.string().trim().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
+  description: z.string().trim().max(2000, "Description must be less than 2000 characters").optional(),
+  session_date: z.string().optional(),
+  session_time: z.string().optional(),
+  video_url: z.union([z.string().url("Invalid URL").refine(
+    (url) => url.includes('youtube.com') || url.includes('youtu.be'),
+    { message: "Must be a YouTube URL" }
+  ), z.literal("")]).optional(),
+  thumbnail_url: z.union([z.string().url("Invalid URL"), z.literal("")]).optional(),
+  event_year: z.number().int().min(2020, "Year must be 2020 or later").max(2030, "Year must be 2030 or earlier"),
+  speaker_id: z.string().uuid().optional(),
+  duration_minutes: z.number().int().positive("Duration must be a positive number").max(600, "Duration must be less than 600 minutes").nullable().optional(),
+  published: z.boolean(),
+  on_agenda: z.boolean(),
+  session_type: z.enum(["keynote", "workshop", "break", "closing", "session"]).optional(),
+  track: z.string().optional(),
+  price_id: z.string().optional(),
+});
 
 
 interface Replay {
@@ -26,16 +52,39 @@ interface Replay {
 const PublicReplays = () => {
   const navigate = useNavigate();
   const [replays, setReplays] = useState<Replay[]>([]);
+  const [speakers, setSpeakers] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReplay, setSelectedReplay] = useState<Replay | null>(null);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingSession, setEditingSession] = useState<Replay | null>(null);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    video_url: "",
+    thumbnail_url: "",
+    event_year: new Date().getFullYear(),
+    speaker_id: "",
+    duration_minutes: "",
+    published: false,
+    on_agenda: false,
+    session_date: "",
+    session_time: "",
+    session_type: "",
+    track: "",
+    price_id: "",
+  });
 
   useEffect(() => {
     fetchReplays();
     checkAdminStatus();
-  }, []);
+    if (isAdmin) {
+      fetchSpeakers();
+    }
+  }, [isAdmin]);
 
   const checkAdminStatus = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -56,6 +105,19 @@ const PublicReplays = () => {
     }
   }, [selectedReplay]);
 
+  const fetchSpeakers = async () => {
+    const { data, error } = await supabase
+      .from("speakers")
+      .select("id, name")
+      .order("name");
+
+    if (error) {
+      console.error("Failed to load speakers", error);
+    } else {
+      setSpeakers(data || []);
+    }
+  };
+
   const fetchReplays = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -72,6 +134,155 @@ const PublicReplays = () => {
       setReplays(data || []);
     }
     setLoading(false);
+  };
+
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be less than 5MB');
+      return;
+    }
+
+    setUploadingThumbnail(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `session-thumbnails/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('event-assets')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('event-assets')
+        .getPublicUrl(filePath);
+
+      setFormData({ ...formData, thumbnail_url: publicUrl });
+      toast.success('Thumbnail uploaded successfully');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload thumbnail');
+    } finally {
+      setUploadingThumbnail(false);
+    }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const sessionData = {
+        title: formData.title,
+        description: formData.description || undefined,
+        video_url: formData.video_url || undefined,
+        thumbnail_url: formData.thumbnail_url || undefined,
+        event_year: formData.event_year,
+        speaker_id: formData.speaker_id || undefined,
+        duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes) : null,
+        published: formData.published,
+        on_agenda: formData.on_agenda,
+        session_date: formData.session_date || undefined,
+        session_time: formData.session_time || undefined,
+        session_type: formData.session_type || undefined,
+        track: formData.track || undefined,
+        price_id: formData.price_id || undefined,
+      };
+
+      const validated = sessionSchema.parse(sessionData);
+
+      const dataToSave = {
+        title: validated.title,
+        description: validated.description || null,
+        video_url: validated.video_url || null,
+        thumbnail_url: validated.thumbnail_url || null,
+        event_year: validated.event_year,
+        speaker_id: validated.speaker_id || null,
+        duration_minutes: validated.duration_minutes ?? null,
+        published: validated.published,
+        on_agenda: validated.on_agenda,
+        session_date: validated.session_date || null,
+        session_time: validated.session_time || null,
+        session_type: validated.session_type || null,
+        track: validated.track || null,
+        price_id: validated.price_id || null,
+      };
+
+      if (editingSession) {
+        const { error } = await supabase
+          .from("sessions")
+          .update(dataToSave)
+          .eq("id", editingSession.id);
+
+        if (error) {
+          toast.error("Failed to update session");
+        } else {
+          toast.success("Session updated successfully");
+          setEditDialogOpen(false);
+          resetEditForm();
+          fetchReplays();
+        }
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const firstError = error.errors[0];
+        toast.error(firstError.message);
+      } else {
+        toast.error("Failed to save session");
+      }
+    }
+  };
+
+  const handleEdit = (replay: Replay) => {
+    setEditingSession(replay);
+    setFormData({
+      title: replay.title,
+      description: replay.description || "",
+      video_url: replay.video_url || "",
+      thumbnail_url: replay.thumbnail_url || "",
+      event_year: replay.event_year,
+      speaker_id: "", // We'll need to fetch this from speaker_name or use speaker_id if available
+      duration_minutes: replay.duration_minutes?.toString() || "",
+      published: true, // Since we're only showing published replays
+      on_agenda: false,
+      session_date: "",
+      session_time: "",
+      session_type: "",
+      track: "",
+      price_id: "",
+    });
+    setEditDialogOpen(true);
+  };
+
+  const resetEditForm = () => {
+    setFormData({
+      title: "",
+      description: "",
+      video_url: "",
+      thumbnail_url: "",
+      event_year: new Date().getFullYear(),
+      speaker_id: "",
+      duration_minutes: "",
+      published: false,
+      on_agenda: false,
+      session_date: "",
+      session_time: "",
+      session_type: "",
+      track: "",
+      price_id: "",
+    });
+    setEditingSession(null);
   };
 
   const handlePurchase = async (eventYear: number, replayId?: string) => {
@@ -226,7 +437,7 @@ const PublicReplays = () => {
                         size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/admin/sessions`);
+                          handleEdit(replay);
                         }}
                         className="shrink-0"
                       >
@@ -320,6 +531,144 @@ const PublicReplays = () => {
               </DialogDescription>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Session Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={(open) => {
+        setEditDialogOpen(open);
+        if (!open) resetEditForm();
+      }}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <form onSubmit={handleEditSubmit}>
+            <DialogHeader>
+              <DialogTitle>Edit Session</DialogTitle>
+              <DialogDescription>
+                Update session details
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="title">Title</Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  maxLength={200}
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  maxLength={2000}
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="speaker">Speaker</Label>
+                  <Select
+                    value={formData.speaker_id}
+                    onValueChange={(value) => setFormData({ ...formData, speaker_id: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select speaker..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {speakers.map((speaker) => (
+                        <SelectItem key={speaker.id} value={speaker.id}>
+                          {speaker.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="year">Event Year</Label>
+                  <Input
+                    id="year"
+                    type="number"
+                    value={formData.event_year}
+                    onChange={(e) => setFormData({ ...formData, event_year: parseInt(e.target.value) })}
+                    min={2020}
+                    max={2030}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="video">Replay Video URL (YouTube)</Label>
+                <Input
+                  id="video"
+                  type="url"
+                  value={formData.video_url}
+                  onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
+                  placeholder="https://youtube.com/watch?v=..."
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="thumbnail">Thumbnail Image</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="thumbnail"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleThumbnailUpload}
+                    disabled={uploadingThumbnail}
+                  />
+                </div>
+                {formData.thumbnail_url && (
+                  <img src={formData.thumbnail_url} alt="Thumbnail preview" className="w-32 h-20 object-cover rounded" />
+                )}
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="duration">Duration (minutes)</Label>
+                <Input
+                  id="duration"
+                  type="number"
+                  value={formData.duration_minutes}
+                  onChange={(e) => setFormData({ ...formData, duration_minutes: e.target.value })}
+                  min={1}
+                  max={600}
+                  placeholder="e.g., 45"
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="price_id">Stripe Price ID</Label>
+                <Input
+                  id="price_id"
+                  value={formData.price_id}
+                  onChange={(e) => setFormData({ ...formData, price_id: e.target.value })}
+                  placeholder="price_xxxxx"
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="published">Published</Label>
+                <Switch
+                  id="published"
+                  checked={formData.published}
+                  onCheckedChange={(checked) => setFormData({ ...formData, published: checked })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
