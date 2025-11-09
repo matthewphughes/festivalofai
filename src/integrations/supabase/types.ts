@@ -119,8 +119,11 @@ export type Database = {
       replay_purchases: {
         Row: {
           event_year: number
+          granted_at: string | null
+          granted_by: string | null
           id: string
           is_admin_grant: boolean | null
+          product_id: string | null
           purchased_at: string
           replay_id: string | null
           stripe_payment_intent: string | null
@@ -128,8 +131,11 @@ export type Database = {
         }
         Insert: {
           event_year: number
+          granted_at?: string | null
+          granted_by?: string | null
           id?: string
           is_admin_grant?: boolean | null
+          product_id?: string | null
           purchased_at?: string
           replay_id?: string | null
           stripe_payment_intent?: string | null
@@ -137,14 +143,24 @@ export type Database = {
         }
         Update: {
           event_year?: number
+          granted_at?: string | null
+          granted_by?: string | null
           id?: string
           is_admin_grant?: boolean | null
+          product_id?: string | null
           purchased_at?: string
           replay_id?: string | null
           stripe_payment_intent?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "replay_purchases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "stripe_products"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "replay_purchases_replay_id_fkey"
             columns: ["replay_id"]
@@ -341,6 +357,59 @@ export type Database = {
           phone?: string | null
         }
         Relationships: []
+      }
+      stripe_products: {
+        Row: {
+          active: boolean | null
+          amount: number
+          created_at: string | null
+          currency: string
+          event_year: number
+          id: string
+          product_name: string
+          product_type: string
+          replay_id: string | null
+          stripe_price_id: string
+          stripe_product_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          amount: number
+          created_at?: string | null
+          currency?: string
+          event_year: number
+          id?: string
+          product_name: string
+          product_type: string
+          replay_id?: string | null
+          stripe_price_id: string
+          stripe_product_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          amount?: number
+          created_at?: string | null
+          currency?: string
+          event_year?: number
+          id?: string
+          product_name?: string
+          product_type?: string
+          replay_id?: string | null
+          stripe_price_id?: string
+          stripe_product_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stripe_products_replay_id_fkey"
+            columns: ["replay_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

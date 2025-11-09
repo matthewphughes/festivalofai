@@ -70,9 +70,12 @@ serve(async (req) => {
     }
 
     // Check if this is a replay purchase
+    const productId = session.metadata?.product_id;
     const productType = session.metadata?.product_type;
     const eventYear = session.metadata?.event_year;
     const replayId = session.metadata?.replay_id;
+
+    logStep("Metadata extracted", { productId, productType, eventYear, replayId });
 
     if (productType === "replay") {
       logStep("Processing replay purchase", { eventYear, replayId });
@@ -106,6 +109,7 @@ serve(async (req) => {
             event_year: parseInt(eventYear),
             replay_id: replayId,
             stripe_payment_intent: session.payment_intent as string,
+            product_id: productId || null,
           });
 
         if (insertError) {
@@ -153,6 +157,7 @@ serve(async (req) => {
             user_id: userId,
             event_year: parseInt(eventYear),
             stripe_payment_intent: session.payment_intent as string,
+            product_id: productId || null,
           });
 
         if (insertError) {

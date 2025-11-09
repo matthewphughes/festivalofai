@@ -30,6 +30,7 @@ import Sponsors from "./pages/Sponsors";
 import AdminContacts from "./pages/AdminContacts";
 import AdminSponsorRequests from "./pages/AdminSponsorRequests";
 import AdminSiteSettings from "./pages/AdminSiteSettings";
+import AdminStripeProducts from "./pages/AdminStripeProducts";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,7 @@ const App = () => (
           <Route path="/admin/contacts" element={<AdminContacts />} />
           <Route path="/admin/sponsor-requests" element={<AdminSponsorRequests />} />
           <Route path="/admin/site-settings" element={<AdminSiteSettings />} />
+          <Route path="/admin/stripe-products" element={<AdminStripeProducts />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
