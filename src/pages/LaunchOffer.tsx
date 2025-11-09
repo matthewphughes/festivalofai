@@ -172,21 +172,21 @@ const LaunchOffer = () => {
   ];
 
   const galleryImages = [
-    { src: event2025_101, alt: "Speaker presenting at Festival of AI 2025" },
-    { src: eventNetworking1, alt: "Networking at Festival of AI 2025" },
-    { src: event2025_194, alt: "Workshop session at Festival of AI 2025" },
-    { src: eventAudience1, alt: "Engaged audience at Festival of AI 2025" },
-    { src: event2025_115, alt: "Festival of AI 2025 atmosphere" },
-    { src: event2025_202, alt: "Interactive demo at Festival of AI 2025" },
-    { src: eventSpeaker2, alt: "Keynote speaker at Festival of AI 2025" },
-    { src: event2025_125, alt: "Panel discussion at Festival of AI 2025" },
-    { src: event2025_204, alt: "Networking break at Festival of AI 2025" },
-    { src: eventNetworking2, alt: "Professional networking at Festival of AI 2025" },
-    { src: event2025_189, alt: "Expert session at Festival of AI 2025" },
-    { src: event2025_210, alt: "Audience engagement at Festival of AI 2025" },
-    { src: eventSpeaker3, alt: "Technical presentation at Festival of AI 2025" },
-    { src: event2025_213, alt: "Collaborative learning at Festival of AI 2025" },
-    { src: eventAtmosphere, alt: "Festival of AI 2025 venue" }
+    { src: event2025_101, alt: "Speaker presenting at Festival of AI 2025", aspectRatio: "aspect-[3/4]" },
+    { src: eventNetworking1, alt: "Networking at Festival of AI 2025", aspectRatio: "aspect-square" },
+    { src: event2025_194, alt: "Workshop session at Festival of AI 2025", aspectRatio: "aspect-[3/4]" },
+    { src: eventAudience1, alt: "Engaged audience at Festival of AI 2025", aspectRatio: "aspect-square" },
+    { src: event2025_115, alt: "Festival of AI 2025 atmosphere", aspectRatio: "aspect-[3/4]" },
+    { src: event2025_202, alt: "Interactive demo at Festival of AI 2025", aspectRatio: "aspect-square" },
+    { src: eventSpeaker2, alt: "Keynote speaker at Festival of AI 2025", aspectRatio: "aspect-[3/4]" },
+    { src: event2025_125, alt: "Panel discussion at Festival of AI 2025", aspectRatio: "aspect-square" },
+    { src: event2025_204, alt: "Networking break at Festival of AI 2025", aspectRatio: "aspect-[4/3]" },
+    { src: eventNetworking2, alt: "Professional networking at Festival of AI 2025", aspectRatio: "aspect-square" },
+    { src: event2025_189, alt: "Expert session at Festival of AI 2025", aspectRatio: "aspect-[3/4]" },
+    { src: event2025_210, alt: "Audience engagement at Festival of AI 2025", aspectRatio: "aspect-square" },
+    { src: eventSpeaker3, alt: "Technical presentation at Festival of AI 2025", aspectRatio: "aspect-[3/4]" },
+    { src: event2025_213, alt: "Collaborative learning at Festival of AI 2025", aspectRatio: "aspect-square" },
+    { src: eventAtmosphere, alt: "Festival of AI 2025 venue", aspectRatio: "aspect-[4/3]" }
   ];
 
   const handleImageClick = (index: number) => {
@@ -685,11 +685,7 @@ const LaunchOffer = () => {
                 {galleryImages.map((image, index) => (
                   <div 
                     key={index}
-                    className={`${
-                      index % 3 === 0 ? 'aspect-[3/4]' : 
-                      index % 3 === 1 ? 'aspect-square' : 
-                      'aspect-[4/3]'
-                    } overflow-hidden rounded-lg cursor-pointer group`}
+                    className={`${image.aspectRatio} overflow-hidden rounded-lg cursor-pointer group`}
                     onClick={() => handleImageClick(index)}
                   >
                     <img 
