@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
-import Footer from "@/components/Footer";
+import { Link, useNavigate } from "react-router-dom";
+import MinimalFooter from "@/components/MinimalFooter";
 import StarField from "@/components/StarField";
 import CountdownTimer from "@/components/CountdownTimer";
 import VideoTestimonialCard from "@/components/VideoTestimonialCard";
@@ -22,10 +22,12 @@ import {
   Rocket,
   Loader2,
   Clock,
-  AlertCircle
+  AlertCircle,
+  CreditCard
 } from "lucide-react";
 import { trackButtonClick, trackPageView } from "@/lib/analytics";
 import { toast } from "sonner";
+import { useCart } from "@/contexts/CartContext";
 
 import logoWhite from "@/assets/logo-white.png";
 import venueExterior from "@/assets/venue-exterior.jpg";
@@ -43,9 +45,12 @@ interface Speaker {
 }
 
 const LaunchOffer = () => {
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [products, setProducts] = useState<any[]>([]);
   
   // Countdown to Friday at 5PM
   const getNextFriday5PM = () => {
@@ -63,7 +68,23 @@ const LaunchOffer = () => {
   useEffect(() => {
     trackPageView('/launch-offer');
     fetchSpeakers();
+    fetchProducts();
   }, []);
+
+  const fetchProducts = async () => {
+    const { data, error } = await supabase
+      .from("stripe_products")
+      .select("*")
+      .eq("active", true)
+      .eq("product_type", "ticket")
+      .eq("event_year", 2026);
+
+    if (error) {
+      console.error("Failed to load products", error);
+    } else {
+      setProducts(data || []);
+    }
+  };
 
   const fetchSpeakers = async () => {
     try {
@@ -171,54 +192,58 @@ const LaunchOffer = () => {
 
   const ticketTypes = [
     {
-      name: "Standard Early Bird",
-      priceId: "price_1SRXFSEFw97UKMysqEKXSBiL", // FAI26 - Festival of AI 2026
-      price: "£199",
-      regularPrice: "£299",
-      savings: "£100",
+      name: "Festival of AI 2026",
+      stripe_product_id: "prod_TOJtOyxypO8VCB",
+      price: "£197",
+      regularPrice: "£497",
+      savings: "£300",
+      discount: "60%",
       features: [
-        "Access to all keynote sessions",
-        "Lifetime access to session replays",
-        "Networking opportunities",
-        "Lunch and refreshments",
-        "Certificate of attendance",
-        "Free parking"
+        "Full day access to all sessions",
+        "Networking reception",
+        "Gift bag",
+        "Workbook",
+        "12 months access to Practical AI"
       ]
     },
     {
-      name: "Workshop Early Bird",
-      priceId: "price_1SRXEKEFw97UKMysbZfR0Frk", // FAI26 - Festival of AI 2026 + Workshop
-      price: "£299",
-      regularPrice: "£399",
-      savings: "£100",
+      name: "Festival of AI 2026 + Workshop",
+      stripe_product_id: "prod_TOJs4TpP9zprD9",
+      price: "£297",
+      regularPrice: "£697",
+      savings: "£400",
+      discount: "57%",
       popular: true,
       features: [
-        "Everything in Standard",
-        "Exclusive hands-on workshops",
-        "Masterclasses with experts",
-        "Advanced AI tool demonstrations",
-        "Priority seating",
-        "Workshop materials & resources"
+        "Full day access to all sessions",
+        "Access to all workshops",
+        "Networking reception",
+        "Gift bag",
+        "Workbook",
+        "12 months access to Practical AI"
       ]
     }
   ];
 
-  const handleTicketPurchase = async (priceId: string, ticketName: string) => {
-    setCheckoutLoading(priceId);
+  const handleTicketPurchase = async (stripeProductId: string, ticketName: string) => {
+    setCheckoutLoading(stripeProductId);
     trackButtonClick(`Purchase ${ticketName}`, 'launch-offer');
     
     try {
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { priceId }
-      });
+      const product = products.find(p => p.stripe_product_id === stripeProductId);
 
-      if (error) throw error;
-      
-      if (data?.url) {
-        window.open(data.url, '_blank');
+      if (!product) {
+        console.error("Product not found. Looking for:", stripeProductId, "Available products:", products);
+        toast.error("This ticket is not available yet. Please contact support.");
+        setCheckoutLoading(null);
+        return;
       }
+
+      // Add to cart and navigate to checkout
+      await addToCart(product.id);
+      navigate("/checkout");
     } catch (error) {
-      console.error('Error creating checkout session:', error);
+      console.error('Error during checkout:', error);
       toast.error('Failed to start checkout. Please try again.');
     } finally {
       setCheckoutLoading(null);
@@ -307,7 +332,7 @@ const LaunchOffer = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-5xl mx-auto mb-6 sm:mb-8 px-4">
               {ticketTypes.map((ticket) => (
                 <Card 
-                  key={ticket.priceId} 
+                  key={ticket.stripe_product_id} 
                   className={`bg-card/50 backdrop-blur-sm ${ticket.popular ? 'border-accent shadow-lg shadow-accent/20 scale-105 md:scale-110' : 'border-border'} hover:border-primary transition-all relative`}
                 >
                   {ticket.popular && (
@@ -326,8 +351,9 @@ const LaunchOffer = () => {
                       <div className="text-3xl sm:text-4xl font-black text-accent mb-1">
                         {ticket.price}
                       </div>
-                      <div className="text-xs sm:text-sm text-accent font-semibold">
-                        Save {ticket.savings}
+                      <div className="text-xs sm:text-sm text-accent font-semibold flex items-center gap-1">
+                        <span>Save {ticket.savings}</span>
+                        <span className="bg-accent/20 px-2 py-0.5 rounded text-xs font-bold">{ticket.discount}</span>
                       </div>
                     </div>
                     <ul className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6">
@@ -341,16 +367,19 @@ const LaunchOffer = () => {
                     <Button 
                       size="lg" 
                       className={`w-full text-sm sm:text-base ${ticket.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : 'bg-primary hover:bg-primary/90'}`}
-                      onClick={() => handleTicketPurchase(ticket.priceId, ticket.name)}
+                      onClick={() => handleTicketPurchase(ticket.stripe_product_id, ticket.name)}
                       disabled={checkoutLoading !== null}
                     >
-                      {checkoutLoading === ticket.priceId ? (
+                      {checkoutLoading === ticket.stripe_product_id ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           Processing...
                         </>
                       ) : (
-                        `Get ${ticket.name}`
+                        <>
+                          <CreditCard className="w-4 h-4 mr-2" />
+                          Buy Now
+                        </>
                       )}
                     </Button>
                   </CardContent>
@@ -474,7 +503,7 @@ const LaunchOffer = () => {
                   <div className="space-y-3 sm:space-y-4">
                       <p className="text-lg sm:text-xl font-semibold text-accent mb-3 sm:mb-4">Choose Your Ticket:</p>
                       {ticketTypes.map((ticket) => (
-                        <div key={ticket.priceId} className="bg-background/90 backdrop-blur-sm rounded-lg p-4 sm:p-6">
+                        <div key={ticket.stripe_product_id} className="bg-background/90 backdrop-blur-sm rounded-lg p-4 sm:p-6">
                           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
                             <h3 className="text-lg sm:text-xl font-bold">{ticket.name}</h3>
                             {ticket.popular && (
@@ -484,21 +513,24 @@ const LaunchOffer = () => {
                           <div className="flex items-baseline gap-2 sm:gap-3 mb-3">
                             <span className="text-2xl sm:text-3xl font-black text-accent">{ticket.price}</span>
                             <span className="text-sm sm:text-base text-muted-foreground line-through">{ticket.regularPrice}</span>
-                            <span className="text-xs sm:text-sm text-accent font-semibold">Save {ticket.savings}</span>
+                            <span className="text-xs sm:text-sm text-accent font-semibold bg-accent/20 px-2 py-1 rounded">{ticket.discount}</span>
                           </div>
                           <Button 
                             size="lg" 
                             className={`w-full text-sm sm:text-base ${ticket.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : 'bg-primary hover:bg-primary/90'}`}
-                            onClick={() => handleTicketPurchase(ticket.priceId, ticket.name)}
+                            onClick={() => handleTicketPurchase(ticket.stripe_product_id, ticket.name)}
                             disabled={checkoutLoading !== null}
                           >
-                            {checkoutLoading === ticket.priceId ? (
+                            {checkoutLoading === ticket.stripe_product_id ? (
                               <>
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                 Processing...
                               </>
                             ) : (
-                              `Get ${ticket.name}`
+                              <>
+                                <CreditCard className="w-4 h-4 mr-2" />
+                                Buy Now
+                              </>
                             )}
                           </Button>
                         </div>
@@ -640,21 +672,21 @@ const LaunchOffer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 max-w-3xl mx-auto mb-4 sm:mb-6">
                   {ticketTypes.map((ticket) => (
                     <Button 
-                      key={ticket.priceId}
+                      key={ticket.stripe_product_id}
                       size="lg" 
                       className={`${ticket.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : 'bg-primary hover:bg-primary/90'} text-base sm:text-lg md:text-xl px-6 sm:px-8 py-4 sm:py-6 h-auto`}
-                      onClick={() => handleTicketPurchase(ticket.priceId, ticket.name)}
+                      onClick={() => handleTicketPurchase(ticket.stripe_product_id, ticket.name)}
                       disabled={checkoutLoading !== null}
                     >
-                      {checkoutLoading === ticket.priceId ? (
+                      {checkoutLoading === ticket.stripe_product_id ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           Processing...
                         </>
                       ) : (
                         <>
+                          <CreditCard className="w-4 h-4 mr-2" />
                           {ticket.name} - {ticket.price}
-                          <span className="ml-1 sm:ml-2 text-xs sm:text-sm opacity-90">(Save {ticket.savings})</span>
                         </>
                       )}
                     </Button>
@@ -671,7 +703,7 @@ const LaunchOffer = () => {
         </div>
       </main>
 
-      <Footer />
+      <MinimalFooter />
     </div>
   );
 };
