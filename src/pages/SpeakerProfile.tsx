@@ -39,18 +39,17 @@ interface Speaker {
   replays?: Replay[];
 }
 
-// Map replay titles to Stripe price IDs
-const REPLAY_PRICES: Record<string, string> = {
-  "Why AI Replacing You Isn't A Bad Thing": "price_1SRGqfEFw97UKMyse39YIzuV",
-  "The Empathy Engine": "price_1SRGqdEFw97UKMyspQ18Ndq9",
-  "Smarter Design with Canva AI": "price_1SRGqcEFw97UKMysqlyO5Gs5",
-  "Digital Dominance with AI": "price_1SRGqbEFw97UKMysnCW9bw0e",
-  "Building A Success Mindset": "price_1SRGqaEFw97UKMysVTjSiNyA",
-  "An AI Powered Super Day": "price_1SRGqZEFw97UKMysehqDpL2D",
-  "All Speaker Q & A": "price_1SRGqYEFw97UKMysDoqfvnWh",
-  "AI For Six Figure Success in Business": "price_1SRGqWEFw97UKMysebRMJ0bs",
-  "AI Agents - The End of Everything As We Know It": "price_1SRGqVEFw97UKMysD1m7vbJz",
-};
+interface StripeProduct {
+  id: string;
+  stripe_price_id: string;
+  product_name: string;
+  product_type: string;
+  amount: number;
+  currency: string;
+  event_year: number;
+  replay_id: string | null;
+  active: boolean;
+}
 
 const SpeakerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -61,6 +60,7 @@ const SpeakerProfile = () => {
   const [purchasedReplayIds, setPurchasedReplayIds] = useState<string[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [purchasingReplayId, setPurchasingReplayId] = useState<string | null>(null);
+  const [stripeProducts, setStripeProducts] = useState<StripeProduct[]>([]);
 
   useEffect(() => {
     checkAuthAndFetch();
@@ -74,7 +74,21 @@ const SpeakerProfile = () => {
       await checkPurchasedYears();
     }
 
-    await fetchSpeaker();
+    await Promise.all([fetchSpeaker(), fetchStripeProducts()]);
+  };
+
+  const fetchStripeProducts = async () => {
+    const { data, error } = await supabase
+      .from("stripe_products")
+      .select("*")
+      .eq("active", true);
+
+    if (error) {
+      console.error("Error fetching stripe products:", error);
+      return;
+    }
+
+    setStripeProducts(data || []);
   };
 
   const checkPurchasedYears = async () => {
@@ -141,14 +155,26 @@ const SpeakerProfile = () => {
            purchasedReplayIds.includes(replay.id);
   };
 
+  const getReplayProduct = (replayId: string) => {
+    return stripeProducts.find(
+      p => p.product_type === "replay" && p.replay_id === replayId
+    );
+  };
+
+  const getYearBundleProduct = (eventYear: number) => {
+    return stripeProducts.find(
+      p => p.product_type === "year_bundle" && p.event_year === eventYear
+    );
+  };
+
   const handlePurchaseReplay = async (replay: Replay) => {
     if (!isAuthenticated) {
       navigate(`/auth?redirect=/speakers/${slug}`);
       return;
     }
 
-    const priceId = REPLAY_PRICES[replay.title];
-    if (!priceId) {
+    const product = getReplayProduct(replay.id);
+    if (!product) {
       toast.error("Replay purchase not available");
       return;
     }
@@ -164,10 +190,7 @@ const SpeakerProfile = () => {
 
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: {
-          price_id: priceId,
-          product_type: "replay",
-          event_year: replay.event_year,
-          replay_id: replay.id,
+          product_id: product.id,
         },
       });
 
@@ -181,6 +204,42 @@ const SpeakerProfile = () => {
       toast.error("Failed to start checkout");
     } finally {
       setPurchasingReplayId(null);
+    }
+  };
+
+  const handlePurchaseYearBundle = async (eventYear: number) => {
+    if (!isAuthenticated) {
+      navigate(`/auth?redirect=/speakers/${slug}`);
+      return;
+    }
+
+    const product = getYearBundleProduct(eventYear);
+    if (!product) {
+      toast.error("Year bundle not available");
+      return;
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate(`/auth?redirect=/speakers/${slug}`);
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: {
+          product_id: product.id,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (error) {
+      console.error("Purchase error:", error);
+      toast.error("Failed to start checkout");
     }
   };
 
@@ -373,6 +432,8 @@ const SpeakerProfile = () => {
               {speaker.replays.map((replay) => {
                 const hasAccess = hasAccessToReplay(replay);
                 const isPurchasing = purchasingReplayId === replay.id;
+                const replayProduct = getReplayProduct(replay.id);
+                const yearBundleProduct = getYearBundleProduct(replay.event_year);
                 
                 return (
                   <Card key={replay.id} className="overflow-hidden">
@@ -432,22 +493,26 @@ const SpeakerProfile = () => {
                               </Button>
                             ) : (
                               <div className="flex flex-col sm:flex-row gap-3">
-                                <Button 
-                                  size="lg"
-                                  onClick={() => handlePurchaseReplay(replay)}
-                                  disabled={isPurchasing}
-                                  className="flex-1"
-                                >
-                                  {isPurchasing ? "Opening Checkout..." : "Purchase Session - £47"}
-                                </Button>
-                                <Button 
-                                  size="lg"
-                                  variant="outline"
-                                  onClick={() => navigate("/buy-replays")}
-                                  className="flex-1"
-                                >
-                                  Purchase {replay.event_year} Session Pack - £99
-                                </Button>
+                                {replayProduct && (
+                                  <Button 
+                                    size="lg"
+                                    onClick={() => handlePurchaseReplay(replay)}
+                                    disabled={isPurchasing}
+                                    className="flex-1"
+                                  >
+                                    {isPurchasing ? "Opening Checkout..." : `Purchase Session - £${(replayProduct.amount / 100).toFixed(2)}`}
+                                  </Button>
+                                )}
+                                {yearBundleProduct && (
+                                  <Button 
+                                    size="lg"
+                                    variant="outline"
+                                    onClick={() => handlePurchaseYearBundle(replay.event_year)}
+                                    className="flex-1"
+                                  >
+                                    Purchase {replay.event_year} Session Pack - £{(yearBundleProduct.amount / 100).toFixed(2)}
+                                  </Button>
+                                )}
                               </div>
                             )}
                           </div>
