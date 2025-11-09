@@ -10,10 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Loader2, ShoppingBag } from "lucide-react";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
+import { Loader2, ShoppingBag, ArrowLeft } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import logoLight from "@/assets/logo-light.png";
+import logoDark from "@/assets/logo-dark.png";
+import { useTheme } from "next-themes";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
 
@@ -186,26 +187,55 @@ const Checkout = () => {
     );
   }
 
+  const { theme } = useTheme();
+  const logo = theme === "dark" ? logoDark : logoLight;
+
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
-        <div className="container mx-auto px-4 py-24 text-center">
-          <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
-          <Button onClick={() => navigate("/buy-replays")}>Browse Replays</Button>
+      <div className="min-h-screen bg-background flex flex-col">
+        <header className="py-8 border-b">
+          <div className="container mx-auto px-4 flex justify-center">
+            <img src={logo} alt="Logo" className="h-16" />
+          </div>
+        </header>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+            <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
+            <Button onClick={() => navigate("/buy-replays")}>Browse Replays</Button>
+          </div>
         </div>
-        <Footer />
+        <footer className="py-6 border-t">
+          <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Festival of AI. All rights reserved.
+          </div>
+        </footer>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Minimal Header with Logo */}
+      <header className="py-8 border-b">
+        <div className="container mx-auto px-4 flex justify-center">
+          <img src={logo} alt="Logo" className="h-20" />
+        </div>
+      </header>
       
-      <div className="container mx-auto px-4 py-24 max-w-6xl">
-        <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+      {/* Main Content */}
+      <div className="flex-1 container mx-auto px-4 py-12 max-w-6xl">
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/buy-replays")}
+            className="mb-4"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Cart
+          </Button>
+          <h1 className="text-3xl font-bold">Secure Checkout</h1>
+        </div>
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Order Summary */}
@@ -253,7 +283,12 @@ const Checkout = () => {
         </div>
       </div>
       
-      <Footer />
+      {/* Minimal Footer */}
+      <footer className="py-6 border-t mt-auto">
+        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+          © {new Date().getFullYear()} Festival of AI. All rights reserved.
+        </div>
+      </footer>
     </div>
   );
 };
