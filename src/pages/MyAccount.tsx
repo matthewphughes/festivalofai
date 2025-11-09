@@ -532,6 +532,23 @@ const MyAccount = () => {
                 </CardContent>
               </Card>
 
+              {/* Theme Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Display Preferences</CardTitle>
+                  <CardDescription>Theme settings (coming soon)</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-2">
+                    <Label>Theme</Label>
+                    <Input value="Dark Mode" disabled />
+                    <p className="text-xs text-muted-foreground">
+                      Theme customization will be available in a future update
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Password Change */}
               <Card>
                 <CardHeader>

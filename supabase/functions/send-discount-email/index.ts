@@ -13,6 +13,7 @@ interface DiscountEmailRequest {
   campaignId: string;
   name: string;
   email: string;
+  phone: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -22,13 +23,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { campaignId, name, email }: DiscountEmailRequest = await req.json();
+    const { campaignId, name, email, phone }: DiscountEmailRequest = await req.json();
 
-    console.log("Processing discount email request:", { campaignId, name, email });
+    console.log("Processing discount email request:", { campaignId, name, email, phone });
 
     // Validate input
-    if (!campaignId || !name || !email) {
-      throw new Error("Missing required fields: campaignId, name, or email");
+    if (!campaignId || !name || !email || !phone) {
+      throw new Error("Missing required fields: campaignId, name, email, or phone");
     }
 
     // Initialize Supabase client
@@ -57,8 +58,8 @@ const handler = async (req: Request): Promise<Response> => {
       .replace(/\{discount_percentage\}/g, campaign.discount_percentage?.toString() || "")
       .replace(/\{discount_amount\}/g, campaign.discount_amount ? `£${(campaign.discount_amount / 100).toFixed(2)}` : "");
 
-    // Send email via Resend API
-    const emailResponse = await fetch("https://api.resend.com/emails", {
+    // Send email to customer via Resend API
+    const customerEmailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
@@ -153,14 +154,115 @@ const handler = async (req: Request): Promise<Response> => {
       }),
     });
 
-    if (!emailResponse.ok) {
-      const errorData = await emailResponse.json();
-      console.error("Resend API error:", errorData);
-      throw new Error(`Failed to send email: ${JSON.stringify(errorData)}`);
+    if (!customerEmailResponse.ok) {
+      const errorData = await customerEmailResponse.json();
+      console.error("Resend API error (customer):", errorData);
+      throw new Error(`Failed to send customer email: ${JSON.stringify(errorData)}`);
     }
 
-    const emailData = await emailResponse.json();
-    console.log("Email sent successfully:", emailData);
+    const customerEmailData = await customerEmailResponse.json();
+    console.log("Customer email sent successfully:", customerEmailData);
+
+    // Send notification email to team
+    const teamEmailResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Festival of AI <team@festivalof.ai>",
+        to: ["team@creatorcompany.co.uk"],
+        subject: `New Discount Code Request - ${campaign.campaign_name}`,
+        html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <style>
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+              }
+              .header {
+                background: #1a1a1a;
+                color: white;
+                padding: 20px;
+                border-radius: 8px 8px 0 0;
+              }
+              .content {
+                background: white;
+                padding: 30px;
+                border: 1px solid #e0e0e0;
+                border-top: none;
+                border-radius: 0 0 8px 8px;
+              }
+              .detail-row {
+                padding: 12px 0;
+                border-bottom: 1px solid #f0f0f0;
+              }
+              .label {
+                font-weight: 600;
+                color: #666;
+                display: inline-block;
+                width: 120px;
+              }
+              .value {
+                color: #333;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h2>New Discount Code Request</h2>
+            </div>
+            <div class="content">
+              <p>Someone has requested a discount code for the ${campaign.campaign_name} campaign.</p>
+              
+              <div style="margin-top: 20px;">
+                <div class="detail-row">
+                  <span class="label">Name:</span>
+                  <span class="value">${name}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Email:</span>
+                  <span class="value">${email}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Phone:</span>
+                  <span class="value">${phone}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Campaign:</span>
+                  <span class="value">${campaign.campaign_name}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Discount Code:</span>
+                  <span class="value"><strong>${campaign.discount_code}</strong></span>
+                </div>
+              </div>
+              
+              <p style="margin-top: 20px; color: #666; font-size: 14px;">
+                The discount code has been automatically sent to the customer's email address.
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+      }),
+    });
+
+    if (!teamEmailResponse.ok) {
+      const teamErrorData = await teamEmailResponse.json();
+      console.error("Resend API error (team notification):", teamErrorData);
+      // Don't throw here - customer email was sent successfully
+    } else {
+      const teamEmailData = await teamEmailResponse.json();
+      console.log("Team notification email sent successfully:", teamEmailData);
+    }
 
     // Update claim record to mark email as sent
     const { error: updateError } = await supabase
@@ -173,7 +275,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("Error updating claim record:", updateError);
     }
 
-    return new Response(JSON.stringify({ success: true, data: emailData }), {
+    return new Response(JSON.stringify({ success: true, data: customerEmailData }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
