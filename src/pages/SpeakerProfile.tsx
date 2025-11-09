@@ -379,18 +379,20 @@ const SpeakerProfile = () => {
                     <CardContent className="p-0">
                       <div className="flex flex-col md:flex-row gap-0">
                         {/* Thumbnail */}
-                        <div className="relative md:w-80 flex-shrink-0">
-                          {replay.thumbnail_url ? (
-                            <img 
-                              src={replay.thumbnail_url} 
-                              alt={replay.title}
-                              className="w-full h-48 md:h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-48 md:h-full bg-muted flex items-center justify-center">
-                              <Play className="w-12 h-12 text-muted-foreground" />
-                            </div>
-                          )}
+                        <div className="relative md:w-96 flex-shrink-0">
+                          <div className="aspect-video bg-muted">
+                            {replay.thumbnail_url ? (
+                              <img 
+                                src={replay.thumbnail_url} 
+                                alt={replay.title}
+                                className="w-full h-full object-contain"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Play className="w-12 h-12 text-muted-foreground" />
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         {/* Content */}
