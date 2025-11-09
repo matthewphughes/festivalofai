@@ -150,7 +150,7 @@ const AdminStripeProducts = () => {
               body: {
                 operation: "create",
                 data: {
-                  product_name: replay.title,
+                  product_name: `FAI25 - ${replay.title}`,
                   product_type: "individual_replay",
                   event_year: replay.event_year,
                   replay_id: replay.id,
@@ -177,7 +177,7 @@ const AdminStripeProducts = () => {
           body: {
             operation: "create",
             data: {
-              product_name: "2025 Full Event Replays Bundle",
+              product_name: "FAI25 - 2025 Full Event Replays Bundle",
               product_type: "year_bundle",
               event_year: 2025,
               replay_id: null,
