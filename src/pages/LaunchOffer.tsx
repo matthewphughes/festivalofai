@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import StarField from "@/components/StarField";
 import CountdownTimer from "@/components/CountdownTimer";
@@ -19,10 +18,13 @@ import {
   Calendar,
   Gift,
   Star,
-  Rocket
+  Rocket,
+  Loader2
 } from "lucide-react";
 import { trackButtonClick, trackPageView } from "@/lib/analytics";
+import { toast } from "sonner";
 
+import logoWhite from "@/assets/logo-white.png";
 import venueExterior from "@/assets/venue-exterior.jpg";
 import venueRockets from "@/assets/venue-rockets.jpg";
 import venuePlanetarium from "@/assets/venue-planetarium.jpg";
@@ -40,10 +42,20 @@ interface Speaker {
 const LaunchOffer = () => {
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   
-  // Countdown to offer end (example: 7 days from now)
-  const offerEndDate = new Date();
-  offerEndDate.setDate(offerEndDate.getDate() + 7);
+  // Countdown to Friday at 5PM
+  const getNextFriday5PM = () => {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const daysUntilFriday = (5 - dayOfWeek + 7) % 7;
+    const nextFriday = new Date(now);
+    nextFriday.setDate(now.getDate() + (daysUntilFriday || 7));
+    nextFriday.setHours(17, 0, 0, 0);
+    return nextFriday;
+  };
+  
+  const offerEndDate = getNextFriday5PM();
 
   useEffect(() => {
     trackPageView('/launch-offer');
@@ -119,8 +131,60 @@ const LaunchOffer = () => {
     { icon: <MapPin className="w-6 h-6" />, text: "Free On-site Parking" }
   ];
 
-  const handleCtaClick = (location: string) => {
-    trackButtonClick('Get Early Bird Ticket', location);
+  const ticketTypes = [
+    {
+      name: "Standard Early Bird",
+      priceId: "price_1SRXFSEFw97UKMysqEKXSBiL", // FAI26 - Festival of AI 2026
+      price: "£199",
+      regularPrice: "£299",
+      savings: "£100",
+      features: [
+        "Access to all keynote sessions",
+        "Lifetime access to session replays",
+        "Networking opportunities",
+        "Lunch and refreshments",
+        "Certificate of attendance",
+        "Free parking"
+      ]
+    },
+    {
+      name: "Workshop Early Bird",
+      priceId: "price_1SRXEKEFw97UKMysbZfR0Frk", // FAI26 - Festival of AI 2026 + Workshop
+      price: "£299",
+      regularPrice: "£399",
+      savings: "£100",
+      popular: true,
+      features: [
+        "Everything in Standard",
+        "Exclusive hands-on workshops",
+        "Masterclasses with experts",
+        "Advanced AI tool demonstrations",
+        "Priority seating",
+        "Workshop materials & resources"
+      ]
+    }
+  ];
+
+  const handleTicketPurchase = async (priceId: string, ticketName: string) => {
+    setCheckoutLoading(priceId);
+    trackButtonClick(`Purchase ${ticketName}`, 'launch-offer');
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { priceId }
+      });
+
+      if (error) throw error;
+      
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast.error('Failed to start checkout. Please try again.');
+    } finally {
+      setCheckoutLoading(null);
+    }
   };
 
   return (
@@ -131,7 +195,19 @@ const LaunchOffer = () => {
       </Helmet>
       
       <StarField />
-      <Navigation />
+      
+      {/* Simple centered header with logo */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="container mx-auto px-4 py-6 flex justify-center">
+          <Link to="/">
+            <img 
+              src={logoWhite} 
+              alt="Festival of AI" 
+              className="h-12 md:h-16 w-auto transition-transform hover:scale-105" 
+            />
+          </Link>
+        </div>
+      </header>
 
       <main className="pt-32 pb-20 relative z-10">
         <div className="container mx-auto px-4">
@@ -149,7 +225,7 @@ const LaunchOffer = () => {
             </h1>
             
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-              Join 500+ AI innovators at the UK's most inspiring venue. Limited early bird tickets available!
+              Join 200+ AI innovators at the UK's most inspiring venue. Limited super early bird tickets available!
             </p>
 
             <div className="flex items-center justify-center gap-6 mb-10 flex-wrap">
@@ -165,21 +241,65 @@ const LaunchOffer = () => {
 
             {/* Countdown Timer */}
             <div className="mb-10">
-              <p className="text-lg text-accent font-semibold mb-4">Early Bird Offer Ends In:</p>
+              <p className="text-lg text-accent font-semibold mb-4">Super Early Bird Offer Ends:</p>
+              <p className="text-2xl font-bold mb-4">Friday at 5PM</p>
               <CountdownTimer targetDate={offerEndDate} />
             </div>
 
-            {/* Primary CTA */}
-            <Button 
-              asChild 
-              size="lg" 
-              className="bg-primary hover:bg-primary/90 text-xl px-10 py-7 h-auto mb-4"
-              onClick={() => handleCtaClick('hero')}
-            >
-              <Link to="/tickets">
-                Claim Your Early Bird Ticket Now
-              </Link>
-            </Button>
+            {/* Ticket Options */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-8">
+              {ticketTypes.map((ticket) => (
+                <Card 
+                  key={ticket.priceId} 
+                  className={`bg-card/50 backdrop-blur-sm ${ticket.popular ? 'border-accent shadow-lg shadow-accent/20' : 'border-border'} hover:border-primary transition-all relative`}
+                >
+                  {ticket.popular && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <Badge className="bg-accent text-accent-foreground font-bold">
+                        MOST POPULAR
+                      </Badge>
+                    </div>
+                  )}
+                  <CardContent className="p-6">
+                    <h3 className="text-2xl font-bold mb-4">{ticket.name}</h3>
+                    <div className="mb-4">
+                      <div className="text-muted-foreground line-through text-lg mb-1">
+                        {ticket.regularPrice}
+                      </div>
+                      <div className="text-4xl font-black text-accent mb-1">
+                        {ticket.price}
+                      </div>
+                      <div className="text-sm text-accent font-semibold">
+                        Save {ticket.savings}
+                      </div>
+                    </div>
+                    <ul className="space-y-2 mb-6">
+                      {ticket.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm">
+                          <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Button 
+                      size="lg" 
+                      className={`w-full ${ticket.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : 'bg-primary hover:bg-primary/90'}`}
+                      onClick={() => handleTicketPurchase(ticket.priceId, ticket.name)}
+                      disabled={checkoutLoading !== null}
+                    >
+                      {checkoutLoading === ticket.priceId ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        `Get ${ticket.name}`
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
 
             {/* Trust Indicators */}
             <div className="flex items-center justify-center gap-6 mt-6 flex-wrap text-sm">
@@ -294,31 +414,39 @@ const LaunchOffer = () => {
                   </div>
                   
                   <div className="text-center lg:text-left">
-                    <div className="inline-block bg-background/90 backdrop-blur-sm rounded-lg p-8 mb-6">
-                      <div className="text-muted-foreground line-through text-2xl mb-2">
-                        Regular Price: £299
-                      </div>
-                      <div className="text-5xl md:text-6xl font-black text-accent mb-2">
-                        £199
-                      </div>
-                      <div className="text-lg text-foreground/80">
-                        Early Bird Price
-                      </div>
-                      <div className="text-sm text-accent font-semibold mt-2">
-                        Save £100 - Limited Time Only!
-                      </div>
+                  <div className="space-y-4">
+                      <p className="text-xl font-semibold text-accent mb-4">Choose Your Ticket:</p>
+                      {ticketTypes.map((ticket) => (
+                        <div key={ticket.priceId} className="bg-background/90 backdrop-blur-sm rounded-lg p-6">
+                          <div className="flex justify-between items-center mb-3">
+                            <h3 className="text-xl font-bold">{ticket.name}</h3>
+                            {ticket.popular && (
+                              <Badge className="bg-accent text-accent-foreground">Popular</Badge>
+                            )}
+                          </div>
+                          <div className="flex items-baseline gap-3 mb-3">
+                            <span className="text-3xl font-black text-accent">{ticket.price}</span>
+                            <span className="text-muted-foreground line-through">{ticket.regularPrice}</span>
+                            <span className="text-sm text-accent font-semibold">Save {ticket.savings}</span>
+                          </div>
+                          <Button 
+                            size="lg" 
+                            className={`w-full ${ticket.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : 'bg-primary hover:bg-primary/90'}`}
+                            onClick={() => handleTicketPurchase(ticket.priceId, ticket.name)}
+                            disabled={checkoutLoading !== null}
+                          >
+                            {checkoutLoading === ticket.priceId ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              `Get ${ticket.name}`
+                            )}
+                          </Button>
+                        </div>
+                      ))}
                     </div>
-                    
-                    <Button 
-                      asChild 
-                      size="lg" 
-                      className="bg-accent text-accent-foreground hover:bg-accent/90 text-xl px-8 py-6 h-auto w-full lg:w-auto"
-                      onClick={() => handleCtaClick('value-stack')}
-                    >
-                      <Link to="/tickets">
-                        Secure Your Ticket Now
-                      </Link>
-                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -408,7 +536,7 @@ const LaunchOffer = () => {
             <Card className="bg-gradient-to-r from-primary/30 to-secondary/30 backdrop-blur-sm border-primary">
               <CardContent className="p-12">
                 <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                  Join 500+ AI Innovators <span className="text-accent">in 2026</span>
+                  Join 200+ AI Innovators <span className="text-accent">in 2026</span>
                 </h2>
                 
                 <ul className="max-w-2xl mx-auto mb-8 space-y-2 text-left">
@@ -430,16 +558,29 @@ const LaunchOffer = () => {
                   </li>
                 </ul>
 
-                <Button 
-                  asChild 
-                  size="lg" 
-                  className="bg-accent text-accent-foreground hover:bg-accent/90 text-2xl px-12 py-8 h-auto mb-6"
-                  onClick={() => handleCtaClick('final')}
-                >
-                  <Link to="/tickets">
-                    Get Your Early Bird Ticket - Save £100
-                  </Link>
-                </Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto mb-6">
+                  {ticketTypes.map((ticket) => (
+                    <Button 
+                      key={ticket.priceId}
+                      size="lg" 
+                      className={`${ticket.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : 'bg-primary hover:bg-primary/90'} text-xl px-8 py-6 h-auto`}
+                      onClick={() => handleTicketPurchase(ticket.priceId, ticket.name)}
+                      disabled={checkoutLoading !== null}
+                    >
+                      {checkoutLoading === ticket.priceId ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          {ticket.name} - {ticket.price}
+                          <span className="ml-2 text-sm opacity-90">(Save {ticket.savings})</span>
+                        </>
+                      )}
+                    </Button>
+                  ))}
+                </div>
 
                 <div className="text-sm text-muted-foreground">
                   Questions? <Link to="/contact" className="text-accent hover:underline">Contact us</Link>

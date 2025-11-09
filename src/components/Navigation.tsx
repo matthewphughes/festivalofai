@@ -106,10 +106,6 @@ const Navigation = () => {
                 Home
               </Link>
 
-              <Link to="/launch-offer" className={cn("text-foreground/80 hover:text-accent transition-colors font-medium px-2", isActive("/launch-offer") && "text-accent font-semibold")}>
-                Launch Offer
-              </Link>
-
               <Link to="/speakers" className={cn("text-foreground/80 hover:text-accent transition-colors font-medium px-2", isActive("/speakers") && "text-accent font-semibold")}>
                 Speakers
               </Link>
@@ -241,14 +237,6 @@ const Navigation = () => {
                 onClick={() => setIsOpen(false)}
               >
                 Home
-              </Link>
-
-              <Link
-                to="/launch-offer"
-                className="text-foreground/80 hover:text-accent transition-colors font-medium py-2"
-                onClick={() => setIsOpen(false)}
-              >
-                Launch Offer
               </Link>
               
               <Link

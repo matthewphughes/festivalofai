@@ -28,98 +28,107 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
-    // Retrieve authenticated user
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      logStep("ERROR: No authorization header");
-      throw new Error("No authorization header provided");
-    }
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data, error: userError } = await supabaseClient.auth.getUser(token);
+    // Get priceId from request body
+    const { priceId, product_id } = await req.json();
     
-    if (userError) {
-      logStep("ERROR: Authentication failed", { error: userError.message });
-      throw new Error(`Authentication error: ${userError.message}`);
+    // Support both priceId (direct price ID) and product_id (lookup from database)
+    if (!priceId && !product_id) {
+      logStep("ERROR: Neither priceId nor product_id provided");
+      throw new Error("Either priceId or product_id is required");
     }
 
-    const user = data.user;
-    if (!user?.email) {
-      logStep("ERROR: User not authenticated or email not available");
-      throw new Error("User not authenticated or email not available");
+    // Try to get authenticated user (optional for one-off payments)
+    const authHeader = req.headers.get("Authorization");
+    let userEmail;
+    let userId;
+    
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data, error: userError } = await supabaseClient.auth.getUser(token);
+      
+      if (!userError && data.user) {
+        userEmail = data.user.email;
+        userId = data.user.id;
+        logStep("User authenticated", { userId, email: userEmail });
+      }
     }
 
-    logStep("User authenticated", { userId: user.id, email: user.email });
-
-    // Get the product_id from request body
-    const { product_id } = await req.json();
-    if (!product_id) {
-      logStep("ERROR: No product_id provided");
-      throw new Error("product_id is required");
-    }
-
-    logStep("Product ID received", { product_id });
+    let finalPriceId = priceId;
+    let metadata: Record<string, string> = {};
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Look up product from database
-    const { data: product, error: productError } = await supabaseClient
-      .from("stripe_products")
-      .select("*")
-      .eq("id", product_id)
-      .single();
+    // If product_id provided, look up from database
+    if (product_id) {
+      const { data: product, error: productError } = await supabaseClient
+        .from("stripe_products")
+        .select("*")
+        .eq("id", product_id)
+        .single();
 
-    if (productError || !product) {
-      logStep("ERROR: Product not found", { product_id });
-      throw new Error("Product not found");
+      if (productError || !product) {
+        logStep("ERROR: Product not found", { product_id });
+        throw new Error("Product not found");
+      }
+
+      if (!product.active) {
+        logStep("ERROR: Product is not active", { product_id });
+        throw new Error("Product is not active");
+      }
+
+      logStep("Product found", { 
+        productName: product.product_name, 
+        amount: product.amount,
+        type: product.product_type 
+      });
+
+      finalPriceId = product.stripe_price_id;
+      metadata = {
+        product_id: product_id,
+        product_type: product.product_type,
+        event_year: product.event_year.toString(),
+        replay_id: product.replay_id || "",
+      };
+      
+      if (userId) {
+        metadata.user_id = userId;
+      }
+    } else {
+      logStep("Using direct price ID", { priceId: finalPriceId });
     }
-
-    if (!product.active) {
-      logStep("ERROR: Product is not active", { product_id });
-      throw new Error("Product is not active");
-    }
-
-    logStep("Product found", { 
-      productName: product.product_name, 
-      amount: product.amount,
-      type: product.product_type 
-    });
 
 
     // Check if a Stripe customer record exists for this user
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId;
     
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-      logStep("Existing Stripe customer found", { customerId });
-    } else {
-      logStep("No existing Stripe customer found");
+    if (userEmail) {
+      const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
+      
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+        logStep("Existing Stripe customer found", { customerId });
+      } else {
+        logStep("No existing Stripe customer found");
+      }
     }
 
     // Create a one-time payment session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      customer_email: customerId ? undefined : user.email,
+      customer_email: customerId ? undefined : userEmail,
       line_items: [
         {
-          price: product.stripe_price_id,
+          price: finalPriceId,
           quantity: 1,
         },
       ],
       mode: "payment",
-      success_url: `${req.headers.get("origin")}/replays?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/replays`,
-      metadata: {
-        product_id: product_id,
-        product_type: product.product_type,
-        event_year: product.event_year.toString(),
-        replay_id: product.replay_id || "",
-        user_id: user.id,
-      },
+      success_url: `${req.headers.get("origin")}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.get("origin")}/launch-offer`,
+      metadata,
     });
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
