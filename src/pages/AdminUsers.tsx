@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Pencil, Trash2, Shield, User, Mic, Users, Video } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Pencil, Trash2, Shield, User, Mic, Users, Video, Upload, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { UserFilters } from "@/components/admin/UserFilters";
 import { BulkActionsBar } from "@/components/admin/BulkActionsBar";
@@ -58,6 +59,13 @@ const AdminUsers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+
+  // Bulk import states
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
+  const [bulkUserData, setBulkUserData] = useState("");
+  const [parsedUsers, setParsedUsers] = useState<Array<{ firstName: string; lastName: string; email: string }>>([]);
+  const [bulkDefaultRole, setBulkDefaultRole] = useState("user");
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     checkAdminAccess();
@@ -406,6 +414,116 @@ const AdminUsers = () => {
     }
   };
 
+  // Parse bulk user data
+  const handleParseBulkData = () => {
+    try {
+      const lines = bulkUserData.trim().split("\n");
+      const parsed: Array<{ firstName: string; lastName: string; email: string }> = [];
+      const errors: string[] = [];
+
+      lines.forEach((line, index) => {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) return;
+
+        // Support both CSV and TSV
+        const parts = trimmedLine.includes("\t") 
+          ? trimmedLine.split("\t") 
+          : trimmedLine.split(",");
+
+        if (parts.length < 3) {
+          errors.push(`Line ${index + 1}: Not enough fields`);
+          return;
+        }
+
+        const firstName = parts[0].trim();
+        const lastName = parts[1].trim();
+        const email = parts[2].trim();
+
+        // Basic email validation
+        if (!email.includes("@")) {
+          errors.push(`Line ${index + 1}: Invalid email format`);
+          return;
+        }
+
+        if (!firstName || !lastName) {
+          errors.push(`Line ${index + 1}: First name and last name required`);
+          return;
+        }
+
+        parsed.push({ firstName, lastName, email: email.toLowerCase() });
+      });
+
+      if (errors.length > 0) {
+        toast.error(`Parsing errors:\n${errors.join("\n")}`);
+      }
+
+      if (parsed.length === 0) {
+        toast.error("No valid users found");
+        return;
+      }
+
+      // Check for duplicate emails in input
+      const emails = parsed.map(u => u.email);
+      const duplicates = emails.filter((e, i) => emails.indexOf(e) !== i);
+      if (duplicates.length > 0) {
+        toast.error(`Duplicate emails found: ${[...new Set(duplicates)].join(", ")}`);
+        return;
+      }
+
+      setParsedUsers(parsed);
+      toast.success(`Parsed ${parsed.length} users successfully`);
+    } catch (error: any) {
+      toast.error("Failed to parse user data");
+    }
+  };
+
+  // Handle bulk import
+  const handleBulkImport = async () => {
+    if (parsedUsers.length === 0) {
+      toast.error("No users to import");
+      return;
+    }
+
+    setImporting(true);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const response = await supabase.functions.invoke("bulk-create-users", {
+        body: {
+          users: parsedUsers,
+          defaultRole: bulkDefaultRole,
+        },
+      });
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      const { results, summary } = response.data;
+
+      // Show detailed results
+      const failed = results.filter((r: any) => !r.success);
+      if (failed.length > 0) {
+        const failedEmails = failed.map((r: any) => `${r.email}: ${r.error}`).join("\n");
+        toast.error(`${summary.failed} failed:\n${failedEmails}`);
+      }
+
+      if (summary.successful > 0) {
+        toast.success(`Successfully created ${summary.successful} user${summary.successful !== 1 ? 's' : ''}`);
+        setBulkImportOpen(false);
+        setBulkUserData("");
+        setParsedUsers([]);
+        await fetchUsers();
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to import users");
+    } finally {
+      setImporting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -416,10 +534,16 @@ const AdminUsers = () => {
             <h1 className="text-4xl font-bold mb-2">User Management</h1>
             <p className="text-muted-foreground">View and manage registered users</p>
           </div>
-          <Button onClick={() => navigate("/admin")} variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setBulkImportOpen(true)} variant="default">
+              <Upload className="mr-2 h-4 w-4" />
+              Bulk Import Users
+            </Button>
+            <Button onClick={() => navigate("/admin")} variant="outline">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Dashboard
+            </Button>
+          </div>
         </div>
 
         <Card>
@@ -634,6 +758,107 @@ const AdminUsers = () => {
             </Button>
             <Button variant="destructive" onClick={handleDeleteUser}>
               Delete User
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Import Dialog */}
+      <Dialog open={bulkImportOpen} onOpenChange={setBulkImportOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Bulk Import Users</DialogTitle>
+            <DialogDescription>
+              Paste user data below. Each line should contain: FirstName, LastName, Email (comma or tab separated)
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-6 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="bulk-data">User Data</Label>
+              <Textarea
+                id="bulk-data"
+                placeholder="John,Doe,john@example.com&#10;Jane,Smith,jane@example.com"
+                className="min-h-[200px] font-mono text-sm"
+                value={bulkUserData}
+                onChange={(e) => setBulkUserData(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Supports CSV (comma-separated) or TSV (tab-separated). Headers will be auto-detected and skipped.
+              </p>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="default-role">Default Role</Label>
+              <Select value={bulkDefaultRole} onValueChange={setBulkDefaultRole}>
+                <SelectTrigger id="default-role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">User</SelectItem>
+                  <SelectItem value="attendee">Attendee</SelectItem>
+                  <SelectItem value="speaker">Speaker</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button 
+              onClick={handleParseBulkData} 
+              variant="outline"
+              disabled={!bulkUserData.trim()}
+            >
+              Parse & Preview
+            </Button>
+
+            {parsedUsers.length > 0 && (
+              <div className="grid gap-2">
+                <Label>Preview ({parsedUsers.length} users)</Label>
+                <div className="border rounded-md max-h-[300px] overflow-y-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>First Name</TableHead>
+                        <TableHead>Last Name</TableHead>
+                        <TableHead>Email</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {parsedUsers.map((user, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell>{user.firstName}</TableCell>
+                          <TableCell>{user.lastName}</TableCell>
+                          <TableCell>{user.email}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Users will be created with auto-confirmed emails. They'll need to use "Forgot Password" to set their password.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setBulkImportOpen(false);
+                setBulkUserData("");
+                setParsedUsers([]);
+              }}
+              disabled={importing}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleBulkImport}
+              disabled={parsedUsers.length === 0 || importing}
+            >
+              {importing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Import {parsedUsers.length} User{parsedUsers.length !== 1 ? 's' : ''}
             </Button>
           </DialogFooter>
         </DialogContent>

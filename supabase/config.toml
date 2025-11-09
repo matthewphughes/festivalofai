@@ -1,5 +1,8 @@
 project_id = "ppvgibvylsxdybsxufxm"
 
+[functions.bulk-create-users]
+verify_jwt = true
+
 [functions.delete-user]
 verify_jwt = true
 
