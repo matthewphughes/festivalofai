@@ -44,6 +44,15 @@ import eventNetworking2 from "@/assets/event-networking-2.jpg";
 import eventSpeaker1 from "@/assets/event-speaker-1.jpg";
 import eventSpeaker2 from "@/assets/event-speaker-2.jpg";
 import eventSpeaker3 from "@/assets/event-speaker-3.jpg";
+import event2025_101 from "@/assets/event-2025-101.jpg";
+import event2025_115 from "@/assets/event-2025-115.jpg";
+import event2025_125 from "@/assets/event-2025-125.jpg";
+import event2025_189 from "@/assets/event-2025-189.jpg";
+import event2025_194 from "@/assets/event-2025-194.jpg";
+import event2025_202 from "@/assets/event-2025-202.jpg";
+import event2025_204 from "@/assets/event-2025-204.jpg";
+import event2025_210 from "@/assets/event-2025-210.jpg";
+import event2025_213 from "@/assets/event-2025-213.jpg";
 
 interface Speaker {
   id: string;
@@ -646,12 +655,12 @@ const LaunchOffer = () => {
             </div>
 
             <div className="px-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
                 {/* Column 1 */}
                 <div className="space-y-3 sm:space-y-4">
                   <div className="aspect-[3/4] overflow-hidden rounded-lg">
                     <img 
-                      src={eventSpeaker1} 
+                      src={event2025_101} 
                       alt="Speaker presenting at Festival of AI 2025" 
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                     />
@@ -660,6 +669,13 @@ const LaunchOffer = () => {
                     <img 
                       src={eventNetworking1} 
                       alt="Networking at Festival of AI 2025" 
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="aspect-[4/3] overflow-hidden rounded-lg">
+                    <img 
+                      src={event2025_194} 
+                      alt="Workshop session at Festival of AI 2025" 
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                     />
                   </div>
@@ -676,8 +692,15 @@ const LaunchOffer = () => {
                   </div>
                   <div className="aspect-[3/4] overflow-hidden rounded-lg">
                     <img 
-                      src={eventAtmosphere} 
+                      src={event2025_115} 
                       alt="Festival of AI 2025 atmosphere" 
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="aspect-square overflow-hidden rounded-lg">
+                    <img 
+                      src={event2025_202} 
+                      alt="Interactive demo at Festival of AI 2025" 
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                     />
                   </div>
@@ -694,8 +717,15 @@ const LaunchOffer = () => {
                   </div>
                   <div className="aspect-square overflow-hidden rounded-lg">
                     <img 
-                      src={eventAudience2} 
-                      alt="Audience participation at Festival of AI 2025" 
+                      src={event2025_125} 
+                      alt="Panel discussion at Festival of AI 2025" 
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="aspect-[4/3] overflow-hidden rounded-lg">
+                    <img 
+                      src={event2025_204} 
+                      alt="Networking break at Festival of AI 2025" 
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                     />
                   </div>
@@ -712,8 +742,40 @@ const LaunchOffer = () => {
                   </div>
                   <div className="aspect-[3/4] overflow-hidden rounded-lg">
                     <img 
-                      src={eventSpeaker3} 
+                      src={event2025_189} 
                       alt="Expert session at Festival of AI 2025" 
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="aspect-square overflow-hidden rounded-lg">
+                    <img 
+                      src={event2025_210} 
+                      alt="Audience engagement at Festival of AI 2025" 
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Column 5 */}
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="aspect-[3/4] overflow-hidden rounded-lg">
+                    <img 
+                      src={eventSpeaker3} 
+                      alt="Technical presentation at Festival of AI 2025" 
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="aspect-square overflow-hidden rounded-lg">
+                    <img 
+                      src={event2025_213} 
+                      alt="Collaborative learning at Festival of AI 2025" 
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="aspect-[4/3] overflow-hidden rounded-lg">
+                    <img 
+                      src={eventAtmosphere} 
+                      alt="Festival of AI 2025 venue" 
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                     />
                   </div>
