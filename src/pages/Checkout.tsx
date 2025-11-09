@@ -18,7 +18,7 @@ import { useTheme } from "next-themes";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
 
-const CheckoutForm = ({ isGuest }: { isGuest: boolean }) => {
+const CheckoutForm = ({ isGuest, userEmail }: { isGuest: boolean; userEmail: string | null }) => {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
@@ -312,8 +312,23 @@ const Checkout = () => {
                 </div>
               )}
               {clientSecret && (
-                <Elements stripe={stripePromise} options={{ clientSecret }}>
-                  <CheckoutForm isGuest={isGuest} />
+                <Elements 
+                  stripe={stripePromise} 
+                  options={{ 
+                    clientSecret,
+                    appearance: {
+                      theme: 'stripe',
+                    },
+                    ...(userEmail && !isGuest && {
+                      defaultValues: {
+                        billingDetails: {
+                          email: userEmail,
+                        }
+                      }
+                    })
+                  }}
+                >
+                  <CheckoutForm isGuest={isGuest} userEmail={userEmail} />
                 </Elements>
               )}
             </CardContent>
