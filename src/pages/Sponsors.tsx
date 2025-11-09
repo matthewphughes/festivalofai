@@ -48,7 +48,7 @@ const Sponsors = () => {
       reset();
     } catch (error) {
       console.error('Error sending sponsor request:', error);
-      toast.error("Failed to send request. Please try emailing us directly at hello@festivalof.ai");
+      toast.error("Failed to send request. Please use our contact form or try again later.");
     } finally {
       setIsSubmitting(false);
     }
@@ -159,9 +159,9 @@ const Sponsors = () => {
 
                 <div className="mt-8 text-center">
                   <p className="text-muted-foreground">
-                    Or email us directly at{" "}
-                    <a href="mailto:hello@festivalof.ai" className="text-primary hover:text-primary/80">
-                      hello@festivalof.ai
+                    Or{" "}
+                    <a href="/contact" className="text-primary hover:text-primary/80">
+                      contact us directly
                     </a>
                   </p>
                 </div>

@@ -154,18 +154,6 @@ const Contact = () => {
                   <Card className="p-6">
                     <div className="flex items-start gap-4">
                       <div className="bg-primary/10 p-3 rounded-lg">
-                        <Mail className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold mb-1">Email</h3>
-                        <p className="text-muted-foreground">hello@festivalof.ai</p>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="bg-primary/10 p-3 rounded-lg">
                         <MapPin className="h-6 w-6 text-primary" />
                       </div>
                       <div>
