@@ -88,9 +88,9 @@ const Tickets = () => {
   const ticketTiers = [
     {
       name: "Festival of AI 2026",
-      price: "£497",
-      originalPrice: null,
-      discount: null,
+      price: "£147",
+      originalPrice: "£497",
+      discount: "70%",
       description: "In-person access to Festival of AI 2026",
       features: [
         "Full day access to all sessions",
