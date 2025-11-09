@@ -5,10 +5,12 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Search } from "lucide-react";
+import { Download, Search, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +24,20 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
+
+type User = {
+  id: string;
+  email: string;
+  full_name: string | null;
+};
+
+type Product = {
+  id: string;
+  product_name: string;
+  amount: number;
+  currency: string;
+};
+
 type EnrichedOrder = {
   id: string;
   user_id: string;
@@ -30,6 +46,7 @@ type EnrichedOrder = {
   event_year: number;
   purchased_at: string;
   stripe_payment_intent: string | null;
+  order_type: string | null;
   is_admin_grant: boolean | null;
   granted_by: string | null;
   granted_at: string | null;
@@ -59,6 +76,10 @@ const AdminOrders = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [selectedProductId, setSelectedProductId] = useState("");
+  const [eventYear, setEventYear] = useState(new Date().getFullYear().toString());
 
   // Check admin access
   const { data: isAdmin, isLoading: checkingAdmin } = useQuery({
@@ -76,6 +97,35 @@ const AdminOrders = () => {
 
       return !!roleData;
     },
+  });
+
+  // Fetch users for dropdown
+  const { data: users } = useQuery<User[]>({
+    queryKey: ["admin-users"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, email, full_name")
+        .order("email");
+      if (error) throw error;
+      return data;
+    },
+    enabled: isAdmin === true,
+  });
+
+  // Fetch products for dropdown
+  const { data: products } = useQuery<Product[]>({
+    queryKey: ["admin-products"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("stripe_products")
+        .select("id, product_name, amount, currency")
+        .eq("active", true)
+        .order("product_name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: isAdmin === true,
   });
 
   // Fetch all orders with related data
@@ -165,6 +215,44 @@ const AdminOrders = () => {
     currentPage * ITEMS_PER_PAGE
   );
 
+  const handleCreateManualOrder = async () => {
+    if (!selectedUserId || !selectedProductId) {
+      toast.error("Please select both a user and a product");
+      return;
+    }
+
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const adminId = sessionData.session?.user.id;
+
+      const { error } = await supabase
+        .from("replay_purchases")
+        .insert({
+          user_id: selectedUserId,
+          product_id: selectedProductId,
+          event_year: parseInt(eventYear),
+          order_type: "manual",
+          is_admin_grant: true,
+          granted_by: adminId,
+          granted_at: new Date().toISOString(),
+        });
+
+      if (error) throw error;
+
+      toast.success("Manual order created successfully");
+      setDialogOpen(false);
+      setSelectedUserId("");
+      setSelectedProductId("");
+      setEventYear(new Date().getFullYear().toString());
+      
+      // Refresh orders
+      window.location.reload();
+    } catch (error: any) {
+      console.error("Error creating manual order:", error);
+      toast.error("Failed to create manual order: " + error.message);
+    }
+  };
+
   const exportToCSV = () => {
     if (!ordersData || ordersData.length === 0) {
       toast.error("No orders to export");
@@ -181,7 +269,7 @@ const AdminOrders = () => {
       order.product?.amount ? (order.product.amount / 100).toFixed(2) : "0.00",
       order.product?.currency?.toUpperCase() || "N/A",
       order.stripe_payment_intent || "N/A",
-      order.is_admin_grant ? "Admin Grant" : "Paid",
+      order.order_type || (order.is_admin_grant ? "Admin Grant" : "Paid"),
       order.event_year,
     ]);
 
@@ -248,6 +336,70 @@ const AdminOrders = () => {
                   </SelectContent>
                 </Select>
 
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="gap-2">
+                      <Plus className="h-4 w-4" />
+                      Create Manual Order
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create Manual Order</DialogTitle>
+                      <DialogDescription>
+                        Manually assign a product to a user without payment processing
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>User</Label>
+                        <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a user" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {users?.map((user) => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.full_name || user.email} ({user.email})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Product</Label>
+                        <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a product" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {products?.map((product) => (
+                              <SelectItem key={product.id} value={product.id}>
+                                {product.product_name} - £{(product.amount / 100).toFixed(2)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Event Year</Label>
+                        <Input
+                          type="number"
+                          value={eventYear}
+                          onChange={(e) => setEventYear(e.target.value)}
+                          placeholder="2025"
+                        />
+                      </div>
+
+                      <Button onClick={handleCreateManualOrder} className="w-full">
+                        Create Manual Order
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
                 <Button onClick={exportToCSV} variant="outline" className="gap-2">
                   <Download className="h-4 w-4" />
                   Export CSV
@@ -290,11 +442,13 @@ const AdminOrders = () => {
                             </TableCell>
                             <TableCell>
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                order.is_admin_grant 
-                                  ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" 
-                                  : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                order.order_type === "manual"
+                                  ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                                  : order.is_admin_grant 
+                                    ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" 
+                                    : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                               }`}>
-                                {order.is_admin_grant ? "Admin Grant" : "Paid"}
+                                {order.order_type === "manual" ? "Manual" : order.is_admin_grant ? "Admin Grant" : "Paid"}
                               </span>
                             </TableCell>
                             <TableCell className="font-mono text-xs">

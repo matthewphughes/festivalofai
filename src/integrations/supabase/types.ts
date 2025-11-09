@@ -125,6 +125,7 @@ export type Database = {
           granted_by: string | null
           id: string
           is_admin_grant: boolean | null
+          order_type: string | null
           product_id: string | null
           purchased_at: string
           replay_id: string | null
@@ -139,6 +140,7 @@ export type Database = {
           granted_by?: string | null
           id?: string
           is_admin_grant?: boolean | null
+          order_type?: string | null
           product_id?: string | null
           purchased_at?: string
           replay_id?: string | null
@@ -153,6 +155,7 @@ export type Database = {
           granted_by?: string | null
           id?: string
           is_admin_grant?: boolean | null
+          order_type?: string | null
           product_id?: string | null
           purchased_at?: string
           replay_id?: string | null
