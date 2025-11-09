@@ -43,6 +43,7 @@ import AdminDiscountCampaigns from "./pages/AdminDiscountCampaigns";
 import Checkout from "./pages/Checkout";
 import LaunchOffer from "./pages/LaunchOffer";
 import ResetPassword from "./pages/ResetPassword";
+import AdminUserEdit from "./pages/AdminUserEdit";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           
           <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/users/:userId" element={<AdminUserEdit />} />
           <Route path="/admin/speakers" element={<AdminSpeakers />} />
           <Route path="/admin/contacts" element={<AdminContacts />} />
           <Route path="/admin/sponsor-requests" element={<AdminSponsorRequests />} />

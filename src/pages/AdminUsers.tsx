@@ -25,6 +25,7 @@ interface UserProfile {
   full_name: string | null;
   created_at: string;
   roles: string[];
+  last_sign_in_at: string | null;
 }
 
 interface EventReplay {
@@ -131,10 +132,18 @@ const AdminUsers = () => {
       return;
     }
 
-    // Combine profiles with their roles
-    const usersWithRoles = profiles?.map(profile => ({
+    // Fetch auth users for last_sign_in_at
+    const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
+    
+    const authUserMap = new Map<string, string | null>(
+      authUsers?.map(u => [u.id, u.last_sign_in_at || null] as [string, string | null]) || []
+    );
+
+    // Combine profiles with their roles and last login
+    const usersWithRoles: UserProfile[] = profiles?.map(profile => ({
       ...profile,
-      roles: userRoles?.filter(r => r.user_id === profile.id).map(r => r.role) || []
+      roles: userRoles?.filter(r => r.user_id === profile.id).map(r => r.role) || [],
+      last_sign_in_at: authUserMap.get(profile.id) || null,
     })) || [];
 
     setUsers(usersWithRoles);
@@ -726,6 +735,7 @@ const AdminUsers = () => {
                     <TableHead>Email</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Joined</TableHead>
+                    <TableHead>Last Login</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -759,12 +769,17 @@ const AdminUsers = () => {
                       <TableCell>
                         {new Date(user.created_at).toLocaleDateString()}
                       </TableCell>
+                      <TableCell>
+                        {user.last_sign_in_at 
+                          ? new Date(user.last_sign_in_at).toLocaleDateString()
+                          : "Never"}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleEdit(user)}
+                            onClick={() => navigate(`/admin/users/${user.id}`)}
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
