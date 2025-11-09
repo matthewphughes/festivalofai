@@ -16,6 +16,7 @@ import logoLight from "@/assets/logo-light.png";
 import logoDark from "@/assets/logo-dark.png";
 import { useTheme } from "next-themes";
 import CheckoutProgress from "@/components/checkout/CheckoutProgress";
+import { AuthDialog } from "@/components/AuthDialog";
 
 const CheckoutForm = ({ isGuest, userEmail }: { isGuest: boolean; userEmail: string }) => {
   const stripe = useStripe();
@@ -135,10 +136,26 @@ const Checkout = () => {
   const [guestEmail, setGuestEmail] = useState("");
   const [showGuestEmailForm, setShowGuestEmailForm] = useState(false);
   const [creatingIntent, setCreatingIntent] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   useEffect(() => {
     initializeStripe();
     checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && event === "SIGNED_IN") {
+        setIsGuest(false);
+        setUserEmail(session.user.email || null);
+        setShowAuthDialog(false);
+        // Reload payment intent with authenticated user
+        if (items.length > 0) {
+          createPaymentIntent(session.user.email!);
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const initializeStripe = async () => {
@@ -293,7 +310,7 @@ const Checkout = () => {
             {isGuest && !showGuestEmailForm && (
               <Button
                 variant="outline"
-                onClick={() => navigate(`/auth?returnUrl=${encodeURIComponent('/checkout')}`)}
+                onClick={() => setShowAuthDialog(true)}
               >
                 Sign In
               </Button>
@@ -359,7 +376,7 @@ const Checkout = () => {
                       <Button
                         variant="link"
                         className="h-auto p-0 text-xs"
-                        onClick={() => navigate("/auth")}
+                        onClick={() => setShowAuthDialog(true)}
                       >
                         Sign in here
                       </Button>
@@ -434,6 +451,14 @@ const Checkout = () => {
           © {new Date().getFullYear()} Festival of AI. All rights reserved.
         </div>
       </footer>
+
+      <AuthDialog 
+        open={showAuthDialog} 
+        onOpenChange={setShowAuthDialog}
+        onSuccess={() => {
+          // Auth state change listener will handle the rest
+        }}
+      />
     </div>
   );
 };
