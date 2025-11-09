@@ -134,14 +134,13 @@ const Admin = () => {
               </Card>
             </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Admin Panel</CardTitle>
-                <CardDescription>Manage all aspects of the Festival of AI</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {/* Analytics - Always visible at top */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Analytics */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Analytics</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1">
                   <Button
                     onClick={() => navigate("/admin/analytics")}
                     variant="ghost"
@@ -149,181 +148,177 @@ const Admin = () => {
                   >
                     <span className="flex items-center gap-2">
                       <BarChart3 className="h-4 w-4" />
-                      Analytics Dashboard
+                      Dashboard
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Content Management */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Content Management</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1">
+                  <Button
+                    onClick={() => navigate("/admin/sessions")}
+                    variant="ghost"
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Video className="h-4 w-4" />
+                      Sessions
                     </span>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
 
-                  {/* Content Management */}
-                  <Collapsible defaultOpen className="border rounded-lg p-2">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted/50 rounded-md">
-                      <span className="font-semibold text-sm">Content Management</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="pt-2 space-y-1">
-                      <Button
-                        onClick={() => navigate("/admin/sessions")}
-                        variant="ghost"
-                        className="w-full justify-between"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Video className="h-4 w-4" />
-                          Session Management
-                        </span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                  <Button
+                    onClick={() => navigate("/admin/agenda-builder")}
+                    variant="ghost"
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Agenda
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
 
-                      <Button
-                        onClick={() => navigate("/admin/agenda-builder")}
-                        variant="ghost"
-                        className="w-full justify-between"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
-                          Agenda Builder
-                        </span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                  <Button
+                    onClick={() => navigate("/admin/speakers")}
+                    variant="ghost"
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Mic className="h-4 w-4" />
+                      Speakers
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
 
-                      <Button
-                        onClick={() => navigate("/admin/speakers")}
-                        variant="ghost"
-                        className="w-full justify-between"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Mic className="h-4 w-4" />
-                          Speaker Management
-                        </span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </CollapsibleContent>
-                  </Collapsible>
+              {/* Sales & Commerce */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Sales & Commerce</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1">
+                  <Button
+                    onClick={() => navigate("/admin/stripe-products")}
+                    variant="ghost"
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <ShoppingBag className="h-4 w-4" />
+                      Products
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
 
-                  {/* Sales & Commerce */}
-                  <Collapsible defaultOpen className="border rounded-lg p-2">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted/50 rounded-md">
-                      <span className="font-semibold text-sm">Sales & Commerce</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="pt-2 space-y-1">
-                      <Button
-                        onClick={() => navigate("/admin/stripe-products")}
-                        variant="ghost"
-                        className="w-full justify-between"
-                      >
-                        <span className="flex items-center gap-2">
-                          <ShoppingBag className="h-4 w-4" />
-                          Products & Tickets
-                        </span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                  <Button
+                    onClick={() => navigate("/admin/coupons")}
+                    variant="ghost"
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Tag className="h-4 w-4" />
+                      Coupons
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
 
-                      <Button
-                        onClick={() => navigate("/admin/coupons")}
-                        variant="ghost"
-                        className="w-full justify-between"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Tag className="h-4 w-4" />
-                          Coupon Management
-                        </span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                  <Button
+                    onClick={() => navigate("/admin/orders")}
+                    variant="ghost"
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Receipt className="h-4 w-4" />
+                      Orders
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
 
-                      <Button
-                        onClick={() => navigate("/admin/orders")}
-                        variant="ghost"
-                        className="w-full justify-between"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Receipt className="h-4 w-4" />
-                          Order History
-                        </span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </CollapsibleContent>
-                  </Collapsible>
+              {/* User Management */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">User Management</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1">
+                  <Button
+                    onClick={() => navigate("/admin/users")}
+                    variant="ghost"
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      Users
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
 
-                  {/* User Management */}
-                  <Collapsible defaultOpen className="border rounded-lg p-2">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted/50 rounded-md">
-                      <span className="font-semibold text-sm">User Management</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="pt-2 space-y-1">
-                      <Button
-                        onClick={() => navigate("/admin/users")}
-                        variant="ghost"
-                        className="w-full justify-between"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Users className="h-4 w-4" />
-                          Users
-                        </span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                  <Button
+                    onClick={() => navigate("/admin/contacts")}
+                    variant="ghost"
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4" />
+                      Contacts
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
 
-                      <Button
-                        onClick={() => navigate("/admin/contacts")}
-                        variant="ghost"
-                        className="w-full justify-between"
-                      >
-                        <span className="flex items-center gap-2">
-                          <MessageSquare className="h-4 w-4" />
-                          Contact Submissions
-                        </span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                  <Button
+                    onClick={() => navigate("/admin/sponsor-requests")}
+                    variant="ghost"
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Gift className="h-4 w-4" />
+                      Sponsors
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
 
-                      <Button
-                        onClick={() => navigate("/admin/sponsor-requests")}
-                        variant="ghost"
-                        className="w-full justify-between"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Gift className="h-4 w-4" />
-                          Sponsor Requests
-                        </span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </CollapsibleContent>
-                  </Collapsible>
+              {/* Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1">
+                  <Button
+                    onClick={() => navigate("/admin/email-settings")}
+                    variant="ghost"
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      Email
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
 
-                  {/* Settings */}
-                  <Collapsible defaultOpen className="border rounded-lg p-2">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted/50 rounded-md">
-                      <span className="font-semibold text-sm">Settings</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="pt-2 space-y-1">
-                      <Button
-                        onClick={() => navigate("/admin/email-settings")}
-                        variant="ghost"
-                        className="w-full justify-between"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Mail className="h-4 w-4" />
-                          Email Settings
-                        </span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-
-                      <Button
-                        onClick={() => navigate("/admin/site-settings")}
-                        variant="ghost"
-                        className="w-full justify-between"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Settings className="h-4 w-4" />
-                          Site Settings
-                        </span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </div>
-              </CardContent>
-            </Card>
+                  <Button
+                    onClick={() => navigate("/admin/site-settings")}
+                    variant="ghost"
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Settings className="h-4 w-4" />
+                      Site
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </>
         )}
       </main>
