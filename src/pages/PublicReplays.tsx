@@ -45,7 +45,9 @@ interface Replay {
   video_url: string;
   thumbnail_url: string | null;
   event_year: number;
+  speaker_id: string | null;
   speaker_name: string | null;
+  speaker_slug: string | null;
   duration_minutes: number | null;
 }
 
@@ -122,7 +124,10 @@ const PublicReplays = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("sessions")
-      .select("*")
+      .select(`
+        *,
+        speaker:speakers(name, slug)
+      `)
       .eq("published", true)
       .not("video_url", "is", null)
       .order("event_year", { ascending: false });
@@ -131,7 +136,12 @@ const PublicReplays = () => {
       toast.error("Failed to load replays");
       console.error(error);
     } else {
-      setReplays(data || []);
+      const formattedReplays = (data || []).map((session: any) => ({
+        ...session,
+        speaker_name: session.speaker?.name || null,
+        speaker_slug: session.speaker?.slug || null,
+      }));
+      setReplays(formattedReplays);
     }
     setLoading(false);
   };
@@ -425,7 +435,17 @@ const PublicReplays = () => {
                     <div className="flex-1 cursor-pointer" onClick={() => setSelectedReplay(replay)}>
                       <h3 className="font-bold text-lg mb-2 line-clamp-2">{replay.title}</h3>
                       {replay.speaker_name && (
-                        <p className="text-sm text-muted-foreground mb-2">{replay.speaker_name}</p>
+                        <p 
+                          className="text-sm text-primary mb-2 hover:underline cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (replay.speaker_slug) {
+                              navigate(`/speakers/${replay.speaker_slug}`);
+                            }
+                          }}
+                        >
+                          {replay.speaker_name}
+                        </p>
                       )}
                       {replay.description && (
                         <p className="text-sm text-muted-foreground line-clamp-2">{replay.description}</p>
