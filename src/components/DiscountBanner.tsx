@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,7 +25,7 @@ interface Campaign {
 
 const DiscountBanner = () => {
   const bannerRef = useRef<HTMLDivElement>(null);
-  const [dismissed, setDismissed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => localStorage.getItem('discountBannerCollapsed') === 'true');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -76,12 +76,15 @@ const DiscountBanner = () => {
   }, [campaign]);
 
   // Update CSS variable for banner height
-  const visible = Boolean(campaign && !dismissed && timeLeft);
-  
   useEffect(() => {
     const updateHeight = () => {
-      const height = visible && bannerRef.current ? bannerRef.current.offsetHeight : 0;
-      document.documentElement.style.setProperty('--discount-banner-height', `${height}px`);
+      if (!campaign || !timeLeft) {
+        document.documentElement.style.setProperty('--discount-banner-height', '0px');
+      } else if (isCollapsed) {
+        document.documentElement.style.setProperty('--discount-banner-height', '48px');
+      } else if (bannerRef.current) {
+        document.documentElement.style.setProperty('--discount-banner-height', `${bannerRef.current.offsetHeight}px`);
+      }
     };
 
     updateHeight();
@@ -91,7 +94,7 @@ const DiscountBanner = () => {
       document.documentElement.style.setProperty('--discount-banner-height', '0px');
       window.removeEventListener('resize', updateHeight);
     };
-  }, [visible]);
+  }, [campaign, timeLeft, isCollapsed]);
 
   const trackEvent = (eventName: string, metadata?: Record<string, any>) => {
     console.log(`[Analytics] ${eventName}`, {
@@ -108,11 +111,14 @@ const DiscountBanner = () => {
     setDialogOpen(true);
   };
 
-  const handleDismiss = () => {
-    trackEvent("discount_banner_dismissed", {
+  const handleToggleCollapse = () => {
+    const newCollapsedState = !isCollapsed;
+    setIsCollapsed(newCollapsedState);
+    localStorage.setItem('discountBannerCollapsed', String(newCollapsedState));
+    
+    trackEvent(newCollapsedState ? "discount_banner_collapsed" : "discount_banner_expanded", {
       campaign_id: campaign?.id,
     });
-    setDismissed(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -168,60 +174,75 @@ const DiscountBanner = () => {
     }
   };
 
-  if (!campaign || dismissed || !timeLeft) return null;
+  if (!campaign || !timeLeft) return null;
 
   return (
     <>
-      <div ref={bannerRef} className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground py-4 px-4">
-        <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-            <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4 flex-1">
-              <p className="font-semibold text-sm md:text-base text-center md:text-left">{campaign.banner_message}</p>
-              
-              <div className="flex items-center gap-2">
-                <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
-                  <span className="text-2xl font-bold font-mono leading-none">{timeLeft.days}</span>
-                  <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Days</span>
-                </div>
-                <span className="text-xl font-bold opacity-50">:</span>
-                <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
-                  <span className="text-2xl font-bold font-mono leading-none">{timeLeft.hours}</span>
-                  <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Hours</span>
-                </div>
-                <span className="text-xl font-bold opacity-50">:</span>
-                <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
-                  <span className="text-2xl font-bold font-mono leading-none">{timeLeft.minutes}</span>
-                  <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Mins</span>
-                </div>
-                <span className="text-xl font-bold opacity-50">:</span>
-                <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
-                  <span className="text-2xl font-bold font-mono leading-none">{timeLeft.seconds}</span>
-                  <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Secs</span>
+      {isCollapsed ? (
+        // Collapsed indicator
+        <div 
+          className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground h-12 flex items-center justify-center cursor-pointer hover:bg-primary/90 transition-colors animate-fade-in"
+          onClick={handleToggleCollapse}
+        >
+          <div className="container mx-auto px-4 flex items-center justify-center gap-2">
+            <span className="text-sm font-semibold">🎉 Special Offer Available!</span>
+            <ChevronDown className="h-4 w-4 animate-pulse" />
+          </div>
+        </div>
+      ) : (
+        // Expanded banner
+        <div ref={bannerRef} className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground py-4 px-4 animate-fade-in transition-all duration-300">
+          <div className="container mx-auto">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+              <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4 flex-1">
+                <p className="font-semibold text-sm md:text-base text-center md:text-left">{campaign.banner_message}</p>
+                
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
+                    <span className="text-2xl font-bold font-mono leading-none">{timeLeft.days}</span>
+                    <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Days</span>
+                  </div>
+                  <span className="text-xl font-bold opacity-50">:</span>
+                  <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
+                    <span className="text-2xl font-bold font-mono leading-none">{timeLeft.hours}</span>
+                    <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Hours</span>
+                  </div>
+                  <span className="text-xl font-bold opacity-50">:</span>
+                  <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
+                    <span className="text-2xl font-bold font-mono leading-none">{timeLeft.minutes}</span>
+                    <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Mins</span>
+                  </div>
+                  <span className="text-xl font-bold opacity-50">:</span>
+                  <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
+                    <span className="text-2xl font-bold font-mono leading-none">{timeLeft.seconds}</span>
+                    <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Secs</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={handleClaimClick}
-                variant="secondary"
-                size="sm"
-                className="whitespace-nowrap font-semibold shadow-lg hover:shadow-xl transition-shadow"
-              >
-                Claim Your Discount
-              </Button>
-              <Button
-                onClick={handleDismiss}
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 hover:bg-primary-foreground/20"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={handleClaimClick}
+                  variant="secondary"
+                  size="sm"
+                  className="whitespace-nowrap font-semibold shadow-lg hover:shadow-xl transition-shadow"
+                >
+                  Claim Your Discount
+                </Button>
+                <Button
+                  onClick={handleToggleCollapse}
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-3 hover:bg-primary-foreground/20 flex items-center gap-1 whitespace-nowrap"
+                >
+                  <span className="text-xs">Hide</span>
+                  <ChevronUp className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
