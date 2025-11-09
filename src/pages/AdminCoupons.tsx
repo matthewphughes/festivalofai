@@ -48,7 +48,7 @@ const AdminCoupons = () => {
     max_redemptions: "",
     valid_from: new Date().toISOString().split('T')[0],
     valid_until: "",
-    product_id: "",
+    product_id: "all",
   });
 
   useEffect(() => {
@@ -104,7 +104,7 @@ const AdminCoupons = () => {
             max_redemptions: formData.max_redemptions ? parseInt(formData.max_redemptions) : null,
             valid_from: formData.valid_from,
             valid_until: formData.valid_until || null,
-            product_id: formData.product_id || null,
+            product_id: formData.product_id === "all" ? null : formData.product_id || null,
           },
         },
       });
@@ -121,7 +121,7 @@ const AdminCoupons = () => {
         max_redemptions: "",
         valid_from: new Date().toISOString().split('T')[0],
         valid_until: "",
-        product_id: "",
+        product_id: "all",
       });
       fetchCoupons();
     } catch (error: any) {
@@ -238,7 +238,7 @@ const AdminCoupons = () => {
                       <SelectValue placeholder="Select a product (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Products</SelectItem>
+                      <SelectItem value="all">All Products</SelectItem>
                       {products.map((product) => (
                         <SelectItem key={product.id} value={product.id}>
                           {product.product_name}
