@@ -73,6 +73,7 @@ const LaunchOffer = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   // Countdown to Friday at 5PM
   const getNextFriday5PM = () => {
@@ -91,7 +92,22 @@ const LaunchOffer = () => {
     trackPageView('/launch-offer');
     fetchSpeakers();
     fetchProducts();
+    checkAdminStatus();
   }, []);
+
+  const checkAdminStatus = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .single();
+      
+      setIsAdmin(!!data);
+    }
+  };
 
   const fetchProducts = async () => {
     const { data, error } = await supabase
@@ -494,28 +510,30 @@ const LaunchOffer = () => {
             </div>
           </section>
 
-          {/* Video Testimonials Section */}
-          <section className="mb-16 sm:mb-24">
-            <div className="text-center mb-8 sm:mb-12 px-4">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
-                Don't Just Take <span className="text-accent">Our Word</span>
-              </h2>
-              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-                Hear from past attendees about their transformative experience
-              </p>
-            </div>
+          {/* Video Testimonials Section - Only visible to admins */}
+          {isAdmin && (
+            <section className="mb-16 sm:mb-24">
+              <div className="text-center mb-8 sm:mb-12 px-4">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
+                  Don't Just Take <span className="text-accent">Our Word</span>
+                </h2>
+                <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+                  Hear from past attendees about their transformative experience
+                </p>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4">
-              {videoTestimonials.map((testimonial, index) => (
-                <VideoTestimonialCard
-                  key={index}
-                  quote={testimonial.quote}
-                  author={testimonial.author}
-                  year={testimonial.year}
-                />
-              ))}
-            </div>
-          </section>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4">
+                {videoTestimonials.map((testimonial, index) => (
+                  <VideoTestimonialCard
+                    key={index}
+                    quote={testimonial.quote}
+                    author={testimonial.author}
+                    year={testimonial.year}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Previous Speakers Showcase */}
           <section className="mb-16 sm:mb-24">
