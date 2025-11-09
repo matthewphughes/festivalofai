@@ -96,6 +96,29 @@ serve(async (req) => {
         });
       }
 
+      case "update": {
+        if (!coupon_id) throw new Error("coupon_id required");
+
+        const updateData: any = {};
+        if (couponData.discount_value !== undefined) updateData.discount_value = couponData.discount_value;
+        if (couponData.max_redemptions !== undefined) updateData.max_redemptions = couponData.max_redemptions;
+        if (couponData.valid_until !== undefined) updateData.valid_until = couponData.valid_until;
+
+        const { data: updated, error } = await supabaseClient
+          .from("stripe_coupons")
+          .update(updateData)
+          .eq("id", coupon_id)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        console.log(`Updated coupon ${coupon_id}`);
+        return new Response(JSON.stringify({ success: true, coupon: updated }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       case "toggle_active": {
         if (!coupon_id) throw new Error("coupon_id required");
 

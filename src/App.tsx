@@ -34,6 +34,8 @@ import AdminSiteSettings from "./pages/AdminSiteSettings";
 import AdminStripeProducts from "./pages/AdminStripeProducts";
 import AdminCoupons from "./pages/AdminCoupons";
 import AdminOrders from "./pages/AdminOrders";
+import AdminEmailSettings from "./pages/AdminEmailSettings";
+import AdminAnalytics from "./pages/AdminAnalytics";
 import Checkout from "./pages/Checkout";
 
 const queryClient = new QueryClient();
@@ -76,6 +78,8 @@ const App = () => (
           <Route path="/admin/stripe-products" element={<AdminStripeProducts />} />
           <Route path="/admin/coupons" element={<AdminCoupons />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
+          <Route path="/admin/email-settings" element={<AdminEmailSettings />} />
+          <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/thank-you" element={<ThankYou />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

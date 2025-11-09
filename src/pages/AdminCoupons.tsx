@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Plus, Power, PowerOff, Trash2 } from "lucide-react";
+import { Loader2, Plus, Power, PowerOff, Trash2, Pencil } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { format } from "date-fns";
@@ -40,6 +40,7 @@ const AdminCoupons = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
   const [formData, setFormData] = useState({
     code: "",
     discount_type: "percentage",
@@ -129,6 +130,58 @@ const AdminCoupons = () => {
     }
   };
 
+  const handleUpdate = async () => {
+    if (!editingCoupon) return;
+
+    try {
+      const { error } = await supabase.functions.invoke("manage-coupon", {
+        body: {
+          operation: "update",
+          coupon_id: editingCoupon.id,
+          data: {
+            discount_value: parseInt(formData.discount_value),
+            max_redemptions: formData.max_redemptions ? parseInt(formData.max_redemptions) : null,
+            valid_until: formData.valid_until || null,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success("Coupon updated successfully");
+      setDialogOpen(false);
+      setEditingCoupon(null);
+      setFormData({
+        code: "",
+        discount_type: "percentage",
+        discount_value: "",
+        currency: "gbp",
+        max_redemptions: "",
+        valid_from: new Date().toISOString().split('T')[0],
+        valid_until: "",
+        product_id: "all",
+      });
+      fetchCoupons();
+    } catch (error: any) {
+      toast.error("Failed to update coupon: " + error.message);
+    }
+  };
+
+  const handleEdit = (coupon: Coupon) => {
+    setEditingCoupon(coupon);
+    setFormData({
+      code: coupon.code,
+      discount_type: coupon.discount_type,
+      discount_value: coupon.discount_value.toString(),
+      currency: coupon.currency,
+      max_redemptions: coupon.max_redemptions?.toString() || "",
+      valid_from: coupon.valid_from.split('T')[0],
+      valid_until: coupon.valid_until?.split('T')[0] || "",
+      product_id: coupon.product_id || "all",
+    });
+    setDialogOpen(true);
+  };
+
   const handleToggleActive = async (couponId: string) => {
     try {
       const { error } = await supabase.functions.invoke("manage-coupon", {
@@ -183,7 +236,22 @@ const AdminCoupons = () => {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Coupon Management</h1>
           
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <Dialog open={dialogOpen} onOpenChange={(open) => {
+            setDialogOpen(open);
+            if (!open) {
+              setEditingCoupon(null);
+              setFormData({
+                code: "",
+                discount_type: "percentage",
+                discount_value: "",
+                currency: "gbp",
+                max_redemptions: "",
+                valid_from: new Date().toISOString().split('T')[0],
+                valid_until: "",
+                product_id: "all",
+              });
+            }
+          }}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
@@ -192,34 +260,38 @@ const AdminCoupons = () => {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Create New Coupon</DialogTitle>
+                <DialogTitle>{editingCoupon ? "Edit Coupon" : "Create New Coupon"}</DialogTitle>
                 <DialogDescription>
-                  Create a discount coupon for customers
+                  {editingCoupon ? "Update coupon details" : "Create a discount coupon for customers"}
                 </DialogDescription>
               </DialogHeader>
               
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Coupon Code</Label>
-                  <Input
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                    placeholder="SUMMER2025"
-                  />
-                </div>
+                {!editingCoupon && (
+                  <>
+                    <div className="space-y-2">
+                      <Label>Coupon Code</Label>
+                      <Input
+                        value={formData.code}
+                        onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                        placeholder="SUMMER2025"
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label>Discount Type</Label>
-                  <Select value={formData.discount_type} onValueChange={(value) => setFormData({ ...formData, discount_type: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="percentage">Percentage</SelectItem>
-                      <SelectItem value="fixed_amount">Fixed Amount</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                    <div className="space-y-2">
+                      <Label>Discount Type</Label>
+                      <Select value={formData.discount_type} onValueChange={(value) => setFormData({ ...formData, discount_type: value })}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="percentage">Percentage</SelectItem>
+                          <SelectItem value="fixed_amount">Fixed Amount</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
 
                 <div className="space-y-2">
                   <Label>Discount Value ({formData.discount_type === "percentage" ? "%" : "Pence"})</Label>
@@ -231,22 +303,24 @@ const AdminCoupons = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Product (Optional)</Label>
-                  <Select value={formData.product_id} onValueChange={(value) => setFormData({ ...formData, product_id: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a product (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Products</SelectItem>
-                      {products.map((product) => (
-                        <SelectItem key={product.id} value={product.id}>
-                          {product.product_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {!editingCoupon && (
+                  <div className="space-y-2">
+                    <Label>Product (Optional)</Label>
+                    <Select value={formData.product_id} onValueChange={(value) => setFormData({ ...formData, product_id: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a product (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Products</SelectItem>
+                        {products.map((product) => (
+                          <SelectItem key={product.id} value={product.id}>
+                            {product.product_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label>Max Redemptions (Optional)</Label>
@@ -259,15 +333,17 @@ const AdminCoupons = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Valid From</Label>
-                    <Input
-                      type="date"
-                      value={formData.valid_from}
-                      onChange={(e) => setFormData({ ...formData, valid_from: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
+                  {!editingCoupon && (
+                    <div className="space-y-2">
+                      <Label>Valid From</Label>
+                      <Input
+                        type="date"
+                        value={formData.valid_from}
+                        onChange={(e) => setFormData({ ...formData, valid_from: e.target.value })}
+                      />
+                    </div>
+                  )}
+                  <div className={`space-y-2 ${!editingCoupon ? '' : 'col-span-2'}`}>
                     <Label>Valid Until (Optional)</Label>
                     <Input
                       type="date"
@@ -277,8 +353,8 @@ const AdminCoupons = () => {
                   </div>
                 </div>
 
-                <Button onClick={handleCreate} className="w-full">
-                  Create Coupon
+                <Button onClick={editingCoupon ? handleUpdate : handleCreate} className="w-full">
+                  {editingCoupon ? "Update Coupon" : "Create Coupon"}
                 </Button>
               </div>
             </DialogContent>
@@ -335,7 +411,16 @@ const AdminCoupons = () => {
                         <Button
                           variant="ghost"
                           size="icon"
+                          onClick={() => handleEdit(coupon)}
+                          title="Edit coupon"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleToggleActive(coupon.id)}
+                          title={coupon.active ? "Deactivate" : "Activate"}
                         >
                           {coupon.active ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}
                         </Button>
@@ -344,6 +429,7 @@ const AdminCoupons = () => {
                           size="icon"
                           onClick={() => handleDelete(coupon.id)}
                           className="text-destructive hover:text-destructive"
+                          title="Delete coupon"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

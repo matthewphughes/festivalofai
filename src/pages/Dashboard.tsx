@@ -5,7 +5,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, Shield, LogOut, Video, Calendar } from "lucide-react";
+import { Shield, LogOut, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 const Dashboard = () => {
@@ -14,7 +14,6 @@ const Dashboard = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [userName, setUserName] = useState("");
-  const [replayCount, setReplayCount] = useState(0);
 
   useEffect(() => {
     checkAuth();
@@ -49,15 +48,6 @@ const Dashboard = () => {
 
     const isUserAdmin = roles?.some(r => r.role === "admin") || false;
     setIsAdmin(isUserAdmin);
-
-    // Get session replay count
-    const { count } = await supabase
-      .from("sessions")
-      .select("*", { count: 'exact', head: true })
-      .eq("published", true)
-      .not("video_url", "is", null);
-
-    setReplayCount(count || 0);
     setLoading(false);
   };
 
@@ -91,81 +81,146 @@ const Dashboard = () => {
           </Button>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        {isAdmin ? (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Video className="h-5 w-5" />
-                Event Replays
+                <Shield className="h-5 w-5" />
+                Admin Panel
               </CardTitle>
+              <CardDescription>Manage all aspects of the Festival of AI</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold mb-2">{replayCount}</p>
-              <p className="text-sm text-muted-foreground mb-4">Videos available</p>
-              <Button onClick={() => navigate("/replays")} className="w-full">
-                <Play className="mr-2 h-4 w-4" />
-                Watch Replays
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Upcoming Events
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold mb-2">2025</p>
-              <p className="text-sm text-muted-foreground mb-4">Next festival year</p>
-              <Button onClick={() => navigate("/schedule")} variant="outline" className="w-full">
-                View Schedule
-              </Button>
-            </CardContent>
-          </Card>
-
-          {isAdmin && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Admin Panel
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">Manage replays and content</p>
-                <Button onClick={() => navigate("/admin")} variant="secondary" className="w-full">
-                  <Shield className="mr-2 h-4 w-4" />
-                  Go to Admin
+              <div className="space-y-2">
+                <Button
+                  onClick={() => navigate("/admin/analytics")}
+                  variant="ghost"
+                  className="w-full justify-between"
+                >
+                  <span>Analytics Dashboard</span>
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Links</CardTitle>
-            <CardDescription>Navigate to important sections</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Button onClick={() => navigate("/about")} variant="outline" className="h-auto py-4">
-                About the Festival
-              </Button>
-              <Button onClick={() => navigate("/speakers")} variant="outline" className="h-auto py-4">
-                Our Speakers
-              </Button>
-              <Button onClick={() => navigate("/venue")} variant="outline" className="h-auto py-4">
-                Venue Information
-              </Button>
-              <Button onClick={() => navigate("/tickets")} variant="outline" className="h-auto py-4">
-                Get Tickets
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+                <Button
+                  onClick={() => navigate("/admin/users")}
+                  variant="ghost"
+                  className="w-full justify-between"
+                >
+                  <span>User Management</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => navigate("/admin/sessions")}
+                  variant="ghost"
+                  className="w-full justify-between"
+                >
+                  <span>Session Management</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => navigate("/admin/speakers")}
+                  variant="ghost"
+                  className="w-full justify-between"
+                >
+                  <span>Speaker Management</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => navigate("/admin/stripe-products")}
+                  variant="ghost"
+                  className="w-full justify-between"
+                >
+                  <span>Products & Tickets</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => navigate("/admin/coupons")}
+                  variant="ghost"
+                  className="w-full justify-between"
+                >
+                  <span>Coupon Management</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => navigate("/admin/orders")}
+                  variant="ghost"
+                  className="w-full justify-between"
+                >
+                  <span>Order History</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => navigate("/admin/contacts")}
+                  variant="ghost"
+                  className="w-full justify-between"
+                >
+                  <span>Contact Submissions</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => navigate("/admin/sponsor-requests")}
+                  variant="ghost"
+                  className="w-full justify-between"
+                >
+                  <span>Sponsor Requests</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => navigate("/admin/email-settings")}
+                  variant="ghost"
+                  className="w-full justify-between"
+                >
+                  <span>Email Settings</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => navigate("/admin/site-settings")}
+                  variant="ghost"
+                  className="w-full justify-between"
+                >
+                  <span>Site Settings</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => navigate("/admin/agenda-builder")}
+                  variant="ghost"
+                  className="w-full justify-between"
+                >
+                  <span>Agenda Builder</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Links</CardTitle>
+              <CardDescription>Navigate to important sections</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Button onClick={() => navigate("/about")} variant="outline" className="h-auto py-4">
+                  About the Festival
+                </Button>
+                <Button onClick={() => navigate("/speakers")} variant="outline" className="h-auto py-4">
+                  Our Speakers
+                </Button>
+                <Button onClick={() => navigate("/venue")} variant="outline" className="h-auto py-4">
+                  Venue Information
+                </Button>
+                <Button onClick={() => navigate("/tickets")} variant="outline" className="h-auto py-4">
+                  Get Tickets
+                </Button>
+                <Button onClick={() => navigate("/replays")} variant="outline" className="h-auto py-4">
+                  Event Replays
+                </Button>
+                <Button onClick={() => navigate("/agenda")} variant="outline" className="h-auto py-4">
+                  Event Schedule
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </main>
 
       <Footer />
