@@ -293,7 +293,7 @@ const Checkout = () => {
             {isGuest && !showGuestEmailForm && (
               <Button
                 variant="outline"
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate(`/auth?returnUrl=${encodeURIComponent('/checkout')}`)}
               >
                 Sign In
               </Button>
