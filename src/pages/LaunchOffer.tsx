@@ -270,7 +270,7 @@ const LaunchOffer = () => {
     <div className="min-h-screen relative">
       <Helmet>
         <title>Launch Offer - Festival of AI 2026 | Limited Early Bird Tickets</title>
-        <meta name="description" content="Don't miss out on Festival of AI 2026! Limited early bird tickets available. Join 500+ AI innovators at the National Space Centre, Leicester." />
+        <meta name="description" content="Don't miss out on Festival of AI 2026! Limited early bird tickets available. Join 200+ AI innovators at the National Space Centre, Leicester." />
       </Helmet>
       
       <StarField />
@@ -429,11 +429,7 @@ const LaunchOffer = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mt-6 px-4 text-xs sm:text-sm">
               <div className="flex items-center gap-2">
                 <Star className="w-4 h-4 sm:w-5 sm:h-5 text-accent fill-accent flex-shrink-0" />
-                <span className="text-foreground/70">500+ Attended 2025</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-accent flex-shrink-0" />
-                <span className="text-foreground/70">98% Satisfaction Rate</span>
+                <span className="text-foreground/70">200+ Attended 2025</span>
               </div>
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-accent flex-shrink-0" />
@@ -586,22 +582,20 @@ const LaunchOffer = () => {
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
                 An Inspiring <span className="text-accent">Location</span>
               </h2>
-              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8">
-                Experience the future of AI at the UK's premier space attraction
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-6 sm:mb-8">
+                The National Space Centre isn't just a venue—it's a statement. As the UK's largest planetarium and space attraction, it embodies the spirit of exploration and innovation that defines Festival of AI. Where better to explore the future of artificial intelligence than at a location dedicated to pushing the boundaries of human knowledge and achievement?
               </p>
             </div>
 
-            {/* Hero Venue Image */}
-            <div className="mb-6 sm:mb-8 rounded-lg overflow-hidden mx-4">
-              <img 
-                src={venueExterior} 
-                alt="National Space Centre Exterior"
-                className="w-full h-[250px] sm:h-[350px] md:h-[400px] object-cover"
-              />
-            </div>
-
-            {/* Venue Gallery */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8 px-4">
+            {/* Venue Gallery - 4 Columns */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8 px-4">
+              <div className="rounded-lg overflow-hidden">
+                <img 
+                  src={venueExterior} 
+                  alt="National Space Centre Exterior"
+                  className="w-full h-48 sm:h-56 md:h-64 object-cover hover:scale-110 transition-transform duration-300"
+                />
+              </div>
               <div className="rounded-lg overflow-hidden">
                 <img 
                   src={venueRockets} 
