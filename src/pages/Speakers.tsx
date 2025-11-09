@@ -44,7 +44,7 @@ const Speakers = () => {
     const { data, error } = await supabase
       .from("speakers")
       .select("*")
-      .order("name", { ascending: true });
+      .order("display_order", { ascending: true });
 
     if (error) {
       toast.error("Failed to load speakers");

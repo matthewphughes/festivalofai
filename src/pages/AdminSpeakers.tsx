@@ -12,8 +12,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Pencil, Trash2, Plus, Upload, Linkedin, Twitter, Globe, Youtube, Instagram } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Plus, Upload, Linkedin, Twitter, Globe, Youtube, Instagram, GripVertical } from "lucide-react";
 import { toast } from "sonner";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface Speaker {
   id: string;
@@ -30,7 +47,111 @@ interface Speaker {
   instagram_url: string | null;
   website_url: string | null;
   slug: string;
+  display_order: number;
 }
+
+const SortableRow = ({ speaker, onEdit, onDelete }: { speaker: Speaker; onEdit: (s: Speaker) => void; onDelete: (s: Speaker) => void }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: speaker.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <TableRow ref={setNodeRef} style={style}>
+      <TableCell>
+        <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
+          <GripVertical className="h-5 w-5 text-muted-foreground" />
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-3">
+          <Avatar>
+            <AvatarImage src={speaker.image_url || undefined} />
+            <AvatarFallback>
+              {speaker.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <span className="font-medium">{speaker.name}</span>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="text-sm">
+          {speaker.title && <div>{speaker.title}</div>}
+          {speaker.company && <div className="text-muted-foreground">{speaker.company}</div>}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="text-sm font-medium">
+          {speaker.years && speaker.years.length > 0 
+            ? speaker.years.sort().join(', ') 
+            : <span className="text-muted-foreground">-</span>}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex gap-2">
+          {speaker.linkedin_url && (
+            <a href={speaker.linkedin_url} target="_blank" rel="noopener noreferrer">
+              <Linkedin className="h-4 w-4 text-muted-foreground hover:text-accent" />
+            </a>
+          )}
+          {speaker.twitter_url && (
+            <a href={speaker.twitter_url} target="_blank" rel="noopener noreferrer">
+              <Twitter className="h-4 w-4 text-muted-foreground hover:text-accent" />
+            </a>
+          )}
+          {speaker.youtube_url && (
+            <a href={speaker.youtube_url} target="_blank" rel="noopener noreferrer">
+              <Youtube className="h-4 w-4 text-muted-foreground hover:text-accent" />
+            </a>
+          )}
+          {speaker.instagram_url && (
+            <a href={speaker.instagram_url} target="_blank" rel="noopener noreferrer">
+              <Instagram className="h-4 w-4 text-muted-foreground hover:text-accent" />
+            </a>
+          )}
+          {speaker.tiktok_url && (
+            <a href={speaker.tiktok_url} target="_blank" rel="noopener noreferrer">
+              <svg className="h-4 w-4 text-muted-foreground hover:text-accent" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+              </svg>
+            </a>
+          )}
+          {speaker.website_url && (
+            <a href={speaker.website_url} target="_blank" rel="noopener noreferrer">
+              <Globe className="h-4 w-4 text-muted-foreground hover:text-accent" />
+            </a>
+          )}
+        </div>
+      </TableCell>
+      <TableCell className="text-right">
+        <div className="flex justify-end gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onEdit(speaker)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onDelete(speaker)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+};
 
 const AdminSpeakers = () => {
   const navigate = useNavigate();
@@ -57,6 +178,13 @@ const AdminSpeakers = () => {
     website_url: "",
     slug: "",
   });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     checkAdminAccess();
@@ -91,7 +219,7 @@ const AdminSpeakers = () => {
     const { data, error } = await supabase
       .from("speakers")
       .select("*")
-      .order("name", { ascending: true });
+      .order("display_order", { ascending: true });
 
     if (error) {
       toast.error("Failed to load speakers");
@@ -99,6 +227,43 @@ const AdminSpeakers = () => {
       setSpeakers(data || []);
     }
     setLoading(false);
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = speakers.findIndex((s) => s.id === active.id);
+    const newIndex = speakers.findIndex((s) => s.id === over.id);
+
+    const newSpeakers = arrayMove(speakers, oldIndex, newIndex);
+    setSpeakers(newSpeakers);
+
+    // Update display_order in database
+    try {
+      const updates = newSpeakers.map((speaker, index) => ({
+        id: speaker.id,
+        display_order: index + 1,
+      }));
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('speakers')
+          .update({ display_order: update.display_order })
+          .eq('id', update.id);
+
+        if (error) throw error;
+      }
+
+      toast.success("Speaker order updated");
+    } catch (error: any) {
+      toast.error("Failed to update order");
+      // Revert on error
+      await fetchSpeakers();
+    }
   };
 
   const optimizeImage = async (file: File): Promise<File> => {
@@ -299,7 +464,7 @@ const AdminSpeakers = () => {
 
       const finalSlug = formData.slug || generateSlug(formData.name);
 
-      const speakerData = {
+      const speakerData: any = {
         name: formData.name,
         title: formData.title || null,
         company: formData.company || null,
@@ -314,6 +479,11 @@ const AdminSpeakers = () => {
         website_url: formData.website_url || null,
         slug: finalSlug,
       };
+
+      // Only set display_order for new speakers
+      if (!selectedSpeaker) {
+        speakerData.display_order = speakers.length + 1;
+      }
 
       if (selectedSpeaker) {
         const { error } = await supabase
@@ -408,101 +578,39 @@ const AdminSpeakers = () => {
             ) : speakers.length === 0 ? (
               <p className="text-center py-8 text-muted-foreground">No speakers found</p>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Speaker</TableHead>
-                    <TableHead>Title & Company</TableHead>
-                    <TableHead>Year</TableHead>
-                    <TableHead>Social Links</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {speakers.map((speaker) => (
-                    <TableRow key={speaker.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src={speaker.image_url || undefined} />
-                            <AvatarFallback>
-                              {speaker.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium">{speaker.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          {speaker.title && <div>{speaker.title}</div>}
-                          {speaker.company && <div className="text-muted-foreground">{speaker.company}</div>}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm font-medium">
-                          {speaker.years && speaker.years.length > 0 
-                            ? speaker.years.sort().join(', ') 
-                            : <span className="text-muted-foreground">-</span>}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          {speaker.linkedin_url && (
-                            <a href={speaker.linkedin_url} target="_blank" rel="noopener noreferrer">
-                              <Linkedin className="h-4 w-4 text-muted-foreground hover:text-accent" />
-                            </a>
-                          )}
-                          {speaker.twitter_url && (
-                            <a href={speaker.twitter_url} target="_blank" rel="noopener noreferrer">
-                              <Twitter className="h-4 w-4 text-muted-foreground hover:text-accent" />
-                            </a>
-                          )}
-                          {speaker.youtube_url && (
-                            <a href={speaker.youtube_url} target="_blank" rel="noopener noreferrer">
-                              <Youtube className="h-4 w-4 text-muted-foreground hover:text-accent" />
-                            </a>
-                          )}
-                          {speaker.instagram_url && (
-                            <a href={speaker.instagram_url} target="_blank" rel="noopener noreferrer">
-                              <Instagram className="h-4 w-4 text-muted-foreground hover:text-accent" />
-                            </a>
-                          )}
-                          {speaker.tiktok_url && (
-                            <a href={speaker.tiktok_url} target="_blank" rel="noopener noreferrer">
-                              <svg className="h-4 w-4 text-muted-foreground hover:text-accent" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                              </svg>
-                            </a>
-                          )}
-                          {speaker.website_url && (
-                            <a href={speaker.website_url} target="_blank" rel="noopener noreferrer">
-                              <Globe className="h-4 w-4 text-muted-foreground hover:text-accent" />
-                            </a>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEdit(speaker)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteClick(speaker)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[50px]"></TableHead>
+                      <TableHead>Speaker</TableHead>
+                      <TableHead>Title & Company</TableHead>
+                      <TableHead>Year</TableHead>
+                      <TableHead>Social Links</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    <SortableContext
+                      items={speakers.map(s => s.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {speakers.map((speaker) => (
+                        <SortableRow
+                          key={speaker.id}
+                          speaker={speaker}
+                          onEdit={handleEdit}
+                          onDelete={handleDeleteClick}
+                        />
+                      ))}
+                    </SortableContext>
+                  </TableBody>
+                </Table>
+              </DndContext>
             )}
           </CardContent>
         </Card>
