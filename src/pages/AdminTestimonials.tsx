@@ -283,35 +283,28 @@ const AdminTestimonials = () => {
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="new-thumbnail-file">Upload Thumbnail</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="new-thumbnail-file"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setThumbnailFile(file);
-                        }
-                      }}
-                      disabled={uploadingThumbnail}
-                    />
-                    {thumbnailFile && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => handleThumbnailUpload(thumbnailFile)}
-                        disabled={uploadingThumbnail}
-                      >
-                        {uploadingThumbnail ? "Uploading..." : "Upload"}
-                      </Button>
-                    )}
-                  </div>
-                  {formData.thumbnail_url && (
+                  <Input
+                    id="new-thumbnail-file"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setThumbnailFile(file);
+                      }
+                    }}
+                    disabled={uploadingThumbnail}
+                  />
+                  {thumbnailFile && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Selected: {thumbnailFile.name} (will be uploaded when you save)
+                    </p>
+                  )}
+                  {formData.thumbnail_url && !thumbnailFile && (
                     <div className="mt-2 flex items-center gap-2">
                       <ImageIcon className="w-4 h-4 text-muted-foreground" />
                       <span className="text-xs text-muted-foreground truncate">
-                        {formData.thumbnail_url}
+                        Current: {formData.thumbnail_url}
                       </span>
                     </div>
                   )}
@@ -401,35 +394,28 @@ const AdminTestimonials = () => {
                       <div className="space-y-4">
                         <div>
                           <Label htmlFor={`thumbnail-file-${testimonial.id}`}>Upload Thumbnail</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              id={`thumbnail-file-${testimonial.id}`}
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  setThumbnailFile(file);
-                                }
-                              }}
-                              disabled={uploadingThumbnail}
-                            />
-                            {thumbnailFile && (
-                              <Button
-                                type="button"
-                                size="sm"
-                                onClick={() => handleThumbnailUpload(thumbnailFile)}
-                                disabled={uploadingThumbnail}
-                              >
-                                {uploadingThumbnail ? "Uploading..." : "Upload"}
-                              </Button>
-                            )}
-                          </div>
-                          {formData.thumbnail_url && (
+                          <Input
+                            id={`thumbnail-file-${testimonial.id}`}
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setThumbnailFile(file);
+                              }
+                            }}
+                            disabled={uploadingThumbnail}
+                          />
+                          {thumbnailFile && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Selected: {thumbnailFile.name} (will be uploaded when you save)
+                            </p>
+                          )}
+                          {formData.thumbnail_url && !thumbnailFile && (
                             <div className="mt-2 flex items-center gap-2">
                               <ImageIcon className="w-4 h-4 text-muted-foreground" />
                               <span className="text-xs text-muted-foreground truncate">
-                                {formData.thumbnail_url}
+                                Current: {formData.thumbnail_url}
                               </span>
                             </div>
                           )}
