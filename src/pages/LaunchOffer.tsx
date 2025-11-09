@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import StarField from "@/components/StarField";
 import CountdownTimer from "@/components/CountdownTimer";
 import VideoTestimonialCard from "@/components/VideoTestimonialCard";
+import FAQItem from "@/components/FAQItem";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +20,9 @@ import {
   Gift,
   Star,
   Rocket,
-  Loader2
+  Loader2,
+  Clock,
+  AlertCircle
 } from "lucide-react";
 import { trackButtonClick, trackPageView } from "@/lib/analytics";
 import { toast } from "sonner";
@@ -116,12 +119,47 @@ const LaunchOffer = () => {
   const benefits = [
     "Access to all keynote sessions and workshops",
     "Lifetime access to session replays",
-    "Exclusive networking opportunities with 500+ attendees",
+    "Exclusive networking opportunities with 200+ attendees",
     "Hands-on AI tool demonstrations",
     "Lunch, refreshments, and evening reception",
     "Certificate of attendance",
     "Free parking at the National Space Centre",
     "Early access to 2027 tickets"
+  ];
+
+  const faqs = [
+    {
+      question: "What's your refund policy?",
+      answer: "We offer a full refund up until June 30th, 2026. No questions asked. After that date, tickets are non-refundable but can be transferred to another person free of charge."
+    },
+    {
+      question: "Can I transfer my ticket to someone else?",
+      answer: "Absolutely! You can transfer your ticket to anyone at any time, completely free of charge. Just email us the details of the new attendee and we'll update our records."
+    },
+    {
+      question: "Is this event suitable for beginners?",
+      answer: "Yes! Festival of AI caters to all skill levels. We have sessions for complete beginners as well as advanced practitioners. The workshops are particularly hands-on and practical for those just getting started."
+    },
+    {
+      question: "What makes this different from other AI conferences?",
+      answer: "Unlike theory-heavy conferences, Festival of AI focuses on practical, actionable insights you can implement immediately. Plus, we're at the National Space Centre - an inspiring venue that enhances the forward-thinking atmosphere."
+    },
+    {
+      question: "Will session recordings be available?",
+      answer: "Yes! All ticket holders get lifetime access to session replays. You'll be able to rewatch any session and share access with your team."
+    },
+    {
+      question: "What's included in the Workshop ticket vs Standard?",
+      answer: "Workshop tickets include everything in Standard plus exclusive hands-on workshops, masterclasses with experts, advanced tool demonstrations, priority seating, and all workshop materials and resources."
+    },
+    {
+      question: "Is there parking available?",
+      answer: "Yes, the National Space Centre offers free on-site parking for all attendees. The venue is also easily accessible by public transport."
+    },
+    {
+      question: "When will the 2026 speaker lineup be announced?",
+      answer: "We'll be announcing speakers throughout spring 2026. Early bird ticket holders will get exclusive first access to speaker announcements and session details."
+    }
   ];
 
   const venueFeatures = [
@@ -196,16 +234,18 @@ const LaunchOffer = () => {
       
       <StarField />
       
-      {/* Simple centered header with logo */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="container mx-auto px-4 py-6 flex justify-center">
-          <Link to="/">
-            <img 
-              src={logoWhite} 
-              alt="Festival of AI" 
-              className="h-12 md:h-16 w-auto transition-transform hover:scale-105" 
-            />
-          </Link>
+      {/* Simple centered header with logo - improved for mobile */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/98 backdrop-blur-md border-b border-border shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-center py-3 sm:py-4">
+            <Link to="/" className="flex-shrink-0">
+              <img 
+                src={logoWhite} 
+                alt="Festival of AI" 
+                className="h-10 sm:h-12 md:h-14 w-auto transition-transform hover:scale-105" 
+              />
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -213,77 +253,94 @@ const LaunchOffer = () => {
         <div className="container mx-auto px-4">
           
           {/* Hero Section */}
-          <section className="text-center mb-20">
-            <Badge variant="secondary" className="mb-6 bg-accent/20 text-accent border-accent/50 text-lg px-6 py-2">
-              <Gift className="w-5 h-5 mr-2 inline" />
+          <section className="text-center mb-16 sm:mb-20">
+            <Badge variant="secondary" className="mb-4 sm:mb-6 bg-accent/20 text-accent border-accent/50 text-sm sm:text-base md:text-lg px-4 sm:px-6 py-1.5 sm:py-2">
+              <Gift className="w-4 h-4 sm:w-5 sm:h-5 mr-2 inline" />
               Limited Time Launch Offer
             </Badge>
             
-            <h1 className="text-5xl md:text-7xl font-black mb-6">
-              Don't Miss Out: <br />
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black mb-4 sm:mb-6 px-4">
+              Don't Miss Out: <br className="hidden sm:block" />
               <span className="text-accent">Festival of AI 2026</span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-6 sm:mb-8 max-w-3xl mx-auto px-4">
               Join 200+ AI innovators at the UK's most inspiring venue. Limited super early bird tickets available!
             </p>
 
-            <div className="flex items-center justify-center gap-6 mb-10 flex-wrap">
-              <div className="flex items-center gap-2 text-foreground/80">
-                <Calendar className="w-5 h-5 text-accent" />
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mb-8 sm:mb-10 px-4">
+              <div className="flex items-center gap-2 text-sm sm:text-base text-foreground/80">
+                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-accent flex-shrink-0" />
                 <span className="font-semibold">October 16th, 2026</span>
               </div>
-              <div className="flex items-center gap-2 text-foreground/80">
-                <MapPin className="w-5 h-5 text-accent" />
+              <div className="flex items-center gap-2 text-sm sm:text-base text-foreground/80">
+                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-accent flex-shrink-0" />
                 <span className="font-semibold">National Space Centre, Leicester</span>
               </div>
             </div>
 
+            {/* Scarcity Indicator */}
+            <div className="mb-6 sm:mb-8">
+              <Card className="inline-block bg-destructive/10 border-destructive/50 backdrop-blur-sm">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center gap-2 text-destructive">
+                    <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    <span className="font-bold text-sm sm:text-base">Only 47 Super Early Bird tickets remaining!</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Countdown Timer */}
-            <div className="mb-10">
-              <p className="text-lg text-accent font-semibold mb-4">Super Early Bird Offer Ends:</p>
-              <p className="text-2xl font-bold mb-4">Friday at 5PM</p>
-              <CountdownTimer targetDate={offerEndDate} />
+            <div className="mb-8 sm:mb-10 px-4">
+              <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
+                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
+                <p className="text-base sm:text-lg text-accent font-semibold">Super Early Bird Offer Ends:</p>
+              </div>
+              <p className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Friday at 5PM</p>
+              <div className="max-w-2xl mx-auto">
+                <CountdownTimer targetDate={offerEndDate} />
+              </div>
             </div>
 
             {/* Ticket Options */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-5xl mx-auto mb-6 sm:mb-8 px-4">
               {ticketTypes.map((ticket) => (
                 <Card 
                   key={ticket.priceId} 
-                  className={`bg-card/50 backdrop-blur-sm ${ticket.popular ? 'border-accent shadow-lg shadow-accent/20' : 'border-border'} hover:border-primary transition-all relative`}
+                  className={`bg-card/50 backdrop-blur-sm ${ticket.popular ? 'border-accent shadow-lg shadow-accent/20 scale-105 md:scale-110' : 'border-border'} hover:border-primary transition-all relative`}
                 >
                   {ticket.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-accent text-accent-foreground font-bold">
+                    <div className="absolute -top-2 sm:-top-3 left-1/2 -translate-x-1/2 z-10">
+                      <Badge className="bg-accent text-accent-foreground font-bold text-xs sm:text-sm px-3 py-1">
                         MOST POPULAR
                       </Badge>
                     </div>
                   )}
-                  <CardContent className="p-6">
-                    <h3 className="text-2xl font-bold mb-4">{ticket.name}</h3>
-                    <div className="mb-4">
-                      <div className="text-muted-foreground line-through text-lg mb-1">
+                  <CardContent className="p-4 sm:p-6">
+                    <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">{ticket.name}</h3>
+                    <div className="mb-3 sm:mb-4">
+                      <div className="text-muted-foreground line-through text-base sm:text-lg mb-1">
                         {ticket.regularPrice}
                       </div>
-                      <div className="text-4xl font-black text-accent mb-1">
+                      <div className="text-3xl sm:text-4xl font-black text-accent mb-1">
                         {ticket.price}
                       </div>
-                      <div className="text-sm text-accent font-semibold">
+                      <div className="text-xs sm:text-sm text-accent font-semibold">
                         Save {ticket.savings}
                       </div>
                     </div>
-                    <ul className="space-y-2 mb-6">
+                    <ul className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6">
                       {ticket.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm">
-                          <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
-                          <span>{feature}</span>
+                        <li key={idx} className="flex items-start gap-2 text-xs sm:text-sm">
+                          <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent flex-shrink-0 mt-0.5" />
+                          <span className="leading-tight">{feature}</span>
                         </li>
                       ))}
                     </ul>
                     <Button 
                       size="lg" 
-                      className={`w-full ${ticket.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : 'bg-primary hover:bg-primary/90'}`}
+                      className={`w-full text-sm sm:text-base ${ticket.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : 'bg-primary hover:bg-primary/90'}`}
                       onClick={() => handleTicketPurchase(ticket.priceId, ticket.name)}
                       disabled={checkoutLoading !== null}
                     >
@@ -302,34 +359,34 @@ const LaunchOffer = () => {
             </div>
 
             {/* Trust Indicators */}
-            <div className="flex items-center justify-center gap-6 mt-6 flex-wrap text-sm">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mt-6 px-4 text-xs sm:text-sm">
               <div className="flex items-center gap-2">
-                <Star className="w-5 h-5 text-accent fill-accent" />
+                <Star className="w-4 h-4 sm:w-5 sm:h-5 text-accent fill-accent flex-shrink-0" />
                 <span className="text-foreground/70">500+ Attended 2025</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-accent" />
+                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-accent flex-shrink-0" />
                 <span className="text-foreground/70">98% Satisfaction Rate</span>
               </div>
               <div className="flex items-center gap-2">
-                <Shield className="w-5 h-5 text-accent" />
+                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-accent flex-shrink-0" />
                 <span className="text-foreground/70">Money-Back Guarantee</span>
               </div>
             </div>
           </section>
 
           {/* Video Testimonials Section */}
-          <section className="mb-24">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <section className="mb-16 sm:mb-24">
+            <div className="text-center mb-8 sm:mb-12 px-4">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
                 Don't Just Take <span className="text-accent">Our Word</span>
               </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
                 Hear from past attendees about their transformative experience
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4">
               {videoTestimonials.map((testimonial, index) => (
                 <VideoTestimonialCard
                   key={index}
@@ -342,20 +399,20 @@ const LaunchOffer = () => {
           </section>
 
           {/* Past Speakers Showcase */}
-          <section className="mb-24">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <section className="mb-16 sm:mb-24">
+            <div className="text-center mb-8 sm:mb-12 px-4">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
                 Learn from <span className="text-accent">the Best</span>
               </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
                 Previous speakers from 2024-2025 who've shared their expertise
               </p>
             </div>
 
             {loading ? (
-              <div className="text-center text-muted-foreground">Loading speakers...</div>
+              <div className="text-center text-muted-foreground px-4">Loading speakers...</div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 px-4">
                 {speakers.map((speaker) => (
                   <Card 
                     key={speaker.id} 
@@ -369,13 +426,13 @@ const LaunchOffer = () => {
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
                       </div>
-                      <div className="p-4">
-                        <h3 className="font-bold text-lg mb-1">{speaker.name}</h3>
-                        <p className="text-sm text-muted-foreground mb-2">{speaker.title}</p>
-                        <p className="text-xs text-accent font-semibold">{speaker.company}</p>
-                        <div className="mt-3">
+                      <div className="p-3 sm:p-4">
+                        <h3 className="font-bold text-sm sm:text-base md:text-lg mb-1 line-clamp-1">{speaker.name}</h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground mb-1 sm:mb-2 line-clamp-2">{speaker.title}</p>
+                        <p className="text-xs text-accent font-semibold line-clamp-1">{speaker.company}</p>
+                        <div className="mt-2 sm:mt-3 flex flex-wrap gap-1">
                           {speaker.years.map((year) => (
-                            <Badge key={year} variant="outline" className="mr-1 text-xs">
+                            <Badge key={year} variant="outline" className="text-xs px-1.5 py-0.5">
                               {year}
                             </Badge>
                           ))}
@@ -387,51 +444,51 @@ const LaunchOffer = () => {
               </div>
             )}
 
-            <div className="text-center">
-              <p className="text-lg text-accent font-semibold">
+            <div className="text-center px-4">
+              <p className="text-base sm:text-lg text-accent font-semibold">
                 And many more world-class speakers confirmed for 2026! 🚀
               </p>
             </div>
           </section>
 
           {/* Value Stack Section */}
-          <section className="mb-24">
-            <Card className="bg-gradient-to-br from-primary/20 via-card/50 to-secondary/20 backdrop-blur-sm border-primary">
-              <CardContent className="p-8 md:p-12">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <section className="mb-16 sm:mb-24">
+            <Card className="bg-gradient-to-br from-primary/20 via-card/50 to-secondary/20 backdrop-blur-sm border-primary mx-4">
+              <CardContent className="p-6 sm:p-8 md:p-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-center">
                   <div>
-                    <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
                       What You <span className="text-accent">Get</span>
                     </h2>
-                    <ul className="space-y-4">
+                    <ul className="space-y-2 sm:space-y-4">
                       {benefits.map((benefit, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0 mt-0.5" />
-                          <span className="text-lg">{benefit}</span>
+                        <li key={index} className="flex items-start gap-2 sm:gap-3">
+                          <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-accent flex-shrink-0 mt-0.5" />
+                          <span className="text-sm sm:text-base md:text-lg">{benefit}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
                   
                   <div className="text-center lg:text-left">
-                  <div className="space-y-4">
-                      <p className="text-xl font-semibold text-accent mb-4">Choose Your Ticket:</p>
+                  <div className="space-y-3 sm:space-y-4">
+                      <p className="text-lg sm:text-xl font-semibold text-accent mb-3 sm:mb-4">Choose Your Ticket:</p>
                       {ticketTypes.map((ticket) => (
-                        <div key={ticket.priceId} className="bg-background/90 backdrop-blur-sm rounded-lg p-6">
-                          <div className="flex justify-between items-center mb-3">
-                            <h3 className="text-xl font-bold">{ticket.name}</h3>
+                        <div key={ticket.priceId} className="bg-background/90 backdrop-blur-sm rounded-lg p-4 sm:p-6">
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+                            <h3 className="text-lg sm:text-xl font-bold">{ticket.name}</h3>
                             {ticket.popular && (
-                              <Badge className="bg-accent text-accent-foreground">Popular</Badge>
+                              <Badge className="bg-accent text-accent-foreground self-start sm:self-auto">Popular</Badge>
                             )}
                           </div>
-                          <div className="flex items-baseline gap-3 mb-3">
-                            <span className="text-3xl font-black text-accent">{ticket.price}</span>
-                            <span className="text-muted-foreground line-through">{ticket.regularPrice}</span>
-                            <span className="text-sm text-accent font-semibold">Save {ticket.savings}</span>
+                          <div className="flex items-baseline gap-2 sm:gap-3 mb-3">
+                            <span className="text-2xl sm:text-3xl font-black text-accent">{ticket.price}</span>
+                            <span className="text-sm sm:text-base text-muted-foreground line-through">{ticket.regularPrice}</span>
+                            <span className="text-xs sm:text-sm text-accent font-semibold">Save {ticket.savings}</span>
                           </div>
                           <Button 
                             size="lg" 
-                            className={`w-full ${ticket.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : 'bg-primary hover:bg-primary/90'}`}
+                            className={`w-full text-sm sm:text-base ${ticket.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : 'bg-primary hover:bg-primary/90'}`}
                             onClick={() => handleTicketPurchase(ticket.priceId, ticket.name)}
                             disabled={checkoutLoading !== null}
                           >
@@ -454,77 +511,99 @@ const LaunchOffer = () => {
           </section>
 
           {/* Venue Section */}
-          <section className="mb-24">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <section className="mb-16 sm:mb-24">
+            <div className="text-center mb-8 sm:mb-12 px-4">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
                 An Inspiring <span className="text-accent">Location</span>
               </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8">
                 Experience the future of AI at the UK's premier space attraction
               </p>
             </div>
 
             {/* Hero Venue Image */}
-            <div className="mb-8 rounded-lg overflow-hidden">
+            <div className="mb-6 sm:mb-8 rounded-lg overflow-hidden mx-4">
               <img 
                 src={venueExterior} 
                 alt="National Space Centre Exterior"
-                className="w-full h-[400px] object-cover"
+                className="w-full h-[250px] sm:h-[350px] md:h-[400px] object-cover"
               />
             </div>
 
             {/* Venue Gallery */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8 px-4">
               <div className="rounded-lg overflow-hidden">
                 <img 
                   src={venueRockets} 
                   alt="Rockets Display"
-                  className="w-full h-64 object-cover hover:scale-110 transition-transform duration-300"
+                  className="w-full h-48 sm:h-56 md:h-64 object-cover hover:scale-110 transition-transform duration-300"
                 />
               </div>
               <div className="rounded-lg overflow-hidden">
                 <img 
                   src={venuePlanetarium} 
                   alt="Planetarium"
-                  className="w-full h-64 object-cover hover:scale-110 transition-transform duration-300"
+                  className="w-full h-48 sm:h-56 md:h-64 object-cover hover:scale-110 transition-transform duration-300"
                 />
               </div>
               <div className="rounded-lg overflow-hidden">
                 <img 
                   src={venueEventSpace} 
                   alt="Event Space"
-                  className="w-full h-64 object-cover hover:scale-110 transition-transform duration-300"
+                  className="w-full h-48 sm:h-56 md:h-64 object-cover hover:scale-110 transition-transform duration-300"
                 />
               </div>
             </div>
 
             {/* Venue Features */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 px-4">
               {venueFeatures.map((feature, index) => (
                 <Card key={index} className="bg-card/50 backdrop-blur-sm border-border">
-                  <CardContent className="p-6 text-center">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/20 text-accent mb-3">
+                  <CardContent className="p-4 sm:p-6 text-center">
+                    <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-accent/20 text-accent mb-2 sm:mb-3">
                       {feature.icon}
                     </div>
-                    <p className="font-semibold">{feature.text}</p>
+                    <p className="font-semibold text-sm sm:text-base">{feature.text}</p>
                   </CardContent>
                 </Card>
               ))}
             </div>
           </section>
 
+          {/* FAQ Section */}
+          <section className="mb-16 sm:mb-24">
+            <div className="text-center mb-8 sm:mb-12 px-4">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
+                Frequently Asked <span className="text-accent">Questions</span>
+              </h2>
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+                Everything you need to know about Festival of AI 2026
+              </p>
+            </div>
+
+            <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4 px-4">
+              {faqs.map((faq, index) => (
+                <FAQItem
+                  key={index}
+                  question={faq.question}
+                  answer={faq.answer}
+                />
+              ))}
+            </div>
+          </section>
+
           {/* Risk Reversal Section */}
-          <section className="mb-24">
+          <section className="mb-16 sm:mb-24 px-4">
             <Card className="bg-card/50 backdrop-blur-sm border-accent/50">
-              <CardContent className="p-8 md:p-12 text-center">
-                <Shield className="w-16 h-16 text-accent mx-auto mb-6" />
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <CardContent className="p-6 sm:p-8 md:p-12 text-center">
+                <Shield className="w-12 h-12 sm:w-16 sm:h-16 text-accent mx-auto mb-4 sm:mb-6" />
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
                   Risk-Free <span className="text-accent">Guarantee</span>
                 </h2>
-                <p className="text-xl text-foreground/80 max-w-2xl mx-auto mb-4">
+                <p className="text-lg sm:text-xl text-foreground/80 max-w-2xl mx-auto mb-3 sm:mb-4">
                   Full refund before June 30th, 2026. No questions asked.
                 </p>
-                <p className="text-lg text-muted-foreground">
+                <p className="text-base sm:text-lg text-muted-foreground">
                   Transfer your ticket anytime, free of charge. Your satisfaction is guaranteed.
                 </p>
               </CardContent>
@@ -532,38 +611,38 @@ const LaunchOffer = () => {
           </section>
 
           {/* Final CTA Section */}
-          <section className="text-center">
-            <Card className="bg-gradient-to-r from-primary/30 to-secondary/30 backdrop-blur-sm border-primary">
-              <CardContent className="p-12">
-                <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          <section className="text-center px-4">
+            <Card className="bg-gradient-to-r from-primary/30 to-secondary/30 backdrop-blur-sm border-primary mx-4">
+              <CardContent className="p-6 sm:p-8 md:p-12">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
                   Join 200+ AI Innovators <span className="text-accent">in 2026</span>
                 </h2>
                 
-                <ul className="max-w-2xl mx-auto mb-8 space-y-2 text-left">
-                  <li className="flex items-center gap-3 text-lg">
-                    <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0" />
+                <ul className="max-w-2xl mx-auto mb-6 sm:mb-8 space-y-1.5 sm:space-y-2 text-left">
+                  <li className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg">
+                    <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-accent flex-shrink-0" />
                     World-class speakers and cutting-edge insights
                   </li>
-                  <li className="flex items-center gap-3 text-lg">
-                    <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0" />
+                  <li className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg">
+                    <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-accent flex-shrink-0" />
                     Hands-on workshops and practical AI applications
                   </li>
-                  <li className="flex items-center gap-3 text-lg">
-                    <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0" />
+                  <li className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg">
+                    <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-accent flex-shrink-0" />
                     Exclusive networking with industry leaders
                   </li>
-                  <li className="flex items-center gap-3 text-lg">
-                    <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0" />
+                  <li className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg">
+                    <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-accent flex-shrink-0" />
                     Lifetime access to all session replays
                   </li>
                 </ul>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 max-w-3xl mx-auto mb-4 sm:mb-6">
                   {ticketTypes.map((ticket) => (
                     <Button 
                       key={ticket.priceId}
                       size="lg" 
-                      className={`${ticket.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : 'bg-primary hover:bg-primary/90'} text-xl px-8 py-6 h-auto`}
+                      className={`${ticket.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : 'bg-primary hover:bg-primary/90'} text-base sm:text-lg md:text-xl px-6 sm:px-8 py-4 sm:py-6 h-auto`}
                       onClick={() => handleTicketPurchase(ticket.priceId, ticket.name)}
                       disabled={checkoutLoading !== null}
                     >
@@ -575,15 +654,15 @@ const LaunchOffer = () => {
                       ) : (
                         <>
                           {ticket.name} - {ticket.price}
-                          <span className="ml-2 text-sm opacity-90">(Save {ticket.savings})</span>
+                          <span className="ml-1 sm:ml-2 text-xs sm:text-sm opacity-90">(Save {ticket.savings})</span>
                         </>
                       )}
                     </Button>
                   ))}
                 </div>
 
-                <div className="text-sm text-muted-foreground">
-                  Questions? <Link to="/contact" className="text-accent hover:underline">Contact us</Link>
+                <div className="text-xs sm:text-sm text-muted-foreground">
+                  Questions? <Link to="/contact" className="text-accent hover:underline font-semibold">Contact us</Link>
                 </div>
               </CardContent>
             </Card>
