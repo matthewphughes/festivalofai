@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import StarField from "@/components/StarField";
@@ -18,6 +19,7 @@ import { useState, useEffect } from "react";
 import { useCart } from "@/contexts/CartContext";
 
 const Tickets = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const { addToCart } = useCart();
   const [loadingTicket, setLoadingTicket] = useState<string | null>(null);
@@ -50,7 +52,7 @@ const Tickets = () => {
     }
   };
 
-  const handleAddToCart = async (ticketName: string) => {
+  const handleBuyNow = async (ticketName: string) => {
     setLoadingTicket(ticketName);
     
     try {
@@ -68,7 +70,9 @@ const Tickets = () => {
         return;
       }
 
+      // Add to cart and navigate to checkout
       await addToCart(product.id);
+      navigate("/checkout");
     } catch (error) {
       console.error('Unexpected error:', error);
       toast({
@@ -209,29 +213,17 @@ const Tickets = () => {
                     ))}
                   </ul>
                   <Button
-                    className={`w-full mb-3 ${
+                    className={`w-full ${
                       tier.highlighted
                         ? "bg-accent text-accent-foreground hover:bg-accent/90"
                         : "bg-primary hover:bg-primary/90"
                     }`}
                     size="lg"
-                    onClick={() => handleAddToCart(tier.name)}
+                    onClick={() => handleBuyNow(tier.name)}
                     disabled={loadingTicket === tier.name}
                   >
                     <CreditCard className="w-4 h-4 mr-2" />
-                    {loadingTicket === tier.name ? "Adding..." : "Add to Cart"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className={`w-full ${
-                      tier.highlighted
-                        ? "border-accent text-accent hover:bg-accent/10"
-                        : "border-primary text-primary hover:bg-primary/10"
-                    }`}
-                    size="lg"
-                  >
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Pay Monthly
+                    {loadingTicket === tier.name ? "Processing..." : "Buy Now"}
                   </Button>
                   {tier.footerNote && (
                     <p className="text-xs text-muted-foreground text-center mt-3 italic">
