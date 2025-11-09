@@ -137,6 +137,7 @@ serve(async (req) => {
       amount: totalAmount,
       currency: products[0].currency,
       customer: customerId,
+      payment_method_configuration: "pmc_1SRXbEEFw97UKMysiLBO3ix4",
       metadata: {
         product_ids: product_ids.join(","),
         coupon_code: validCoupon?.code || "",
