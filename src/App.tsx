@@ -42,6 +42,7 @@ import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminDiscountCampaigns from "./pages/AdminDiscountCampaigns";
 import Checkout from "./pages/Checkout";
 import LaunchOffer from "./pages/LaunchOffer";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +73,7 @@ const App = () => (
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/my-account" element={<MyAccount />} />
           <Route path="/order-history" element={<OrderHistory />} />
