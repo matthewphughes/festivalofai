@@ -9,9 +9,44 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Play, Shield, User, Mic, Users, Video, Calendar, Lock, Gift, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+
+const COUNTRIES = [
+  "United Kingdom",
+  "United States",
+  "Canada",
+  "Australia",
+  "Germany",
+  "France",
+  "Spain",
+  "Italy",
+  "Netherlands",
+  "Belgium",
+  "Switzerland",
+  "Austria",
+  "Sweden",
+  "Norway",
+  "Denmark",
+  "Finland",
+  "Ireland",
+  "Portugal",
+  "Poland",
+  "Czech Republic",
+  "Greece",
+  "Japan",
+  "South Korea",
+  "Singapore",
+  "New Zealand",
+  "India",
+  "China",
+  "Brazil",
+  "Mexico",
+  "Argentina",
+  "South Africa",
+];
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
@@ -422,12 +457,18 @@ const MyAccount = () => {
 
                       <div className="grid gap-2">
                         <Label htmlFor="edit-country">Country</Label>
-                        <Input
-                          id="edit-country"
-                          value={newCountry}
-                          onChange={(e) => setNewCountry(e.target.value)}
-                          placeholder="Country"
-                        />
+                        <Select value={newCountry} onValueChange={setNewCountry}>
+                          <SelectTrigger id="edit-country" className="bg-background">
+                            <SelectValue placeholder="Select a country" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background z-50">
+                            {COUNTRIES.map((country) => (
+                              <SelectItem key={country} value={country}>
+                                {country}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       <div className="flex gap-2">
