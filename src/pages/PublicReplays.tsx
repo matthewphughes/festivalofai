@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Clock } from "lucide-react";
+import { Play, Clock, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
 
@@ -30,10 +30,25 @@ const PublicReplays = () => {
   const [selectedReplay, setSelectedReplay] = useState<Replay | null>(null);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     fetchReplays();
+    checkAdminStatus();
   }, []);
+
+  const checkAdminStatus = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      setIsAdmin(!!data);
+    }
+  };
 
   useEffect(() => {
     if (selectedReplay) {
@@ -168,10 +183,9 @@ const PublicReplays = () => {
             {replays.map((replay) => (
               <Card
                 key={replay.id}
-                className="group cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden"
-                onClick={() => setSelectedReplay(replay)}
+                className="group hover:shadow-lg transition-all duration-300 overflow-hidden"
               >
-                <div className="relative aspect-video bg-muted">
+                <div className="relative aspect-video bg-muted cursor-pointer" onClick={() => setSelectedReplay(replay)}>
                   {replay.thumbnail_url ? (
                     <img
                       src={replay.thumbnail_url}
@@ -196,13 +210,30 @@ const PublicReplays = () => {
                   )}
                 </div>
                 <CardContent className="p-4">
-                  <h3 className="font-bold text-lg mb-2 line-clamp-2">{replay.title}</h3>
-                  {replay.speaker_name && (
-                    <p className="text-sm text-muted-foreground mb-2">{replay.speaker_name}</p>
-                  )}
-                  {replay.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">{replay.description}</p>
-                  )}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 cursor-pointer" onClick={() => setSelectedReplay(replay)}>
+                      <h3 className="font-bold text-lg mb-2 line-clamp-2">{replay.title}</h3>
+                      {replay.speaker_name && (
+                        <p className="text-sm text-muted-foreground mb-2">{replay.speaker_name}</p>
+                      )}
+                      {replay.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">{replay.description}</p>
+                      )}
+                    </div>
+                    {isAdmin && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/admin/sessions`);
+                        }}
+                        className="shrink-0"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))}
