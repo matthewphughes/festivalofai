@@ -412,6 +412,7 @@ export type Database = {
           discount_value: number
           id: string
           max_redemptions: number | null
+          product_id: string | null
           stripe_coupon_id: string
           times_redeemed: number | null
           updated_at: string | null
@@ -427,6 +428,7 @@ export type Database = {
           discount_value: number
           id?: string
           max_redemptions?: number | null
+          product_id?: string | null
           stripe_coupon_id: string
           times_redeemed?: number | null
           updated_at?: string | null
@@ -442,13 +444,22 @@ export type Database = {
           discount_value?: number
           id?: string
           max_redemptions?: number | null
+          product_id?: string | null
           stripe_coupon_id?: string
           times_redeemed?: number | null
           updated_at?: string | null
           valid_from?: string | null
           valid_until?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "stripe_coupons_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "stripe_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stripe_product_replays: {
         Row: {

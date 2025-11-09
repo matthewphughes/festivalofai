@@ -15,7 +15,8 @@ serve(async (req) => {
   try {
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
     );
 
     // Authenticate user and check admin
@@ -82,6 +83,7 @@ serve(async (req) => {
             valid_from: couponData.valid_from || null,
             valid_until: couponData.valid_until || null,
             active: true,
+            product_id: couponData.product_id || null,
           })
           .select()
           .single();

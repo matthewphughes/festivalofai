@@ -26,10 +26,18 @@ interface Coupon {
   valid_from: string;
   valid_until: string | null;
   created_at: string;
+  product_id: string | null;
+}
+
+interface Product {
+  id: string;
+  product_name: string;
+  stripe_product_id: string;
 }
 
 const AdminCoupons = () => {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -40,7 +48,28 @@ const AdminCoupons = () => {
     max_redemptions: "",
     valid_from: new Date().toISOString().split('T')[0],
     valid_until: "",
+    product_id: "",
   });
+
+  useEffect(() => {
+    fetchCoupons();
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("stripe_products")
+        .select("id, product_name, stripe_product_id")
+        .eq("active", true)
+        .order("product_name");
+
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error: any) {
+      toast.error("Failed to fetch products: " + error.message);
+    }
+  };
 
   useEffect(() => {
     fetchCoupons();
@@ -50,7 +79,7 @@ const AdminCoupons = () => {
     try {
       const { data, error } = await supabase
         .from("stripe_coupons")
-        .select("*")
+        .select("*, product_id")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -75,6 +104,7 @@ const AdminCoupons = () => {
             max_redemptions: formData.max_redemptions ? parseInt(formData.max_redemptions) : null,
             valid_from: formData.valid_from,
             valid_until: formData.valid_until || null,
+            product_id: formData.product_id || null,
           },
         },
       });
@@ -91,6 +121,7 @@ const AdminCoupons = () => {
         max_redemptions: "",
         valid_from: new Date().toISOString().split('T')[0],
         valid_until: "",
+        product_id: "",
       });
       fetchCoupons();
     } catch (error: any) {
@@ -201,6 +232,23 @@ const AdminCoupons = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <Label>Product (Optional)</Label>
+                  <Select value={formData.product_id} onValueChange={(value) => setFormData({ ...formData, product_id: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a product (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Products</SelectItem>
+                      {products.map((product) => (
+                        <SelectItem key={product.id} value={product.id}>
+                          {product.product_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
                   <Label>Max Redemptions (Optional)</Label>
                   <Input
                     type="number"
@@ -247,6 +295,7 @@ const AdminCoupons = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Code</TableHead>
+                  <TableHead>Product</TableHead>
                   <TableHead>Discount</TableHead>
                   <TableHead>Usage</TableHead>
                   <TableHead>Valid Period</TableHead>
@@ -255,9 +304,14 @@ const AdminCoupons = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {coupons.map((coupon) => (
+                {coupons.map((coupon) => {
+                  const product = products.find(p => p.id === coupon.product_id);
+                  return (
                   <TableRow key={coupon.id}>
                     <TableCell className="font-mono font-semibold">{coupon.code}</TableCell>
+                    <TableCell>
+                      {product ? product.product_name : "All Products"}
+                    </TableCell>
                     <TableCell>
                       {coupon.discount_type === "percentage" 
                         ? `${coupon.discount_value}%` 
@@ -296,7 +350,8 @@ const AdminCoupons = () => {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </CardContent>
