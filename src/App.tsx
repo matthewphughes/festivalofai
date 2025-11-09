@@ -41,6 +41,7 @@ import AdminEmailSettings from "./pages/AdminEmailSettings";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminDiscountCampaigns from "./pages/AdminDiscountCampaigns";
 import Checkout from "./pages/Checkout";
+import LaunchOffer from "./pages/LaunchOffer";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
               <AppContent />
               <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/launch-offer" element={<LaunchOffer />} />
           <Route path="/about" element={<About />} />
           <Route path="/speakers" element={<Speakers />} />
           <Route path="/speakers/:slug" element={<SpeakerProfile />} />
