@@ -5,20 +5,53 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Calendar, Mail, Download } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import CheckoutProgress from "@/components/checkout/CheckoutProgress";
+import { supabase } from "@/integrations/supabase/client";
+import { trackPurchase } from "@/lib/analytics";
 
 const ThankYou = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session_id");
+  const paymentIntentId = searchParams.get("payment_intent");
+  const [tracked, setTracked] = useState(false);
 
   useEffect(() => {
-    // If no session_id in URL, redirect to tickets page
-    if (!sessionId) {
+    // If no session_id or payment_intent in URL, redirect to tickets page
+    if (!sessionId && !paymentIntentId) {
       navigate("/tickets");
+      return;
     }
-  }, [sessionId, navigate]);
+
+    // Track purchase completion only once
+    if (!tracked && (sessionId || paymentIntentId)) {
+      trackPurchaseCompletion();
+      setTracked(true);
+    }
+  }, [sessionId, paymentIntentId, navigate, tracked]);
+
+  const trackPurchaseCompletion = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) return;
+
+      // Simple tracking with transaction ID
+      // Full order details will be tracked via backend webhook
+      const transactionId = sessionId || paymentIntentId || "";
+      
+      // Track basic purchase event
+      trackPurchase(
+        transactionId,
+        0, // Amount will be tracked via webhook
+        "GBP",
+        []
+      );
+    } catch (error) {
+      console.error("Error tracking purchase:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen relative">

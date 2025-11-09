@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { useState } from "react";
+import { trackFormSubmit } from "@/lib/analytics";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, { message: "Name is required" }).max(100, { message: "Name must be less than 100 characters" }),
@@ -43,6 +44,9 @@ const Contact = () => {
       });
 
       if (error) throw error;
+
+      // Track form submission
+      trackFormSubmit("Contact Form");
 
       toast.success("Message sent successfully! We'll get back to you soon.");
       reset();

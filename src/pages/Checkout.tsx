@@ -5,6 +5,7 @@ import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
+import { trackBeginCheckout } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -354,6 +355,18 @@ const Checkout = () => {
 
       setClientSecret(data.clientSecret);
       setShowGuestEmailForm(false);
+      
+      // Track begin checkout event
+      trackBeginCheckout(
+        total / 100,
+        items.map(item => ({
+          item_id: item.product_id,
+          item_name: item.product_name,
+          price: item.amount / 100,
+          item_category: item.product_type,
+          quantity: item.quantity,
+        }))
+      );
     } catch (error: any) {
       toast.error(error.message);
     } finally {

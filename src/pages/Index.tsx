@@ -17,6 +17,7 @@ import eventNetworking1 from "@/assets/event-networking-1.jpg";
 import eventNetworking2 from "@/assets/event-networking-2.jpg";
 import eventAtmosphere from "@/assets/event-atmosphere-1.jpg";
 import { Calendar, MapPin, Users, Lightbulb, Rocket, Zap, Play } from "lucide-react";
+import { trackButtonClick } from "@/lib/analytics";
 
 const Index = () => {
   const [api, setApi] = useState<CarouselApi>();
@@ -141,6 +142,7 @@ const Index = () => {
               asChild
               size="lg"
               className="bg-primary hover:bg-primary/90 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 animate-pulse-glow w-full sm:w-auto"
+              onClick={() => trackButtonClick("Get Your 2026 Ticket", "Hero")}
             >
               <Link to="/tickets">Get Your 2026 Ticket</Link>
             </Button>
@@ -149,6 +151,7 @@ const Index = () => {
               size="lg"
               variant="outline"
               className="text-base md:text-lg px-6 md:px-8 py-5 md:py-6 border-accent text-accent hover:bg-accent hover:text-accent-foreground w-full sm:w-auto"
+              onClick={() => trackButtonClick("Buy 2025 Replays", "Hero")}
             >
               <Link to="/buy-replays">Buy 2025 Replays</Link>
             </Button>

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { trackAddToCart } from "@/lib/analytics";
 
 interface CartItem {
   product_id: string;
@@ -179,7 +180,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error;
 
       // Update local state
-      setItems(prev => [...prev, {
+      const newItem = {
         product_id: productId,
         product_name: product.product_name,
         amount: product.amount,
@@ -187,7 +188,18 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         product_type: product.product_type,
         event_year: product.event_year,
         quantity: 1,
-      }]);
+      };
+      
+      setItems(prev => [...prev, newItem]);
+
+      // Track add to cart event
+      trackAddToCart({
+        item_id: productId,
+        item_name: product.product_name,
+        price: product.amount / 100,
+        item_category: product.product_type,
+        quantity: 1,
+      });
 
       toast.success("Added to cart");
     } catch (error) {
