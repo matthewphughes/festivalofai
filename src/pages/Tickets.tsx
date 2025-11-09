@@ -43,7 +43,8 @@ const Tickets = () => {
       .from("stripe_products")
       .select("*")
       .eq("active", true)
-      .eq("product_type", "ticket");
+      .eq("product_type", "ticket")
+      .eq("event_year", 2026);
 
     if (error) {
       console.error("Failed to load products", error);
@@ -52,15 +53,14 @@ const Tickets = () => {
     }
   };
 
-  const handleBuyNow = async (ticketName: string) => {
+  const handleBuyNow = async (stripeProductId: string, ticketName: string) => {
     setLoadingTicket(ticketName);
     
     try {
-      const product = products.find(p => 
-        p.product_name.toLowerCase().includes(ticketName.toLowerCase())
-      );
+      const product = products.find(p => p.stripe_product_id === stripeProductId);
 
       if (!product) {
+        console.error("Product not found. Looking for:", stripeProductId, "Available products:", products);
         toast({
           title: "Product Not Found",
           description: "This ticket is not available yet. Please contact support.",
@@ -88,6 +88,7 @@ const Tickets = () => {
   const ticketTiers = [
     {
       name: "Festival of AI 2026",
+      stripe_product_id: "prod_TOJtOyxypO8VCB",
       price: "£147",
       originalPrice: "£497",
       discount: "70%",
@@ -103,7 +104,8 @@ const Tickets = () => {
       footerNote: "Switch between virtual and in-person at any time",
     },
     {
-      name: "Workshop",
+      name: "Festival of AI 2026 + Workshop",
+      stripe_product_id: "prod_TOJs4TpP9zprD9",
       price: "£197",
       originalPrice: "£697",
       discount: "72%",
@@ -219,7 +221,7 @@ const Tickets = () => {
                         : "bg-primary hover:bg-primary/90"
                     }`}
                     size="lg"
-                    onClick={() => handleBuyNow(tier.name)}
+                    onClick={() => handleBuyNow(tier.stripe_product_id, tier.name)}
                     disabled={loadingTicket === tier.name}
                   >
                     <CreditCard className="w-4 h-4 mr-2" />
