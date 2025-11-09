@@ -5,7 +5,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Video, Calendar, ArrowRight } from "lucide-react";
+import { Users, Video, Calendar, ArrowRight, Settings, Building2, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 const Admin = () => {
@@ -208,6 +208,22 @@ const Admin = () => {
                   </p>
                   <Button onClick={() => navigate("/admin/sponsor-requests")} className="w-full">
                     View Requests
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Site Settings</CardTitle>
+                  <CardDescription>Manage site configuration</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Update site title, logo, description and share image.
+                  </p>
+                  <Button onClick={() => navigate("/admin/site-settings")} className="w-full">
+                    Manage Settings
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </CardContent>

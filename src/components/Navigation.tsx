@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import { Menu, X, User, Video, LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
-import logoDark from "@/assets/logo-dark.png";
-import logoLight from "@/assets/logo-light.png";
+import logoWhite from "@/assets/logo-white.png";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -90,14 +89,9 @@ const Navigation = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
             <img 
-              src={logoLight} 
+              src={logoWhite} 
               alt="Festival of AI" 
-              className="h-12 w-auto transition-transform group-hover:scale-105 dark:hidden" 
-            />
-            <img 
-              src={logoDark} 
-              alt="Festival of AI" 
-              className="h-12 w-auto transition-transform group-hover:scale-105 hidden dark:block" 
+              className="h-12 w-auto transition-transform group-hover:scale-105" 
             />
           </Link>
 
