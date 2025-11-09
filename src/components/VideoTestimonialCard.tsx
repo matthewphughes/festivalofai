@@ -17,22 +17,33 @@ const VideoTestimonialCard = ({
   thumbnailUrl = "/placeholder.svg",
   videoUrl 
 }: VideoTestimonialCardProps) => {
+  const handleClick = () => {
+    if (videoUrl) {
+      window.open(videoUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <Card className="bg-card/50 backdrop-blur-sm border-border hover:border-primary transition-all group">
       <CardContent className="p-0">
         {/* Video Thumbnail */}
-        <div className="relative aspect-video bg-muted/30 overflow-hidden rounded-t-lg">
+        <div 
+          className="relative aspect-video bg-muted/30 overflow-hidden rounded-t-lg cursor-pointer"
+          onClick={handleClick}
+        >
           <img 
             src={thumbnailUrl} 
             alt={`${author} testimonial`}
             className="w-full h-full object-cover"
           />
           {/* Play Button Overlay */}
-          <div className="absolute inset-0 flex items-center justify-center bg-background/40 group-hover:bg-background/20 transition-all">
-            <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center group-hover:scale-110 transition-transform cursor-pointer">
-              <Play className="w-8 h-8 text-primary-foreground ml-1" fill="currentColor" />
+          {videoUrl && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/40 group-hover:bg-background/20 transition-all">
+              <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Play className="w-8 h-8 text-primary-foreground ml-1" fill="currentColor" />
+              </div>
             </div>
-          </div>
+          )}
           {/* Year Badge */}
           <div className="absolute top-3 right-3">
             <Badge variant="secondary" className="bg-accent text-accent-foreground font-semibold">
