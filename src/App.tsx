@@ -31,6 +31,8 @@ import AdminContacts from "./pages/AdminContacts";
 import AdminSponsorRequests from "./pages/AdminSponsorRequests";
 import AdminSiteSettings from "./pages/AdminSiteSettings";
 import AdminStripeProducts from "./pages/AdminStripeProducts";
+import AdminCoupons from "./pages/AdminCoupons";
+import Checkout from "./pages/Checkout";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +71,9 @@ const App = () => (
           <Route path="/admin/sponsor-requests" element={<AdminSponsorRequests />} />
           <Route path="/admin/site-settings" element={<AdminSiteSettings />} />
           <Route path="/admin/stripe-products" element={<AdminStripeProducts />} />
+          <Route path="/admin/coupons" element={<AdminCoupons />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/thank-you" element={<ThankYou />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

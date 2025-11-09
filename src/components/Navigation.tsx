@@ -8,6 +8,7 @@ import { Menu, X, User, Video, LogOut, LayoutDashboard, ChevronDown } from "luci
 import logoWhite from "@/assets/logo-white.png";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { CartIcon } from "./CartIcon";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -165,6 +166,8 @@ const Navigation = () => {
             <Button asChild variant="default" className="bg-primary hover:bg-primary/90 ml-2">
               <Link to="/tickets">Get Tickets</Link>
             </Button>
+
+            <CartIcon />
 
             {isLoggedIn && (
               <DropdownMenu>

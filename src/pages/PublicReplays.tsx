@@ -13,9 +13,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Play, Clock, Edit } from "lucide-react";
+import { Play, Clock, Edit, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
+import { useCart } from "@/contexts/CartContext";
 
 const sessionSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
@@ -47,16 +48,17 @@ interface Replay {
 
 const PublicReplays = () => {
   const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [replays, setReplays] = useState<Replay[]>([]);
   const [speakers, setSpeakers] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReplay, setSelectedReplay] = useState<Replay | null>(null);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
-  const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingSession, setEditingSession] = useState<Replay | null>(null);
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [products, setProducts] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -70,6 +72,7 @@ const PublicReplays = () => {
 
   useEffect(() => {
     fetchReplays();
+    fetchProducts();
     checkAdminStatus();
   }, []);
 
@@ -136,6 +139,19 @@ const PublicReplays = () => {
       setReplays(formattedReplays);
     }
     setLoading(false);
+  };
+
+  const fetchProducts = async () => {
+    const { data, error } = await supabase
+      .from("stripe_products")
+      .select("*")
+      .eq("active", true);
+
+    if (error) {
+      console.error("Failed to load products", error);
+    } else {
+      setProducts(data || []);
+    }
   };
 
   const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -263,73 +279,32 @@ const PublicReplays = () => {
     setEditingSession(null);
   };
 
-  const handlePurchase = async (eventYear: number, replayId?: string) => {
-    try {
-      setPurchaseLoading(true);
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error("Please sign in to purchase replays");
-        navigate("/auth");
-        return;
-      }
+  const handleAddToCart = async (replay: Replay) => {
+    const product = products.find(p => 
+      p.product_type === "individual_replay" && 
+      p.replay_id === replay.id
+    );
 
-      let priceId: string;
-
-      // Individual replay purchase
-      if (replayId) {
-        // Map replay IDs to price IDs for individual purchases
-        const individualPriceIds: { [key: string]: string } = {
-          "71069a53-fc6c-401b-a59b-e9bc0c190d20": "price_1SRGqVEFw97UKMysD1m7vbJz", // AI Agents
-          "86b57135-c65d-4b75-830c-75c3406fb66a": "price_1SRGqWEFw97UKMysebRMJ0bs", // AI For Six Figure Success
-          "3bb799b9-e878-4685-8939-2e31719e0f2f": "price_1SRGqYEFw97UKMysDoqfvnWh", // All Speaker Q & A
-          "abbe186e-9f98-4a3f-b524-b6b09ccb7086": "price_1SRGqZEFw97UKMysehqDpL2D", // An AI Powered Super Day
-          "a0a3ebe8-ecd5-4bc2-b954-53b381318231": "price_1SRGqaEFw97UKMysVTjSiNyA", // Building A Success Mindset
-          "84600d95-d5bc-42e2-909d-cf17a8345ac1": "price_1SRGqbEFw97UKMysnCW9bw0e", // Digital Dominance with AI
-          "d4710e51-8981-489f-ada9-58d97d4d069a": "price_1SRGqcEFw97UKMysqlyO5Gs5", // Smarter Design with Canva AI
-          "42e8285c-7ad2-4942-ae97-acc40cd1eb06": "price_1SRGqdEFw97UKMyspQ18Ndq9", // The Empathy Engine
-          "b7a6c74d-734b-4ea6-854b-278ca4748062": "price_1SRGqfEFw97UKMyse39YIzuV", // Why AI Replacing You Isn't A Bad Thing
-        };
-
-        priceId = individualPriceIds[replayId];
-        if (!priceId) {
-          toast.error("Invalid replay selection");
-          return;
-        }
-      } else {
-        // Year bundle purchase
-        const bundlePriceIds: { [key: number]: string } = {
-          2025: "price_1SRFvHEFw97UKMyskr6hX5xc", // 2025 Replays Bundle
-          2026: "price_1SRFvaEFw97UKMysELPzJJDX", // 2026 Replays Bundle
-        };
-
-        priceId = bundlePriceIds[eventYear];
-        if (!priceId) {
-          toast.error("Invalid event year");
-          return;
-        }
-      }
-
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { 
-          price_id: priceId,
-          product_type: "replay",
-          event_year: eventYear,
-          replay_id: replayId
-        },
-      });
-
-      if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, '_blank');
-      }
-    } catch (error: any) {
-      console.error("Purchase error:", error);
-      toast.error(error.message || "Failed to create checkout session");
-    } finally {
-      setPurchaseLoading(false);
-      setPurchaseDialogOpen(false);
+    if (!product) {
+      toast.error("No pricing configured for this replay");
+      return;
     }
+
+    await addToCart(product.id);
+  };
+
+  const handleAddBundleToCart = async (eventYear: number) => {
+    const product = products.find(p => 
+      p.product_type === "year_bundle" && 
+      p.event_year === eventYear
+    );
+
+    if (!product) {
+      toast.error("No pricing configured for this bundle");
+      return;
+    }
+
+    await addToCart(product.id);
   };
 
 
@@ -450,7 +425,7 @@ const PublicReplays = () => {
         <DialogContent className="max-w-lg">
           {selectedReplay && (
             <>
-              <DialogHeader>
+               <DialogHeader>
                 <DialogTitle className="text-2xl">{selectedReplay.title}</DialogTitle>
               </DialogHeader>
               <DialogDescription className="space-y-4">
@@ -476,17 +451,22 @@ const PublicReplays = () => {
                         <p className="text-xs text-muted-foreground">This session only</p>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold">£47</div>
+                        <div className="text-2xl font-bold">
+                          {products.find(p => p.product_type === "individual_replay" && p.replay_id === selectedReplay.id)
+                            ? `£${(products.find(p => p.product_type === "individual_replay" && p.replay_id === selectedReplay.id)!.amount / 100).toFixed(2)}`
+                            : "—"}
+                        </div>
                         <div className="text-xs text-muted-foreground">one-time</div>
                       </div>
                     </div>
                     <Button 
-                      onClick={() => handlePurchase(selectedReplay.event_year, selectedReplay.id)}
-                      disabled={purchaseLoading}
+                      onClick={() => handleAddToCart(selectedReplay)}
                       className="w-full mt-2"
                       size="sm"
+                      disabled={!products.find(p => p.product_type === "individual_replay" && p.replay_id === selectedReplay.id)}
                     >
-                      {purchaseLoading ? "Processing..." : "Buy This Replay"}
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      Add to Cart
                     </Button>
                   </div>
 
@@ -497,18 +477,23 @@ const PublicReplays = () => {
                         <p className="text-xs text-muted-foreground">All {selectedReplay.event_year} replays</p>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold">£99</div>
+                        <div className="text-2xl font-bold">
+                          {products.find(p => p.product_type === "year_bundle" && p.event_year === selectedReplay.event_year)
+                            ? `£${(products.find(p => p.product_type === "year_bundle" && p.event_year === selectedReplay.event_year)!.amount / 100).toFixed(2)}`
+                            : "—"}
+                        </div>
                         <div className="text-xs text-muted-foreground">one-time</div>
                       </div>
                     </div>
                     <Button 
-                      onClick={() => handlePurchase(selectedReplay.event_year)}
-                      disabled={purchaseLoading}
+                      onClick={() => handleAddBundleToCart(selectedReplay.event_year)}
                       variant="outline"
                       className="w-full mt-2"
                       size="sm"
+                      disabled={!products.find(p => p.product_type === "year_bundle" && p.event_year === selectedReplay.event_year)}
                     >
-                      {purchaseLoading ? "Processing..." : "Buy Full Bundle"}
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      Add Bundle to Cart
                     </Button>
                   </div>
                 </div>

@@ -5,8 +5,9 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Video, Calendar, ArrowRight, Settings, Building2, Mail, CreditCard } from "lucide-react";
+import { Users, Video, Calendar, ArrowRight, Settings, Building2, Mail, CreditCard, Ticket } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -229,21 +230,41 @@ const Admin = () => {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Stripe Products</CardTitle>
-                  <CardDescription>Manage replay pricing</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Create and manage Stripe products for individual replays and year bundles.
-                  </p>
-                  <Button onClick={() => navigate("/admin/stripe-products")} className="w-full">
-                    Manage Products
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardContent>
-              </Card>
+              <Link to="/admin/stripe-products">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader>
+                    <CardTitle>Stripe Products</CardTitle>
+                    <CardDescription>Manage replay pricing</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Create and manage Stripe products for individual replays and year bundles.
+                    </p>
+                    <Button className="w-full">
+                      Manage Products
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link to="/admin/coupons">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader>
+                    <CardTitle>Discount Coupons</CardTitle>
+                    <CardDescription>Manage promotional codes</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Create and manage discount coupons for replay purchases.
+                    </p>
+                    <Button className="w-full">
+                      Manage Coupons
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
 
               <Card>
                 <CardHeader>

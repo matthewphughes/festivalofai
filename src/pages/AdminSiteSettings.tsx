@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Loader2, Upload } from "lucide-react";
 import Navigation from "@/components/Navigation";
@@ -18,6 +19,7 @@ const AdminSiteSettings = () => {
     site_description: "",
     site_logo_url: "",
     site_share_image_url: "",
+    stripe_test_mode: false,
   });
 
   useEffect(() => {
@@ -42,6 +44,7 @@ const AdminSiteSettings = () => {
         site_description: settingsMap.site_description || "",
         site_logo_url: settingsMap.site_logo_url || "",
         site_share_image_url: settingsMap.site_share_image_url || "",
+        stripe_test_mode: settingsMap.stripe_test_mode === "true",
       });
     } catch (error: any) {
       toast.error("Failed to fetch settings: " + error.message);
@@ -59,7 +62,7 @@ const AdminSiteSettings = () => {
           .from("site_settings")
           .upsert({
             setting_key: key,
-            setting_value: value,
+            setting_value: typeof value === "boolean" ? String(value) : value,
           }, {
             onConflict: "setting_key"
           });
@@ -224,6 +227,22 @@ const AdminSiteSettings = () => {
                 className="mt-2 max-w-md object-contain"
               />
             )}
+          </div>
+
+          <div className="flex items-center justify-between space-x-2 p-4 border rounded-lg">
+            <div className="space-y-0.5">
+              <Label htmlFor="stripe_test_mode">Stripe Test Mode</Label>
+              <p className="text-sm text-muted-foreground">
+                Use Stripe test keys for payments (no real charges)
+              </p>
+            </div>
+            <Switch
+              id="stripe_test_mode"
+              checked={settings.stripe_test_mode}
+              onCheckedChange={(checked) =>
+                setSettings((prev) => ({ ...prev, stripe_test_mode: checked }))
+              }
+            />
           </div>
 
           <Button onClick={handleSave} disabled={loading} className="w-full">
