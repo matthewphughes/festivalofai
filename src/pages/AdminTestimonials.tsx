@@ -63,7 +63,7 @@ const AdminTestimonials = () => {
     }
   };
 
-  const handleThumbnailUpload = async (file: File) => {
+  const handleThumbnailUpload = async (file: File): Promise<string> => {
     try {
       setUploadingThumbnail(true);
       const fileExt = file.name.split('.').pop();
@@ -80,11 +80,12 @@ const AdminTestimonials = () => {
         .from('event-assets')
         .getPublicUrl(filePath);
 
-      setFormData({ ...formData, thumbnail_url: publicUrl });
       toast.success("Thumbnail uploaded successfully");
+      return publicUrl;
     } catch (error) {
       console.error("Error uploading thumbnail:", error);
       toast.error("Failed to upload thumbnail");
+      throw error;
     } finally {
       setUploadingThumbnail(false);
       setThumbnailFile(null);
@@ -96,8 +97,7 @@ const AdminTestimonials = () => {
       let thumbnailUrl = formData.thumbnail_url;
 
       if (thumbnailFile) {
-        await handleThumbnailUpload(thumbnailFile);
-        return;
+        thumbnailUrl = await handleThumbnailUpload(thumbnailFile);
       }
 
       const maxOrder = testimonials.length > 0 
@@ -106,6 +106,7 @@ const AdminTestimonials = () => {
 
       const { error } = await supabase.from("testimonials").insert({
         ...formData,
+        thumbnail_url: thumbnailUrl,
         quote: formData.quote || null,
         display_order: maxOrder + 1,
       });
@@ -124,15 +125,17 @@ const AdminTestimonials = () => {
 
   const handleUpdate = async (id: string) => {
     try {
+      let thumbnailUrl = formData.thumbnail_url;
+
       if (thumbnailFile) {
-        await handleThumbnailUpload(thumbnailFile);
-        return;
+        thumbnailUrl = await handleThumbnailUpload(thumbnailFile);
       }
 
       const { error } = await supabase
         .from("testimonials")
         .update({
           ...formData,
+          thumbnail_url: thumbnailUrl,
           quote: formData.quote || null,
         })
         .eq("id", id);
