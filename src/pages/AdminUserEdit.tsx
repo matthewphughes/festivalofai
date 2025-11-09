@@ -128,14 +128,18 @@ const AdminUserEdit = () => {
         country: profile.country || "",
       });
 
-      // Fetch auth user data for last_sign_in_at
-      const { data: { user: authUserData } } = await supabase.auth.admin.getUserById(userId);
-      if (authUserData) {
-        setAuthUser({
-          last_sign_in_at: authUserData.last_sign_in_at,
-          created_at: authUserData.created_at,
-          email: authUserData.email || "",
-        });
+      // Fetch auth user data for last_sign_in_at via edge function
+      const { data: authData, error: authError } = await supabase.functions.invoke('get-auth-users');
+      
+      if (!authError && authData?.users) {
+        const authUserData = authData.users.find((u: any) => u.id === userId);
+        if (authUserData) {
+          setAuthUser({
+            last_sign_in_at: authUserData.last_sign_in_at,
+            created_at: authUserData.created_at,
+            email: authUserData.email || "",
+          });
+        }
       }
 
       // Fetch roles

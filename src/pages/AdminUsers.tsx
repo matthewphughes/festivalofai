@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Pencil, Trash2, Shield, User, Mic, Users, Video, Upload, Loader2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Shield, User, Mic, Users, Video, Upload, Loader2, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { UserFilters } from "@/components/admin/UserFilters";
 import { BulkActionsBar } from "@/components/admin/BulkActionsBar";
@@ -113,45 +113,56 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     setLoading(true);
     
-    // Fetch all profiles
-    const { data: profiles, error: profilesError } = await supabase
-      .from("profiles")
-      .select("*")
-      .order("created_at", { ascending: false });
+    try {
+      // Fetch all profiles
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    if (profilesError) {
-      toast.error("Failed to load users");
+      if (profilesError) {
+        toast.error("Failed to load users");
+        setLoading(false);
+        return;
+      }
+
+      // Fetch all user roles
+      const { data: userRoles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id, role");
+
+      if (rolesError) {
+        toast.error("Failed to load user roles");
+        setLoading(false);
+        return;
+      }
+
+      // Fetch auth users via edge function (requires service role)
+      const { data: authData, error: authError } = await supabase.functions.invoke('get-auth-users');
+      
+      if (authError) {
+        console.error('Error fetching auth users:', authError);
+        // Continue without auth data rather than failing completely
+      }
+
+      const authUserMap = new Map<string, string | null>(
+        authData?.users?.map((u: any) => [u.id, u.last_sign_in_at || null] as [string, string | null]) || []
+      );
+
+      // Combine profiles with their roles and last login
+      const usersWithRoles: UserProfile[] = profiles?.map(profile => ({
+        ...profile,
+        roles: userRoles?.filter(r => r.user_id === profile.id).map(r => r.role) || [],
+        last_sign_in_at: authUserMap.get(profile.id) || null,
+      })) || [];
+
+      setUsers(usersWithRoles);
+    } catch (error: any) {
+      console.error('Error in fetchUsers:', error);
+      toast.error(error.message || "Failed to load users");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Fetch all user roles
-    const { data: userRoles, error: rolesError } = await supabase
-      .from("user_roles")
-      .select("user_id, role");
-
-    if (rolesError) {
-      toast.error("Failed to load user roles");
-      setLoading(false);
-      return;
-    }
-
-    // Fetch auth users for last_sign_in_at
-    const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
-    
-    const authUserMap = new Map<string, string | null>(
-      authUsers?.map(u => [u.id, u.last_sign_in_at || null] as [string, string | null]) || []
-    );
-
-    // Combine profiles with their roles and last login
-    const usersWithRoles: UserProfile[] = profiles?.map(profile => ({
-      ...profile,
-      roles: userRoles?.filter(r => r.user_id === profile.id).map(r => r.role) || [],
-      last_sign_in_at: authUserMap.get(profile.id) || null,
-    })) || [];
-
-    setUsers(usersWithRoles);
-    setLoading(false);
   };
 
   const handleEdit = async (user: UserProfile) => {
@@ -740,6 +751,14 @@ const AdminUsers = () => {
             <p className="text-muted-foreground">View and manage registered users</p>
           </div>
           <div className="flex gap-2">
+            <Button 
+              onClick={fetchUsers} 
+              variant="outline"
+              disabled={loading}
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
             <Button onClick={() => setBulkImportOpen(true)} variant="default">
               <Upload className="mr-2 h-4 w-4" />
               Bulk Import Users
