@@ -124,6 +124,7 @@ export type Database = {
           email_sent: boolean | null
           id: string
           name: string
+          phone: string | null
         }
         Insert: {
           campaign_id?: string | null
@@ -132,6 +133,7 @@ export type Database = {
           email_sent?: boolean | null
           id?: string
           name: string
+          phone?: string | null
         }
         Update: {
           campaign_id?: string | null
@@ -140,6 +142,7 @@ export type Database = {
           email_sent?: boolean | null
           id?: string
           name?: string
+          phone?: string | null
         }
         Relationships: [
           {

@@ -12,6 +12,7 @@ import { z } from "zod";
 const claimSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
   email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
+  phone: z.string().trim().min(1, "Phone number is required").max(20, "Phone number must be less than 20 characters"),
 });
 
 interface Campaign {
@@ -29,6 +30,7 @@ const DiscountBanner = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
 
@@ -89,6 +91,7 @@ const DiscountBanner = () => {
     trackEvent("discount_banner_claim_clicked", {
       campaign_id: campaign?.id,
     });
+    setIsCollapsed(true); // Close the panel
     setDialogOpen(true);
   };
 
@@ -106,7 +109,7 @@ const DiscountBanner = () => {
     e.preventDefault();
     
     // Validate input
-    const validation = claimSchema.safeParse({ name, email });
+    const validation = claimSchema.safeParse({ name, email, phone });
     if (!validation.success) {
       toast.error(validation.error.errors[0].message);
       return;
@@ -122,6 +125,7 @@ const DiscountBanner = () => {
           campaign_id: campaign!.id,
           name: validation.data.name,
           email: validation.data.email,
+          phone: validation.data.phone,
         });
 
       if (claimError) throw claimError;
@@ -138,6 +142,7 @@ const DiscountBanner = () => {
           campaignId: campaign!.id,
           name: validation.data.name,
           email: validation.data.email,
+          phone: validation.data.phone,
         },
       });
 
@@ -147,6 +152,7 @@ const DiscountBanner = () => {
       setDialogOpen(false);
       setName("");
       setEmail("");
+      setPhone("");
     } catch (error: any) {
       console.error("Error claiming discount:", error);
       toast.error("Failed to send discount code. Please try again.");
@@ -160,10 +166,13 @@ const DiscountBanner = () => {
   return (
     <>
       {isCollapsed ? (
-        // Collapsed tab peeking from right side
+        // Collapsed tab peeking from right side with pulsing glow
         <div 
-          className="fixed right-0 top-1/2 -translate-y-1/2 z-[60] bg-primary text-primary-foreground rounded-l-lg shadow-lg cursor-pointer hover:bg-primary/90 transition-all hover:pr-1 group"
+          className="fixed right-0 top-1/2 -translate-y-1/2 z-[60] bg-primary text-primary-foreground rounded-l-lg shadow-lg cursor-pointer hover:bg-primary/90 transition-all hover:pr-1 group animate-pulse-glow"
           onClick={handleToggleCollapse}
+          style={{
+            boxShadow: '0 0 20px 5px hsl(var(--primary) / 0.5), 0 0 40px 10px hsl(var(--primary) / 0.3)'
+          }}
         >
           <div className="flex flex-col items-center gap-2 px-3 py-6">
             <span className="text-xs font-bold tracking-wider [writing-mode:vertical-lr] rotate-180">
@@ -264,6 +273,18 @@ const DiscountBanner = () => {
                 placeholder="your@email.com"
                 required
                 maxLength={255}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+44 1234 567890"
+                required
+                maxLength={20}
               />
             </div>
             <Button type="submit" className="w-full" disabled={submitting}>
