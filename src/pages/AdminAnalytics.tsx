@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DateRangeFilter } from "@/components/admin/DateRangeFilter";
+import { RealtimeVisitors } from "@/components/admin/RealtimeVisitors";
 
 interface AnalyticsData {
   totalRevenue: number;
@@ -37,11 +39,16 @@ const AdminAnalytics = () => {
   const [ga4Data, setGA4Data] = useState<GA4Data | null>(null);
   const [loading, setLoading] = useState(true);
   const [ga4Loading, setGA4Loading] = useState(true);
+  const [dateRange, setDateRange] = useState<{ startDate: Date; endDate: Date } | null>(null);
+  const [daysBack, setDaysBack] = useState(30);
 
   useEffect(() => {
     fetchAnalytics();
-    fetchGA4Data();
   }, []);
+
+  useEffect(() => {
+    fetchGA4Data();
+  }, [dateRange, daysBack]);
 
   const fetchAnalytics = async () => {
     try {
@@ -131,28 +138,52 @@ const AdminAnalytics = () => {
 
   const fetchGA4Data = async () => {
     try {
+      setGA4Loading(true);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         throw new Error("Not authenticated");
       }
 
-      const response = await supabase.functions.invoke("fetch-ga4-data", {
+      const url = new URL("https://ppvgibvylsxdybsxufxm.supabase.co/functions/v1/fetch-ga4-data");
+      
+      if (dateRange) {
+        url.searchParams.set("startDate", dateRange.startDate.toISOString().split('T')[0]);
+        url.searchParams.set("endDate", dateRange.endDate.toISOString().split('T')[0]);
+      } else {
+        url.searchParams.set("daysBack", daysBack.toString());
+      }
+
+      console.log("Fetching GA4 data from:", url.toString());
+
+      const response = await fetch(url.toString(), {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
       });
 
-      if (response.error) {
-        throw response.error;
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("GA4 fetch error:", errorText);
+        throw new Error(`Failed to fetch GA4 data: ${response.statusText}`);
       }
 
-      setGA4Data(response.data);
+      const data = await response.json();
+      console.log("GA4 data received:", data);
+      setGA4Data(data);
     } catch (error: any) {
       console.error("Failed to fetch GA4 data:", error);
-      toast.error("Failed to fetch Google Analytics data");
+      toast.error("Failed to fetch Google Analytics data: " + error.message);
     } finally {
       setGA4Loading(false);
     }
+  };
+
+  const handleDateRangeChange = (range: { startDate: Date; endDate: Date } | null) => {
+    setDateRange(range);
+  };
+
+  const handlePresetChange = (days: number) => {
+    setDaysBack(days);
   };
 
   if (loading && ga4Loading) {
@@ -199,6 +230,7 @@ const AdminAnalytics = () => {
           <TabsList className="mb-8">
             <TabsTrigger value="sales">Sales Analytics</TabsTrigger>
             <TabsTrigger value="traffic">Google Analytics</TabsTrigger>
+            <TabsTrigger value="realtime">Real-time Visitors</TabsTrigger>
           </TabsList>
 
           <TabsContent value="sales" className="space-y-8">
@@ -320,6 +352,11 @@ const AdminAnalytics = () => {
           </TabsContent>
 
           <TabsContent value="traffic" className="space-y-8">
+            <DateRangeFilter
+              onDateRangeChange={handleDateRangeChange}
+              onPresetChange={handlePresetChange}
+            />
+            
             {ga4Loading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin" />
@@ -449,6 +486,10 @@ const AdminAnalytics = () => {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          <TabsContent value="realtime" className="space-y-8">
+            <RealtimeVisitors />
           </TabsContent>
         </Tabs>
       </div>
