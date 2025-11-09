@@ -18,13 +18,12 @@ import { useTheme } from "next-themes";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
 
-const CheckoutForm = () => {
+const CheckoutForm = ({ isGuest }: { isGuest: boolean }) => {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
   const { items, total, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
-  const [isGuest, setIsGuest] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
   const [createAccount, setCreateAccount] = useState(false);
   const [couponCode, setCouponCode] = useState("");
@@ -234,7 +233,17 @@ const Checkout = () => {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Cart
           </Button>
-          <h1 className="text-3xl font-bold">Secure Checkout</h1>
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-3xl font-bold">Secure Checkout</h1>
+            {isGuest && (
+              <Button
+                variant="outline"
+                onClick={() => navigate("/auth")}
+              >
+                Sign In
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -273,9 +282,26 @@ const Checkout = () => {
               <CardDescription>Complete your purchase securely</CardDescription>
             </CardHeader>
             <CardContent>
+              {isGuest && (
+                <div className="mb-6 p-4 bg-muted rounded-lg">
+                  <p className="text-sm mb-2">
+                    <strong>Checking out as guest</strong>
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Already have an account?{" "}
+                    <Button
+                      variant="link"
+                      className="h-auto p-0 text-xs"
+                      onClick={() => navigate("/auth")}
+                    >
+                      Sign in here
+                    </Button>
+                  </p>
+                </div>
+              )}
               {clientSecret && (
                 <Elements stripe={stripePromise} options={{ clientSecret }}>
-                  <CheckoutForm />
+                  <CheckoutForm isGuest={isGuest} />
                 </Elements>
               )}
             </CardContent>
