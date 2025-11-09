@@ -5,7 +5,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Video, Calendar, ArrowRight, Settings, Building2, Mail } from "lucide-react";
+import { Users, Video, Calendar, ArrowRight, Settings, Building2, Mail, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 
 const Admin = () => {
@@ -224,6 +224,22 @@ const Admin = () => {
                   </p>
                   <Button onClick={() => navigate("/admin/sponsor-requests")} className="w-full">
                     View Requests
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Stripe Products</CardTitle>
+                  <CardDescription>Manage replay pricing</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Create and manage Stripe products for individual replays and year bundles.
+                  </p>
+                  <Button onClick={() => navigate("/admin/stripe-products")} className="w-full">
+                    Manage Products
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </CardContent>

@@ -20,8 +20,6 @@ import { Helmet } from "react-helmet-async";
 const sessionSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
   description: z.string().trim().max(2000, "Description must be less than 2000 characters").optional(),
-  session_date: z.string().optional(),
-  session_time: z.string().optional(),
   video_url: z.union([z.string().url("Invalid URL").refine(
     (url) => url.includes('youtube.com') || url.includes('youtu.be'),
     { message: "Must be a YouTube URL" }
@@ -31,10 +29,6 @@ const sessionSchema = z.object({
   speaker_id: z.string().uuid().optional(),
   duration_minutes: z.number().int().positive("Duration must be a positive number").max(600, "Duration must be less than 600 minutes").nullable().optional(),
   published: z.boolean(),
-  on_agenda: z.boolean(),
-  session_type: z.enum(["keynote", "workshop", "break", "closing", "session"]).optional(),
-  track: z.string().optional(),
-  price_id: z.string().optional(),
 });
 
 
@@ -55,7 +49,6 @@ const PublicReplays = () => {
   const navigate = useNavigate();
   const [replays, setReplays] = useState<Replay[]>([]);
   const [speakers, setSpeakers] = useState<Array<{ id: string; name: string }>>([]);
-  const [stripePrices, setStripePrices] = useState<Array<{ id: string; product_name: string; amount: number; currency: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReplay, setSelectedReplay] = useState<Replay | null>(null);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
@@ -73,12 +66,6 @@ const PublicReplays = () => {
     speaker_id: "",
     duration_minutes: "",
     published: false,
-    on_agenda: false,
-    session_date: "",
-    session_time: "",
-    session_type: "",
-    track: "",
-    price_id: "",
   });
 
   useEffect(() => {
@@ -99,31 +86,10 @@ const PublicReplays = () => {
       const adminStatus = !!data;
       setIsAdmin(adminStatus);
       
-      // Only fetch admin-specific data if user is admin
+      // Only fetch speakers if user is admin
       if (adminStatus) {
         fetchSpeakers();
-        fetchStripePrices();
       }
-    }
-  };
-
-  const fetchStripePrices = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      // Fetch products and prices from Stripe via edge function
-      const { data: pricesData, error: pricesError } = await supabase.functions.invoke("fetch-stripe-prices");
-      
-      if (pricesError) {
-        console.error("Failed to load Stripe prices", pricesError);
-        toast.error("Failed to load Stripe products");
-        return;
-      }
-
-      setStripePrices(pricesData?.prices || []);
-    } catch (error) {
-      console.error("Error fetching Stripe prices:", error);
     }
   };
 
@@ -228,12 +194,6 @@ const PublicReplays = () => {
         speaker_id: formData.speaker_id || undefined,
         duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes) : null,
         published: formData.published,
-        on_agenda: formData.on_agenda,
-        session_date: formData.session_date || undefined,
-        session_time: formData.session_time || undefined,
-        session_type: formData.session_type || undefined,
-        track: formData.track || undefined,
-        price_id: formData.price_id || undefined,
       };
 
       const validated = sessionSchema.parse(sessionData);
@@ -247,12 +207,6 @@ const PublicReplays = () => {
         speaker_id: validated.speaker_id || null,
         duration_minutes: validated.duration_minutes ?? null,
         published: validated.published,
-        on_agenda: validated.on_agenda,
-        session_date: validated.session_date || null,
-        session_time: validated.session_time || null,
-        session_type: validated.session_type || null,
-        track: validated.track || null,
-        price_id: validated.price_id || null,
       };
 
       if (editingSession) {
@@ -288,15 +242,9 @@ const PublicReplays = () => {
       video_url: replay.video_url || "",
       thumbnail_url: replay.thumbnail_url || "",
       event_year: replay.event_year,
-      speaker_id: "", // We'll need to fetch this from speaker_name or use speaker_id if available
+      speaker_id: "",
       duration_minutes: replay.duration_minutes?.toString() || "",
-      published: true, // Since we're only showing published replays
-      on_agenda: false,
-      session_date: "",
-      session_time: "",
-      session_type: "",
-      track: "",
-      price_id: "",
+      published: true,
     });
     setEditDialogOpen(true);
   };
@@ -311,12 +259,6 @@ const PublicReplays = () => {
       speaker_id: "",
       duration_minutes: "",
       published: false,
-      on_agenda: false,
-      session_date: "",
-      session_time: "",
-      session_type: "",
-      track: "",
-      price_id: "",
     });
     setEditingSession(null);
   };
@@ -687,30 +629,6 @@ const PublicReplays = () => {
                 />
               </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="price_id">Stripe Product</Label>
-                <Select
-                  value={formData.price_id}
-                  onValueChange={(value) => setFormData({ ...formData, price_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Stripe product..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {stripePrices
-                      .filter(price => price.amount) // Only show prices with amounts
-                      .map((price) => (
-                        <SelectItem key={price.id} value={price.id}>
-                          {price.product_name} - £{(price.amount / 100).toFixed(2)} {price.currency.toUpperCase()}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
-                  Select the Stripe product/price for individual replay purchases
-                </p>
-              </div>
-
               <div className="flex items-center justify-between">
                 <Label htmlFor="published">Published</Label>
                 <Switch
@@ -719,6 +637,26 @@ const PublicReplays = () => {
                   onCheckedChange={(checked) => setFormData({ ...formData, published: checked })}
                 />
               </div>
+
+              {isAdmin && (
+                <div className="p-4 border border-primary/20 bg-primary/5 rounded-lg">
+                  <p className="text-sm font-medium mb-1">Stripe Product Management</p>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Manage pricing and products in the Stripe Products page
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setEditDialogOpen(false);
+                      navigate("/admin/stripe-products");
+                    }}
+                  >
+                    Manage Pricing →
+                  </Button>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
