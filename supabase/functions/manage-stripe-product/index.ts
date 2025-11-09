@@ -13,6 +13,7 @@ serve(async (req) => {
   }
 
   try {
+    // Create client with anon key for auth
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
@@ -27,17 +28,36 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    // Check admin role
-    const { data: roleData } = await supabaseClient
+    // Create service role client to check admin status (bypass RLS)
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      {
+        auth: {
+          persistSession: false,
+        },
+      }
+    );
+
+    // Check admin role using service role client
+    const { data: roleData, error: roleError } = await supabaseAdmin
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
       .eq("role", "admin")
       .maybeSingle();
 
+    if (roleError) {
+      console.error("Error checking admin role:", roleError);
+      throw new Error("Failed to verify admin access");
+    }
+
     if (!roleData) {
+      console.log(`User ${user.id} attempted admin action without admin role`);
       throw new Error("Admin access required");
     }
+
+    console.log(`Admin action authorized for user ${user.id}`);
 
     const { operation, product_id, data: productData } = await req.json();
 
@@ -65,8 +85,8 @@ serve(async (req) => {
           currency: productData.currency,
         });
 
-        // Insert into database
-        const { data: dbProduct, error: dbError } = await supabaseClient
+        // Insert into database using admin client
+        const { data: dbProduct, error: dbError } = await supabaseAdmin
           .from("stripe_products")
           .insert({
             stripe_product_id: stripeProduct.id,
@@ -93,8 +113,8 @@ serve(async (req) => {
       case "update": {
         if (!product_id) throw new Error("product_id required for update");
 
-        // Get existing product
-        const { data: existingProduct } = await supabaseClient
+        // Get existing product using admin client
+        const { data: existingProduct } = await supabaseAdmin
           .from("stripe_products")
           .select("*")
           .eq("id", product_id)
@@ -121,8 +141,8 @@ serve(async (req) => {
           });
         }
 
-        // Update database
-        const { data: updatedProduct, error: updateError } = await supabaseClient
+        // Update database using admin client
+        const { data: updatedProduct, error: updateError } = await supabaseAdmin
           .from("stripe_products")
           .update({
             stripe_price_id: newPrice.id,
@@ -145,7 +165,7 @@ serve(async (req) => {
       case "toggle_active": {
         if (!product_id) throw new Error("product_id required");
 
-        const { data: product, error: fetchError } = await supabaseClient
+        const { data: product, error: fetchError } = await supabaseAdmin
           .from("stripe_products")
           .select("active")
           .eq("id", product_id)
@@ -155,7 +175,7 @@ serve(async (req) => {
 
         const newActiveState = !product.active;
 
-        const { data: updatedProduct, error } = await supabaseClient
+        const { data: updatedProduct, error } = await supabaseAdmin
           .from("stripe_products")
           .update({ active: newActiveState })
           .eq("id", product_id)
@@ -173,8 +193,8 @@ serve(async (req) => {
       case "delete": {
         if (!product_id) throw new Error("product_id required");
 
-        // Check if product has purchases
-        const { data: purchases } = await supabaseClient
+        // Check if product has purchases using admin client
+        const { data: purchases } = await supabaseAdmin
           .from("replay_purchases")
           .select("id")
           .eq("product_id", product_id)
@@ -184,8 +204,8 @@ serve(async (req) => {
           throw new Error("Cannot delete product with existing purchases. Deactivate instead.");
         }
 
-        // Get product details
-        const { data: product, error: fetchError } = await supabaseClient
+        // Get product details using admin client
+        const { data: product, error: fetchError } = await supabaseAdmin
           .from("stripe_products")
           .select("stripe_product_id")
           .eq("id", product_id)
@@ -198,8 +218,8 @@ serve(async (req) => {
           active: false,
         });
 
-        // Delete from database
-        const { error } = await supabaseClient
+        // Delete from database using admin client
+        const { error } = await supabaseAdmin
           .from("stripe_products")
           .delete()
           .eq("id", product_id);
@@ -215,7 +235,7 @@ serve(async (req) => {
       case "sync": {
         if (!product_id) throw new Error("product_id required");
 
-        const { data: dbProduct, error: fetchError } = await supabaseClient
+        const { data: dbProduct, error: fetchError } = await supabaseAdmin
           .from("stripe_products")
           .select("stripe_product_id, stripe_price_id")
           .eq("id", product_id)
@@ -226,7 +246,7 @@ serve(async (req) => {
         const stripeProduct = await stripe.products.retrieve(dbProduct.stripe_product_id);
         const stripePrice = await stripe.prices.retrieve(dbProduct.stripe_price_id);
 
-        const { data: synced, error } = await supabaseClient
+        const { data: synced, error } = await supabaseAdmin
           .from("stripe_products")
           .update({
             product_name: stripeProduct.name,
