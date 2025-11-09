@@ -87,33 +87,31 @@ const Navigation = () => {
     <nav className={cn("fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border transition-shadow", scrolled && "shadow-lg")}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          {/* Logo and Event Info */}
-          <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center gap-3 group">
-              <img 
-                src={logoLight} 
-                alt="Festival of AI" 
-                className="h-12 w-auto transition-transform group-hover:scale-105 dark:hidden" 
-              />
-              <img 
-                src={logoDark} 
-                alt="Festival of AI" 
-                className="h-12 w-auto transition-transform group-hover:scale-105 hidden dark:block" 
-              />
-            </Link>
+          {/* Logo */}
+          <Link to="/" className="flex flex-col items-start gap-2 group">
+            <img 
+              src={logoLight} 
+              alt="Festival of AI" 
+              className="h-12 w-auto transition-transform group-hover:scale-105 dark:hidden" 
+            />
+            <img 
+              src={logoDark} 
+              alt="Festival of AI" 
+              className="h-12 w-auto transition-transform group-hover:scale-105 hidden dark:block" 
+            />
             
-            {/* Date and Venue Info - Desktop */}
-            <div className="hidden lg:flex items-center gap-4 text-sm">
+            {/* Date and Venue Info */}
+            <div className="hidden md:flex items-center gap-4 text-sm">
               <div className="flex items-center gap-2 text-foreground/80">
                 <Calendar className="h-4 w-4 text-accent" />
-                <span className="font-medium">October 16th, 2026</span>
+                <span className="font-medium">Oct 16, 2026</span>
               </div>
               <div className="flex items-center gap-2 text-foreground/80">
                 <MapPin className="h-4 w-4 text-accent" />
-                <span className="font-medium">National Space Centre, Leicester, UK</span>
+                <span className="font-medium">National Space Centre</span>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
