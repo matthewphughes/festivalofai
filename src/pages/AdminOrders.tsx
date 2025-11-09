@@ -597,33 +597,33 @@ const AdminOrders = () => {
                             <>
                               <TableRow key={order.id}>
                                 <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <Checkbox
-                                      checked={selectedOrders.has(order.id)}
-                                      onCheckedChange={(checked) => handleSelectOrder(order.id, checked as boolean)}
-                                      onClick={(e) => e.stopPropagation()}
-                                    />
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm" 
-                                      className="p-0 h-6 w-6"
-                                      onClick={() => {
-                                        const newExpanded = new Set(expandedRows);
-                                        if (isExpanded) {
-                                          newExpanded.delete(order.id);
-                                        } else {
-                                          newExpanded.add(order.id);
-                                        }
-                                        setExpandedRows(newExpanded);
-                                      }}
-                                    >
-                                      {isExpanded ? (
-                                        <ChevronDown className="h-4 w-4" />
-                                      ) : (
-                                        <ChevronRight className="h-4 w-4" />
-                                      )}
-                                    </Button>
-                                  </div>
+                                  <Checkbox
+                                    checked={selectedOrders.has(order.id)}
+                                    onCheckedChange={(checked) => handleSelectOrder(order.id, checked as boolean)}
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="p-0 h-6 w-6"
+                                    onClick={() => {
+                                      const newExpanded = new Set(expandedRows);
+                                      if (isExpanded) {
+                                        newExpanded.delete(order.id);
+                                      } else {
+                                        newExpanded.add(order.id);
+                                      }
+                                      setExpandedRows(newExpanded);
+                                    }}
+                                  >
+                                    {isExpanded ? (
+                                      <ChevronDown className="h-4 w-4" />
+                                    ) : (
+                                      <ChevronRight className="h-4 w-4" />
+                                    )}
+                                  </Button>
                                 </TableCell>
                                 <TableCell className="whitespace-nowrap">
                                   {format(new Date(order.purchased_at), "MMM d, yyyy HH:mm")}
@@ -675,7 +675,7 @@ const AdminOrders = () => {
                               </TableRow>
                               {isExpanded && (
                                 <TableRow key={`${order.id}-expanded`}>
-                                  <TableCell colSpan={7} className="bg-muted/50 border-t">
+                                  <TableCell colSpan={8} className="bg-muted/50 border-t">
                                     <div className="p-4 space-y-3">
                                       <div className="grid grid-cols-2 gap-4">
                                         <div>
