@@ -227,52 +227,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Photo Gallery Section */}
-      <section className="py-20 relative z-10 bg-background/30">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
-            Experience <span className="text-accent">Festival of AI</span>
-          </h2>
-          <p className="text-xl text-center mb-12 text-muted-foreground max-w-2xl mx-auto">
-            Join hundreds of innovators, entrepreneurs, and AI enthusiasts at the UK's premier AI event
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="relative overflow-hidden rounded-lg aspect-video group">
-              <img 
-                src={eventSpeaker1} 
-                alt="Speaker presenting at Festival of AI" 
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-            <div className="relative overflow-hidden rounded-lg aspect-video group">
-              <img 
-                src={eventAudience1} 
-                alt="Engaged audience at Festival of AI" 
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-            <div className="relative overflow-hidden rounded-lg aspect-video group">
-              <img 
-                src={eventNetworking1} 
-                alt="Networking at Festival of AI" 
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-            <div className="relative overflow-hidden rounded-lg aspect-video group">
-              <img 
-                src={eventSpeaker3} 
-                alt="Industry experts sharing insights at Festival of AI" 
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* FAQ Section */}
       <section className="py-20 relative z-10">
         <div className="container mx-auto px-4 max-w-4xl">
