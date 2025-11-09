@@ -7,9 +7,13 @@ import Footer from "@/components/Footer";
 import StarField from "@/components/StarField";
 import spaceBg from "@/assets/space-bg.jpg";
 import eventSpeaker1 from "@/assets/event-speaker-1.jpg";
+import eventSpeaker2 from "@/assets/event-speaker-2.jpg";
 import eventSpeaker3 from "@/assets/event-speaker-3.jpg";
 import eventAudience1 from "@/assets/event-audience-1.jpg";
+import eventAudience2 from "@/assets/event-audience-2.jpg";
 import eventNetworking1 from "@/assets/event-networking-1.jpg";
+import eventNetworking2 from "@/assets/event-networking-2.jpg";
+import eventAtmosphere from "@/assets/event-atmosphere-1.jpg";
 import { Calendar, MapPin, Users, Lightbulb, Rocket, Zap, Play } from "lucide-react";
 
 const Index = () => {
@@ -107,20 +111,99 @@ const Index = () => {
             Discover practical AI that actually moves the needle for your business
           </p>
           
-          {/* Video Highlights from Last Year */}
-          <div className="mb-12 max-w-4xl mx-auto">
-            <div className="relative aspect-video rounded-lg overflow-hidden border-2 border-accent/50 shadow-2xl bg-background/20 backdrop-blur-sm group cursor-pointer hover:border-accent transition-all duration-300">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-accent/90 text-accent-foreground mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <Play className="w-10 h-10 ml-1" />
-                  </div>
-                  <p className="text-xl font-semibold">2025 Festival Highlights</p>
-                  <p className="text-sm text-muted-foreground mt-2">Click to watch the video</p>
+          {/* Image Gallery Highlights from Last Year */}
+          <div className="mb-12 max-w-6xl mx-auto">
+            <h3 className="text-2xl font-bold text-center mb-6">Highlights from 2025</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {/* Large featured image */}
+              <div className="col-span-2 row-span-2 relative overflow-hidden rounded-lg group cursor-pointer">
+                <img 
+                  src={eventSpeaker1} 
+                  alt="Speaker presenting at Festival of AI 2025" 
+                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                  <p className="text-lg font-semibold">Inspiring Speakers</p>
                 </div>
               </div>
-              {/* Placeholder - replace with actual video embed when URL is provided */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20" />
+              
+              {/* Grid of smaller images */}
+              <div className="relative overflow-hidden rounded-lg group cursor-pointer aspect-square">
+                <img 
+                  src={eventAudience1} 
+                  alt="Engaged audience" 
+                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                  <p className="text-sm font-semibold">Engaged Learning</p>
+                </div>
+              </div>
+              
+              <div className="relative overflow-hidden rounded-lg group cursor-pointer aspect-square">
+                <img 
+                  src={eventNetworking1} 
+                  alt="Networking opportunities" 
+                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                  <p className="text-sm font-semibold">Networking</p>
+                </div>
+              </div>
+              
+              <div className="relative overflow-hidden rounded-lg group cursor-pointer aspect-square">
+                <img 
+                  src={eventSpeaker2} 
+                  alt="Expert presentations" 
+                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                  <p className="text-sm font-semibold">Expert Insights</p>
+                </div>
+              </div>
+              
+              <div className="relative overflow-hidden rounded-lg group cursor-pointer aspect-square">
+                <img 
+                  src={eventAtmosphere} 
+                  alt="Festival atmosphere" 
+                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                  <p className="text-sm font-semibold">Amazing Atmosphere</p>
+                </div>
+              </div>
+              
+              <div className="col-span-2 relative overflow-hidden rounded-lg group cursor-pointer aspect-video">
+                <img 
+                  src={eventAudience2} 
+                  alt="Full venue" 
+                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                  <p className="text-base font-semibold">Packed Sessions</p>
+                </div>
+              </div>
+              
+              <div className="relative overflow-hidden rounded-lg group cursor-pointer aspect-square">
+                <img 
+                  src={eventNetworking2} 
+                  alt="Community connections" 
+                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                  <p className="text-sm font-semibold">Build Connections</p>
+                </div>
+              </div>
+              
+              <div className="relative overflow-hidden rounded-lg group cursor-pointer aspect-square">
+                <img 
+                  src={eventSpeaker3} 
+                  alt="Industry leaders" 
+                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                  <p className="text-sm font-semibold">Industry Leaders</p>
+                </div>
+              </div>
             </div>
           </div>
 
