@@ -190,7 +190,7 @@ const Schedule = () => {
               Event <span className="text-accent">Schedule</span>
             </h1>
             <p className="text-xl text-muted-foreground">
-              October 15-16th, 2026 | National Space Center, Leicester
+              October 15-16th, 2026 | National Space Centre, Leicester
             </p>
           </div>
 

@@ -160,7 +160,7 @@ const PreviousEvents = () => {
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Looking Forward to 2026</h2>
               <p className="text-xl mb-8 text-foreground/80 max-w-2xl mx-auto">
                 Building on our success, Festival of AI 2026 will be our biggest and best event yet. 
-                Join us on October 16th, 2026 at the National Space Center!
+                Join us on October 16th, 2026 at the National Space Centre!
               </p>
             </CardContent>
           </Card>

@@ -129,7 +129,7 @@ const Index = () => {
             <div className="hidden md:block text-accent">|</div>
             <div className="flex items-center gap-2">
               <MapPin className="text-accent" />
-              <span>National Space Center, Leicester UK</span>
+              <span>National Space Centre, Leicester UK</span>
             </div>
           </div>
           <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-foreground/90">
@@ -256,7 +256,7 @@ const Index = () => {
                 Ready to Transform Your Business with AI?
               </h2>
               <p className="text-xl mb-8 text-foreground/80 max-w-2xl mx-auto">
-                Join us on October 16th, 2026 at the National Space Center in Leicester for a day of 
+                Join us on October 16th, 2026 at the National Space Centre in Leicester for a day of 
                 practical AI insights, networking, and innovation.
               </p>
               <Button

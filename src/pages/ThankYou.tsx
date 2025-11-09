@@ -85,7 +85,7 @@ const ThankYou = () => {
                     <h3 className="font-bold text-lg mb-1">Save the Date</h3>
                     <p className="text-muted-foreground">
                       Festival of AI 2026 will take place on <strong>October 16th, 2026</strong> at the 
-                      National Space Center, Leicester. Add it to your calendar now!
+                      National Space Centre, Leicester. Add it to your calendar now!
                     </p>
                   </div>
                 </div>
@@ -105,7 +105,7 @@ const ThankYou = () => {
                 </div>
                 <div>
                   <p className="font-semibold mb-1">Venue</p>
-                  <p className="text-muted-foreground">National Space Center</p>
+                  <p className="text-muted-foreground">National Space Centre</p>
                   <p className="text-muted-foreground">Exploration Drive, Leicester, LE4 5NS</p>
                 </div>
               </div>

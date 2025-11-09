@@ -31,15 +31,15 @@ const Venue = () => {
             <CardContent className="p-8 md:p-12">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div>
-                  <h2 className="text-4xl font-bold mb-6">National Space Center</h2>
+                  <h2 className="text-4xl font-bold mb-6">National Space Centre</h2>
                   <div className="space-y-4 text-foreground/80">
                     <p className="text-lg">
-                      The National Space Center in Leicester is the UK's largest attraction dedicated to space 
+                      The National Space Centre in Leicester is the UK's largest attraction dedicated to space 
                       science and astronomy. It's the perfect venue for exploring the future of AI!
                     </p>
                     <p>
                       With state-of-the-art facilities, inspiring exhibitions, and a truly unique atmosphere, 
-                      the National Space Center provides an unforgettable backdrop for our event.
+                      the National Space Centre provides an unforgettable backdrop for our event.
                     </p>
                     <div className="pt-4">
                       <div className="flex items-start gap-2 mb-2">
@@ -65,7 +65,7 @@ const Venue = () => {
                     allowFullScreen
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
-                    title="National Space Center Location"
+                    title="National Space Centre Location"
                   />
                 </div>
               </div>
@@ -79,7 +79,7 @@ const Venue = () => {
               <div className="relative overflow-hidden rounded-lg aspect-square group">
                 <img 
                   src={venueRockets} 
-                  alt="PGM 17 THOR rocket display at National Space Center" 
+                  alt="PGM 17 THOR rocket display at National Space Centre" 
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
@@ -91,7 +91,7 @@ const Venue = () => {
               <div className="relative overflow-hidden rounded-lg aspect-square group">
                 <img 
                   src={venueExterior} 
-                  alt="National Space Center exterior building" 
+                  alt="National Space Centre exterior building" 
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
@@ -103,7 +103,7 @@ const Venue = () => {
               <div className="relative overflow-hidden rounded-lg aspect-square group">
                 <img 
                   src={venuePlanetarium} 
-                  alt="Planetarium theater at National Space Center" 
+                  alt="Planetarium theater at National Space Centre" 
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
@@ -115,7 +115,7 @@ const Venue = () => {
               <div className="relative overflow-hidden rounded-lg aspect-square group">
                 <img 
                   src={venueEventSpace} 
-                  alt="Event space at National Space Center featuring Innovation Challenge" 
+                  alt="Event space at National Space Centre featuring Innovation Challenge" 
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">

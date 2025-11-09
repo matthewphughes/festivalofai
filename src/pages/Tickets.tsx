@@ -151,7 +151,7 @@ const Tickets = () => {
               Get Your <span className="text-accent">Tickets</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              Secure your spot at Festival of AI 2026 - October 16th at the National Space Center, Leicester
+              Secure your spot at Festival of AI 2026 - October 16th at the National Space Centre, Leicester
             </p>
             
             {/* Countdown Timer */}

@@ -47,7 +47,7 @@ const Footer = () => {
             <h3 className="text-lg font-bold mb-4">Event Info</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>📅 October 16th, 2026</li>
-              <li>📍 National Space Center</li>
+              <li>📍 National Space Centre</li>
               <li>🏙️ Leicester, UK</li>
             </ul>
           </div>
