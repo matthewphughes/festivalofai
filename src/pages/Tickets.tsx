@@ -25,14 +25,15 @@ const Tickets = () => {
   const [loadingTicket, setLoadingTicket] = useState<string | null>(null);
   const [products, setProducts] = useState<any[]>([]);
 
-  // Calculate next Monday at 12:00 PM (lunchtime)
-  const getNextMondayLunchtime = () => {
+  // Calculate next Friday at 5:00 PM
+  const getNextFridayEvening = () => {
     const now = new Date();
-    const monday = nextMonday(now);
-    return set(monday, { hours: 12, minutes: 0, seconds: 0, milliseconds: 0 });
+    const daysUntilFriday = (5 - now.getDay() + 7) % 7 || 7; // 5 is Friday
+    const nextFriday = addDays(now, daysUntilFriday);
+    return set(nextFriday, { hours: 17, minutes: 0, seconds: 0, milliseconds: 0 });
   };
 
-  const superEarlyBirdEndDate = getNextMondayLunchtime();
+  const superEarlyBirdEndDate = getNextFridayEvening();
 
   useEffect(() => {
     fetchProducts();
@@ -164,7 +165,7 @@ const Tickets = () => {
                     🎉 SUPER EARLY BIRD PRICING - Limited Time Only!
                   </div>
                   <h3 className="text-2xl font-bold mb-2">Offer Ends In:</h3>
-                  <p className="text-sm text-muted-foreground">Monday at Lunchtime</p>
+                  <p className="text-sm text-muted-foreground">Friday at 5PM</p>
                 </div>
                 <CountdownTimer targetDate={superEarlyBirdEndDate} />
               </div>
@@ -183,11 +184,6 @@ const Tickets = () => {
                 }`}
               >
                 <CardContent className="p-8">
-                  {tier.highlighted && (
-                    <div className="bg-accent text-accent-foreground text-sm font-bold px-3 py-1 rounded-full inline-block mb-4">
-                      SUPER EARLY BIRD
-                    </div>
-                  )}
                   <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
                   <p className="text-muted-foreground text-sm mb-4">{tier.description}</p>
                   <div className="mb-6">
@@ -388,7 +384,7 @@ const Tickets = () => {
                     What happens when Super Early Bird pricing ends?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    When the Super Early Bird period ends on Monday at lunchtime, ticket prices will increase to the next pricing phase. Standard and Virtual tickets will move from £147 to a higher price point, and Workshop tickets will increase from £197. We recommend booking now to lock in the maximum discount of up to 72% off regular prices.
+                    When the Super Early Bird period ends on Friday at 5PM, ticket prices will increase to the next pricing phase. Standard and Workshop tickets will move to a higher price point. We recommend booking now to lock in the maximum discount.
                   </AccordionContent>
                 </AccordionItem>
 
