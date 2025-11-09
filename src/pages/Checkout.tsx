@@ -19,7 +19,17 @@ import { useTheme } from "next-themes";
 import CheckoutProgress from "@/components/checkout/CheckoutProgress";
 import { AuthDialog } from "@/components/AuthDialog";
 
-const CheckoutForm = ({ isGuest, userEmail }: { isGuest: boolean; userEmail: string }) => {
+const CheckoutForm = ({ 
+  isGuest, 
+  userEmail,
+  discount,
+  setDiscount,
+}: { 
+  isGuest: boolean; 
+  userEmail: string;
+  discount: number;
+  setDiscount: (discount: number) => void;
+}) => {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
@@ -27,7 +37,6 @@ const CheckoutForm = ({ isGuest, userEmail }: { isGuest: boolean; userEmail: str
   const [loading, setLoading] = useState(false);
   const [createAccount, setCreateAccount] = useState(false);
   const [couponCode, setCouponCode] = useState("");
-  const [discount, setDiscount] = useState(0);
   const [verifyingCoupon, setVerifyingCoupon] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
 
@@ -246,6 +255,7 @@ const Checkout = () => {
   const [showGuestEmailForm, setShowGuestEmailForm] = useState(false);
   const [creatingIntent, setCreatingIntent] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [discount, setDiscount] = useState(0);
 
   useEffect(() => {
     initializeStripe();
@@ -449,9 +459,43 @@ const Checkout = () => {
                 </div>
               ))}
               <Separator />
-              <div className="flex justify-between font-bold text-lg">
-                <span>Total</span>
-                <span>£{(total / 100).toFixed(2)}</span>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span className={discount > 0 ? "line-through text-muted-foreground" : "font-semibold"}>
+                    £{(total / 100).toFixed(2)}
+                  </span>
+                </div>
+                
+                {discount > 0 && (
+                  <>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-green-600 font-medium">Discount</span>
+                      <span className="text-green-600 font-semibold">
+                        -£{(discount / 100).toFixed(2)}
+                      </span>
+                    </div>
+                    <Separator className="my-2" />
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-lg">Total</span>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-primary">
+                          £{((total - discount) / 100).toFixed(2)}
+                        </div>
+                        <div className="text-xs text-green-600 font-medium">
+                          You save £{(discount / 100).toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+                
+                {discount === 0 && (
+                  <div className="flex justify-between font-bold text-lg">
+                    <span>Total</span>
+                    <span>£{(total / 100).toFixed(2)}</span>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -541,7 +585,12 @@ const Checkout = () => {
                     })
                   }}
                 >
-                  <CheckoutForm isGuest={isGuest} userEmail={userEmail || guestEmail} />
+                  <CheckoutForm 
+                    isGuest={isGuest} 
+                    userEmail={userEmail || guestEmail}
+                    discount={discount}
+                    setDiscount={setDiscount}
+                  />
                 </Elements>
               ) : (
                 <div className="space-y-6">
