@@ -55,6 +55,7 @@ const PublicReplays = () => {
   const navigate = useNavigate();
   const [replays, setReplays] = useState<Replay[]>([]);
   const [speakers, setSpeakers] = useState<Array<{ id: string; name: string }>>([]);
+  const [stripePrices, setStripePrices] = useState<Array<{ id: string; product_name: string; amount: number; currency: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReplay, setSelectedReplay] = useState<Replay | null>(null);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
@@ -85,8 +86,29 @@ const PublicReplays = () => {
     checkAdminStatus();
     if (isAdmin) {
       fetchSpeakers();
+      fetchStripePrices();
     }
   }, [isAdmin]);
+
+  const fetchStripePrices = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      // Fetch products and prices from Stripe via edge function
+      const { data: pricesData, error: pricesError } = await supabase.functions.invoke("fetch-stripe-prices");
+      
+      if (pricesError) {
+        console.error("Failed to load Stripe prices", pricesError);
+        toast.error("Failed to load Stripe products");
+        return;
+      }
+
+      setStripePrices(pricesData?.prices || []);
+    } catch (error) {
+      console.error("Error fetching Stripe prices:", error);
+    }
+  };
 
   const checkAdminStatus = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -662,13 +684,27 @@ const PublicReplays = () => {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="price_id">Stripe Price ID</Label>
-                <Input
-                  id="price_id"
+                <Label htmlFor="price_id">Stripe Product</Label>
+                <Select
                   value={formData.price_id}
-                  onChange={(e) => setFormData({ ...formData, price_id: e.target.value })}
-                  placeholder="price_xxxxx"
-                />
+                  onValueChange={(value) => setFormData({ ...formData, price_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Stripe product..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {stripePrices
+                      .filter(price => price.amount) // Only show prices with amounts
+                      .map((price) => (
+                        <SelectItem key={price.id} value={price.id}>
+                          {price.product_name} - £{(price.amount / 100).toFixed(2)} {price.currency.toUpperCase()}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Select the Stripe product/price for individual replay purchases
+                </p>
               </div>
 
               <div className="flex items-center justify-between">
