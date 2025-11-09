@@ -75,26 +75,7 @@ const DiscountBanner = () => {
     return () => clearInterval(timer);
   }, [campaign]);
 
-  // Update CSS variable for banner height
-  useEffect(() => {
-    const updateHeight = () => {
-      if (!campaign || !timeLeft) {
-        document.documentElement.style.setProperty('--discount-banner-height', '0px');
-      } else if (isCollapsed) {
-        document.documentElement.style.setProperty('--discount-banner-height', '48px');
-      } else if (bannerRef.current) {
-        document.documentElement.style.setProperty('--discount-banner-height', `${bannerRef.current.offsetHeight}px`);
-      }
-    };
-
-    updateHeight();
-    window.addEventListener('resize', updateHeight);
-
-    return () => {
-      document.documentElement.style.setProperty('--discount-banner-height', '0px');
-      window.removeEventListener('resize', updateHeight);
-    };
-  }, [campaign, timeLeft, isCollapsed]);
+  // No longer need CSS variable for height since we're using side panel
 
   const trackEvent = (eventName: string, metadata?: Record<string, any>) => {
     console.log(`[Analytics] ${eventName}`, {
@@ -179,67 +160,75 @@ const DiscountBanner = () => {
   return (
     <>
       {isCollapsed ? (
-        // Collapsed indicator
+        // Collapsed tab peeking from right side
         <div 
-          className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground h-12 flex items-center justify-center cursor-pointer hover:bg-primary/90 transition-colors animate-fade-in"
+          className="fixed right-0 top-1/2 -translate-y-1/2 z-[60] bg-primary text-primary-foreground rounded-l-lg shadow-lg cursor-pointer hover:bg-primary/90 transition-all hover:pr-1 group"
           onClick={handleToggleCollapse}
         >
-          <div className="container mx-auto px-4 flex items-center justify-center gap-2">
-            <span className="text-sm font-semibold">🎉 Special Offer Available!</span>
-            <ChevronDown className="h-4 w-4 animate-pulse" />
+          <div className="flex flex-col items-center gap-2 px-3 py-6">
+            <span className="text-xs font-bold tracking-wider [writing-mode:vertical-lr] rotate-180">
+              SPECIAL OFFER
+            </span>
+            <div className="w-6 h-6 rounded-full bg-primary-foreground/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <ChevronDown className="h-4 w-4 -rotate-90" />
+            </div>
           </div>
         </div>
       ) : (
-        // Expanded banner
-        <div ref={bannerRef} className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground py-4 px-4 animate-fade-in transition-all duration-300">
-          <div className="container mx-auto">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-              <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4 flex-1">
-                <p className="font-semibold text-sm md:text-base text-center md:text-left">{campaign.banner_message}</p>
-                
-                <div className="flex items-center gap-2">
-                  <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
-                    <span className="text-2xl font-bold font-mono leading-none">{timeLeft.days}</span>
-                    <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Days</span>
-                  </div>
-                  <span className="text-xl font-bold opacity-50">:</span>
-                  <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
-                    <span className="text-2xl font-bold font-mono leading-none">{timeLeft.hours}</span>
-                    <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Hours</span>
-                  </div>
-                  <span className="text-xl font-bold opacity-50">:</span>
-                  <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
-                    <span className="text-2xl font-bold font-mono leading-none">{timeLeft.minutes}</span>
-                    <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Mins</span>
-                  </div>
-                  <span className="text-xl font-bold opacity-50">:</span>
-                  <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
-                    <span className="text-2xl font-bold font-mono leading-none">{timeLeft.seconds}</span>
-                    <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Secs</span>
-                  </div>
-                </div>
+        // Expanded side panel
+        <div 
+          ref={bannerRef}
+          className="fixed right-0 top-1/2 -translate-y-1/2 z-[60] bg-primary text-primary-foreground rounded-l-xl shadow-2xl w-[90vw] max-w-md animate-slide-in-right"
+        >
+          <div className="p-6">
+            {/* Header with close button */}
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <h3 className="font-bold text-lg mb-1">{campaign.banner_message}</h3>
+                <p className="text-xs opacity-80">Limited time only!</p>
               </div>
-              
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={handleClaimClick}
-                  variant="secondary"
-                  size="sm"
-                  className="whitespace-nowrap font-semibold shadow-lg hover:shadow-xl transition-shadow"
-                >
-                  Claim Your Discount
-                </Button>
-                <Button
-                  onClick={handleToggleCollapse}
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-3 hover:bg-primary-foreground/20 flex items-center gap-1 whitespace-nowrap"
-                >
-                  <span className="text-xs">Hide</span>
-                  <ChevronUp className="h-4 w-4" />
-                </Button>
+              <Button
+                onClick={handleToggleCollapse}
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 hover:bg-primary-foreground/20 -mt-1"
+              >
+                <ChevronUp className="h-4 w-4 rotate-90" />
+              </Button>
+            </div>
+
+            {/* Countdown timer */}
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <div className="flex flex-col items-center min-w-[70px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-3 border border-primary-foreground/20">
+                <span className="text-3xl font-bold font-mono leading-none">{timeLeft.days}</span>
+                <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Days</span>
+              </div>
+              <span className="text-2xl font-bold opacity-50">:</span>
+              <div className="flex flex-col items-center min-w-[70px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-3 border border-primary-foreground/20">
+                <span className="text-3xl font-bold font-mono leading-none">{timeLeft.hours}</span>
+                <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Hours</span>
+              </div>
+              <span className="text-2xl font-bold opacity-50">:</span>
+              <div className="flex flex-col items-center min-w-[70px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-3 border border-primary-foreground/20">
+                <span className="text-3xl font-bold font-mono leading-none">{timeLeft.minutes}</span>
+                <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Mins</span>
+              </div>
+              <span className="text-2xl font-bold opacity-50">:</span>
+              <div className="flex flex-col items-center min-w-[70px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-3 border border-primary-foreground/20">
+                <span className="text-3xl font-bold font-mono leading-none">{timeLeft.seconds}</span>
+                <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Secs</span>
               </div>
             </div>
+
+            {/* Claim button */}
+            <Button
+              onClick={handleClaimClick}
+              variant="secondary"
+              size="lg"
+              className="w-full font-semibold shadow-lg hover:shadow-xl transition-shadow"
+            >
+              Claim Your Discount
+            </Button>
           </div>
         </div>
       )}
