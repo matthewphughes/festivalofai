@@ -16,21 +16,22 @@ interface Purchase {
   id: string;
   purchased_at: string;
   event_year: number;
-  product_id: string;
+  product_id: string | null;
   replay_id: string | null;
   stripe_payment_intent: string | null;
   discount_amount: number;
   is_admin_grant: boolean;
+  custom_amount: number | null;
   stripe_products: {
     product_name: string;
     product_type: string;
     amount: number;
     currency: string;
-  };
+  } | null;
   sessions?: {
     title: string;
     video_url: string;
-  };
+  } | null;
 }
 
 const OrderHistory = () => {
@@ -104,11 +105,22 @@ const OrderHistory = () => {
     }
   };
 
-  const formatCurrency = (amount: number, currency: string) => {
+  const formatCurrency = (amount: number, currency: string = "GBP") => {
     return new Intl.NumberFormat("en-GB", {
       style: "currency",
       currency: currency.toUpperCase(),
     }).format(amount / 100);
+  };
+
+  const getDisplayAmount = (purchase: Purchase) => {
+    if (purchase.custom_amount !== null && purchase.custom_amount !== undefined) {
+      return purchase.custom_amount;
+    }
+    return purchase.stripe_products?.amount || 0;
+  };
+
+  const getDisplayCurrency = (purchase: Purchase) => {
+    return purchase.stripe_products?.currency || "GBP";
   };
 
   if (loading) {
@@ -161,7 +173,9 @@ const OrderHistory = () => {
                     <div className="flex justify-between items-start">
                       <div>
                         <CardTitle className="text-xl mb-2">
-                          {purchase.stripe_products.product_name}
+                          {purchase.stripe_products?.product_name || 
+                           purchase.sessions?.title || 
+                           "Manual Order"}
                         </CardTitle>
                         <CardDescription className="flex items-center gap-4">
                           <span className="flex items-center gap-1">
@@ -179,15 +193,15 @@ const OrderHistory = () => {
                       <div className="text-right">
                         <div className="text-2xl font-bold">
                           {formatCurrency(
-                            purchase.stripe_products.amount - (purchase.discount_amount || 0),
-                            purchase.stripe_products.currency
+                            getDisplayAmount(purchase) - (purchase.discount_amount || 0),
+                            getDisplayCurrency(purchase)
                           )}
                         </div>
                         {purchase.discount_amount > 0 && (
                           <div className="text-sm text-muted-foreground line-through">
                             {formatCurrency(
-                              purchase.stripe_products.amount,
-                              purchase.stripe_products.currency
+                              getDisplayAmount(purchase),
+                              getDisplayCurrency(purchase)
                             )}
                           </div>
                         )}
@@ -200,11 +214,13 @@ const OrderHistory = () => {
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <Badge variant="outline">
-                            {purchase.stripe_products.product_type === "year_bundle"
+                            {purchase.stripe_products?.product_type === "year_bundle"
                               ? "Year Bundle"
-                              : purchase.stripe_products.product_type === "individual_replay"
+                              : purchase.stripe_products?.product_type === "individual_replay"
                               ? "Individual Replay"
-                              : "Ticket"}
+                              : purchase.stripe_products?.product_type === "ticket"
+                              ? "Ticket"
+                              : "Manual Order"}
                           </Badge>
                           <Badge variant="outline">
                             {purchase.event_year}
@@ -230,7 +246,7 @@ const OrderHistory = () => {
                         </Button>
                       )}
                       
-                      {purchase.stripe_products.product_type === "ticket" && (
+                      {purchase.stripe_products?.product_type === "ticket" && (
                         <Button
                           variant="outline"
                           onClick={() => navigate("/dashboard")}
@@ -240,7 +256,7 @@ const OrderHistory = () => {
                         </Button>
                       )}
                       
-                      {purchase.stripe_products.product_type === "year_bundle" && (
+                      {purchase.stripe_products?.product_type === "year_bundle" && (
                         <Button
                           onClick={() => navigate("/replays")}
                           className="gap-2"
