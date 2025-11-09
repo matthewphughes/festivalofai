@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Activity, Users, Globe } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { GeographicChart } from "./GeographicChart";
 
 interface RealtimeData {
   activeUsers: number;
@@ -79,89 +80,95 @@ export const RealtimeVisitors = () => {
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Active Users Right Now
-          </CardTitle>
-          <CardDescription>Currently browsing your site</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-4xl font-bold text-primary">
-            {realtimeData.activeUsers}
-          </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            Live visitors
-          </p>
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Active Users Right Now
+            </CardTitle>
+            <CardDescription>Currently browsing your site</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-4xl font-bold text-primary">
+              {realtimeData.activeUsers}
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">
+              Live visitors
+            </p>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5" />
-            Active Pages
-          </CardTitle>
-          <CardDescription>What users are viewing</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-[200px]">
-            {realtimeData.usersByPage.length > 0 ? (
-              <div className="space-y-2">
-                {realtimeData.usersByPage.map((page, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
-                  >
-                    <span className="text-sm truncate flex-1">{page.page}</span>
-                    <Badge variant="secondary" className="ml-2">
-                      {page.users} {page.users === 1 ? 'user' : 'users'}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No active pages</p>
-            )}
-          </ScrollArea>
-        </CardContent>
-      </Card>
-
-      <Card className="md:col-span-2">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            Recent Activity
-          </CardTitle>
-          <CardDescription>Latest user interactions</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-[200px]">
-            {realtimeData.recentEvents.length > 0 ? (
-              <div className="space-y-2">
-                {realtimeData.recentEvents.map((event, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 rounded-lg border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="h-2 w-2 bg-primary rounded-full animate-pulse" />
-                      <span className="text-sm font-medium">{event.eventName}</span>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              Active Pages
+            </CardTitle>
+            <CardDescription>What users are viewing</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[200px]">
+              {realtimeData.usersByPage.length > 0 ? (
+                <div className="space-y-2">
+                  {realtimeData.usersByPage.map((page, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
+                    >
+                      <span className="text-sm truncate flex-1">{page.page}</span>
+                      <Badge variant="secondary" className="ml-2">
+                        {page.users} {page.users === 1 ? 'user' : 'users'}
+                      </Badge>
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      Just now
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No recent events</p>
-            )}
-          </ScrollArea>
-        </CardContent>
-      </Card>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No active pages</p>
+              )}
+            </ScrollArea>
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Recent Activity
+            </CardTitle>
+            <CardDescription>Latest user interactions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[200px]">
+              {realtimeData.recentEvents.length > 0 ? (
+                <div className="space-y-2">
+                  {realtimeData.recentEvents.map((event, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 rounded-lg border"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-2 w-2 bg-primary rounded-full animate-pulse" />
+                        <span className="text-sm font-medium">{event.eventName}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        Just now
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No recent events</p>
+              )}
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      </div>
+
+      {realtimeData.usersByCountry && realtimeData.usersByCountry.length > 0 && (
+        <GeographicChart data={realtimeData.usersByCountry} />
+      )}
     </div>
   );
 };

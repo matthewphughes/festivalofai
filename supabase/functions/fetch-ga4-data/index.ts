@@ -284,10 +284,11 @@ async function fetchRealtimeData(
 ): Promise<RealtimeResponse> {
   console.log("Fetching realtime data");
 
-  const [activeUsersData, pageViewsData, eventsData] = await Promise.all([
+  const [activeUsersData, pageViewsData, eventsData, countryData] = await Promise.all([
     fetchRealtimeReport(accessToken, propertyId, [{ name: "activeUsers" }], []),
     fetchRealtimeReport(accessToken, propertyId, [{ name: "activeUsers" }], [{ name: "unifiedScreenName" }]),
-    fetchRealtimeReport(accessToken, propertyId, [{ name: "eventCount" }], [{ name: "eventName" }])
+    fetchRealtimeReport(accessToken, propertyId, [{ name: "eventCount" }], [{ name: "eventName" }]),
+    fetchRealtimeReport(accessToken, propertyId, [{ name: "activeUsers" }], [{ name: "country" }])
   ]);
 
   return {
@@ -296,7 +297,10 @@ async function fetchRealtimeData(
       page: row.dimensionValues[0].value,
       users: parseInt(row.metricValues[0].value)
     })),
-    usersByCountry: [],
+    usersByCountry: (countryData.rows || []).slice(0, 15).map((row: any) => ({
+      country: row.dimensionValues[0].value,
+      users: parseInt(row.metricValues[0].value)
+    })),
     recentEvents: (eventsData.rows || []).slice(0, 10).map((row: any) => ({
       eventName: row.dimensionValues[0].value,
       timestamp: new Date().toISOString()
