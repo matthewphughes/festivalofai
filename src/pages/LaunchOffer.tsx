@@ -173,7 +173,7 @@ const LaunchOffer = () => {
     },
     {
       question: "What's included in the Workshop ticket vs Standard?",
-      answer: "Workshop tickets include a second full day (October 15th, 2026) dedicated to hands-on workshops and masterclasses. You'll get everything in the Standard ticket for October 16th, plus an exclusive workshop day on October 15th with expert-led sessions, advanced tool demonstrations, priority seating, and all workshop materials and resources."
+      answer: "Workshop tickets include a second full day (October 15th, 2026) dedicated to hands-on workshops. You can choose between beginner-level or advanced workshops based on your skill level. You'll get everything in the Standard ticket for October 16th, plus an exclusive workshop day on October 15th with expert-led sessions, advanced tool demonstrations, priority seating, and all workshop materials and resources."
     },
     {
       question: "Is there parking available?",
@@ -220,6 +220,7 @@ const LaunchOffer = () => {
       popular: true,
       features: [
         "TWO FULL DAYS: Oct 15th (Workshop) + Oct 16th (Festival)",
+        "Choose your track: Beginner OR Advanced workshops (Oct 15th)",
         "Exclusive hands-on workshops (Oct 15th)",
         "Full day access to all sessions (Oct 16th)",
         "Networking reception",
