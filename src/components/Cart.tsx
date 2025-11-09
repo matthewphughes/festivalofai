@@ -61,7 +61,7 @@ export const Cart = ({ onClose }: CartProps) => {
         </div>
       </div>
 
-      <div className="border-t pt-4 mt-4 space-y-4">
+      <div className="border-t pt-4 mt-4 space-y-4 pb-6">
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Items</span>

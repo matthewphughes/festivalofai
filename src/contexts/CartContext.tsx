@@ -126,6 +126,19 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
+      // If adding an individual replay, check if bundle for that year already exists
+      if (product.product_type === "individual_replay") {
+        const bundleExists = items.find(
+          item => (item.product_type === "year_bundle" || item.product_type === "bundle") && 
+                  item.event_year === product.event_year
+        );
+
+        if (bundleExists) {
+          toast.info(`You already have the ${product.event_year} bundle which includes this session`);
+          return;
+        }
+      }
+
       // If adding a bundle or year_bundle, remove individual replays from the same year
       if (product.product_type === "year_bundle" || product.product_type === "bundle") {
         const individualReplaysToRemove = items.filter(
