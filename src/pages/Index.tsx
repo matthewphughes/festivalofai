@@ -430,133 +430,6 @@ const Index = () => {
             </div>
           </section>
 
-          {/* Ticket Pricing Section */}
-          <section className="mb-24 px-4">
-            <div className="container mx-auto max-w-5xl">
-              {/* Scarcity & Urgency */}
-              <div className="text-center mb-8">
-                <Badge variant="secondary" className="mb-6 bg-accent/20 text-accent border-accent/50 text-lg px-6 py-2">
-                  <Gift className="w-5 h-5 mr-2 inline" />
-                  Limited Time Launch Offer
-                </Badge>
-
-                <div className="mb-6">
-                  <Card className="inline-block bg-destructive/10 border-destructive/50 backdrop-blur-sm">
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-2 text-destructive">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                        <span className="font-bold">22 Super Early Bird Tickets remaining!</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <div className="mb-10">
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <Clock className="w-6 h-6 text-accent" />
-                    <p className="text-lg text-accent font-semibold">Super Early Bird Offer Ends:</p>
-                  </div>
-                  <p className="text-2xl font-bold mb-4">Friday at 5PM</p>
-                  <div className="max-w-2xl mx-auto">
-                    <CountdownTimer targetDate={offerEndDate} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Ticket Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-8">
-                {ticketTypes.map((ticket) => (
-                  <Card 
-                    key={ticket.stripe_product_id} 
-                    className={`bg-card/50 backdrop-blur-sm ${ticket.popular ? 'border-accent shadow-lg shadow-accent/20 scale-105 md:scale-110' : 'border-border'} hover:border-primary transition-all relative`}
-                  >
-                    {ticket.popular && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                        <Badge className="bg-accent text-accent-foreground font-bold px-3 py-1">
-                          MOST POPULAR
-                        </Badge>
-                      </div>
-                    )}
-                    <CardContent className="p-6">
-                      <h3 className="text-2xl font-bold mb-3">{ticket.name}</h3>
-                      <div className="flex items-center justify-center gap-2 mb-6 p-3 bg-accent/10 rounded-lg border border-accent/30">
-                        <Calendar className="w-5 h-5 text-accent" />
-                        <span className="font-bold text-lg text-accent">{ticket.date}</span>
-                      </div>
-                      <div className="mb-4">
-                        <div className="text-muted-foreground line-through text-lg mb-1">
-                          {ticket.regularPrice}
-                        </div>
-                        <div className="text-4xl font-black text-accent mb-1">
-                          {ticket.price}
-                        </div>
-                        <div className="text-sm text-accent font-semibold flex items-center gap-1">
-                          <span>Save {ticket.savings}</span>
-                          <span className="bg-accent/20 px-2 py-0.5 rounded text-xs font-bold">{ticket.discount}</span>
-                        </div>
-                      </div>
-                      <ul className="space-y-2 mb-6">
-                        {ticket.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-start gap-2 text-sm">
-                            <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
-                            <span className="leading-tight">{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                      <Button 
-                        size="lg" 
-                        className={`w-full ${ticket.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : 'bg-primary hover:bg-primary/90'}`}
-                        onClick={() => handleTicketPurchase(ticket.stripe_product_id, ticket.name)}
-                        disabled={checkoutLoading !== null}
-                      >
-                        {checkoutLoading === ticket.stripe_product_id ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Processing...
-                          </>
-                        ) : (
-                          <>
-                            <CreditCard className="w-4 h-4 mr-2" />
-                            Buy Now
-                          </>
-                        )}
-                      </Button>
-                      
-                      <div className="mt-4 pt-4 border-t border-border/50">
-                        <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1.5">
-                            <Lock className="w-3.5 h-3.5 text-accent" />
-                            <span>SSL Encrypted</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Shield className="w-3.5 h-3.5 text-accent" />
-                            <span>Secure Checkout</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
-                            <span>Money-Back Guarantee</span>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm">
-                <div className="flex items-center gap-2">
-                  <Star className="w-5 h-5 text-accent fill-accent flex-shrink-0" />
-                  <span className="text-foreground/70">200+ Attended 2025</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-accent flex-shrink-0" />
-                  <span className="text-foreground/70">Money-Back Guarantee</span>
-                </div>
-              </div>
-            </div>
-          </section>
-
           {/* NEW FOR 2026 Section */}
           <section className="mb-24 px-4">
             <div className="container mx-auto max-w-4xl">
@@ -821,20 +694,130 @@ const Index = () => {
             onNavigate={setLightboxIndex}
           />
 
-          {/* Risk-Free Guarantee Section */}
-          <section className="mb-24 px-4">
-            <div className="container mx-auto max-w-3xl">
-              <Card className="bg-card/50 backdrop-blur-sm border-border">
-                <CardContent className="p-8 text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/20 text-accent mb-4">
-                    <Shield className="w-8 h-8" />
+          {/* Ticket Pricing Section */}
+          <section id="pricing" className="mb-24 px-4">
+            <div className="container mx-auto max-w-5xl">
+              {/* Scarcity & Urgency */}
+              <div className="text-center mb-8">
+                <Badge variant="secondary" className="mb-6 bg-accent/20 text-accent border-accent/50 text-lg px-6 py-2">
+                  <Gift className="w-5 h-5 mr-2 inline" />
+                  Limited Time Launch Offer
+                </Badge>
+
+                <div className="mb-6">
+                  <Card className="inline-block bg-destructive/10 border-destructive/50 backdrop-blur-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 text-destructive">
+                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                        <span className="font-bold">22 Super Early Bird Tickets remaining!</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="mb-10">
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <Clock className="w-6 h-6 text-accent" />
+                    <p className="text-lg text-accent font-semibold">Super Early Bird Offer Ends:</p>
                   </div>
-                  <h3 className="text-2xl font-bold mb-4">Risk-Free Guarantee</h3>
-                  <p className="text-lg text-muted-foreground">
-                    We're so confident you'll love Festival of AI that we offer a full refund up until June 30th, 2026. No questions asked. After that date, tickets are non-refundable but can be transferred to another person free of charge.
-                  </p>
-                </CardContent>
-              </Card>
+                  <p className="text-2xl font-bold mb-4">Friday at 5PM</p>
+                  <div className="max-w-2xl mx-auto">
+                    <CountdownTimer targetDate={offerEndDate} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Ticket Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-8">
+                {ticketTypes.map((ticket) => (
+                  <Card 
+                    key={ticket.stripe_product_id} 
+                    className={`bg-card/50 backdrop-blur-sm ${ticket.popular ? 'border-accent shadow-lg shadow-accent/20 scale-105 md:scale-110' : 'border-border'} hover:border-primary transition-all relative`}
+                  >
+                    {ticket.popular && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                        <Badge className="bg-accent text-accent-foreground font-bold px-3 py-1">
+                          MOST POPULAR
+                        </Badge>
+                      </div>
+                    )}
+                    <CardContent className="p-6">
+                      <h3 className="text-2xl font-bold mb-3">{ticket.name}</h3>
+                      <div className="flex items-center justify-center gap-2 mb-6 p-3 bg-accent/10 rounded-lg border border-accent/30">
+                        <Calendar className="w-5 h-5 text-accent" />
+                        <span className="font-bold text-lg text-accent">{ticket.date}</span>
+                      </div>
+                      <div className="mb-4">
+                        <div className="text-muted-foreground line-through text-lg mb-1">
+                          {ticket.regularPrice}
+                        </div>
+                        <div className="text-4xl font-black text-accent mb-1">
+                          {ticket.price}
+                        </div>
+                        <div className="text-sm text-accent font-semibold flex items-center gap-1">
+                          <span>Save {ticket.savings}</span>
+                          <span className="bg-accent/20 px-2 py-0.5 rounded text-xs font-bold">{ticket.discount}</span>
+                        </div>
+                      </div>
+                      <ul className="space-y-2 mb-6">
+                        {ticket.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm">
+                            <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
+                            <span className="leading-tight">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <Button 
+                        size="lg" 
+                        className={`w-full ${ticket.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : 'bg-primary hover:bg-primary/90'}`}
+                        onClick={() => handleTicketPurchase(ticket.stripe_product_id, ticket.name)}
+                        disabled={checkoutLoading !== null}
+                      >
+                        {checkoutLoading === ticket.stripe_product_id ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            <CreditCard className="w-4 h-4 mr-2" />
+                            Buy Now
+                          </>
+                        )}
+                      </Button>
+                      
+                      <div className="mt-4 pt-4 border-t border-border/50">
+                        <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1.5">
+                            <Lock className="w-3.5 h-3.5 text-accent" />
+                            <span>SSL Encrypted</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Shield className="w-3.5 h-3.5 text-accent" />
+                            <span>Secure Checkout</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
+                            <span>Money-Back Guarantee</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Trust Indicators */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm">
+                <div className="flex items-center gap-2">
+                  <Star className="w-5 h-5 text-accent fill-accent flex-shrink-0" />
+                  <span className="text-foreground/70">200+ Attended 2025</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-accent flex-shrink-0" />
+                  <span className="text-foreground/70">Money-Back Guarantee</span>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -864,6 +847,23 @@ const Index = () => {
                   </Card>
                 ))}
               </Accordion>
+            </div>
+          </section>
+
+          {/* Risk-Free Guarantee Section */}
+          <section className="mb-24 px-4">
+            <div className="container mx-auto max-w-3xl">
+              <Card className="bg-card/50 backdrop-blur-sm border-border">
+                <CardContent className="p-8 text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/20 text-accent mb-4">
+                    <Shield className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4">Risk-Free Guarantee</h3>
+                  <p className="text-lg text-muted-foreground">
+                    We're so confident you'll love Festival of AI that we offer a full refund up until June 30th, 2026. No questions asked. After that date, tickets are non-refundable but can be transferred to another person free of charge.
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </section>
 
