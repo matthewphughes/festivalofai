@@ -48,20 +48,41 @@ serve(async (req) => {
       { global: { headers: { Authorization: authToken } } }
     );
 
-    const { data: { user } } = await supabaseClient.auth.getUser();
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    
+    if (userError) {
+      console.error("Auth error:", userError);
+      throw new Error(`Authentication failed: ${userError.message}`);
+    }
+    
     if (!user) {
-      throw new Error("Unauthorized");
+      console.error("No user found in session");
+      throw new Error("Unauthorized: No user in session");
     }
 
-    const { data: userRole } = await supabaseClient
+    console.log("User authenticated:", user.id);
+
+    // Check admin role
+    const { data: userRole, error: roleError } = await supabaseClient
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
-      .single();
+      .eq("role", "admin")
+      .maybeSingle();
 
-    if (!userRole || userRole.role !== "admin") {
+    console.log("Role query result:", { userRole, roleError });
+
+    if (roleError) {
+      console.error("Role check error:", roleError);
+      throw new Error(`Role check failed: ${roleError.message}`);
+    }
+
+    if (!userRole) {
+      console.error("User is not an admin:", user.id);
       throw new Error("Admin access required");
     }
+
+    console.log("Admin access verified for user:", user.id);
 
     const url = new URL(req.url);
     const mode = url.searchParams.get("mode") || "analytics";
