@@ -93,6 +93,28 @@ const DiscountBanner = () => {
     };
   }, [visible]);
 
+  const trackEvent = (eventName: string, metadata?: Record<string, any>) => {
+    console.log(`[Analytics] ${eventName}`, {
+      ...metadata,
+      timestamp: new Date().toISOString(),
+      page_url: window.location.pathname,
+    });
+  };
+
+  const handleClaimClick = () => {
+    trackEvent("discount_banner_claim_clicked", {
+      campaign_id: campaign?.id,
+    });
+    setDialogOpen(true);
+  };
+
+  const handleDismiss = () => {
+    trackEvent("discount_banner_dismissed", {
+      campaign_id: campaign?.id,
+    });
+    setDismissed(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -116,6 +138,12 @@ const DiscountBanner = () => {
         });
 
       if (claimError) throw claimError;
+
+      // Track successful claim
+      trackEvent("discount_code_claimed", {
+        campaign_id: campaign!.id,
+        email: validation.data.email,
+      });
 
       // Send discount email
       const { error: emailError } = await supabase.functions.invoke("send-discount-email", {
@@ -144,43 +172,53 @@ const DiscountBanner = () => {
 
   return (
     <>
-      <div ref={bannerRef} className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground py-3 px-4">
-        <div className="container mx-auto flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-4 flex-1 min-w-0">
-            <p className="font-semibold text-sm md:text-base truncate">{campaign.banner_message}</p>
-            <div className="flex items-center gap-2 text-xs md:text-sm font-mono">
-              <span className="bg-primary-foreground text-primary px-2 py-1 rounded">
-                {timeLeft.days}d
-              </span>
-              <span className="bg-primary-foreground text-primary px-2 py-1 rounded">
-                {timeLeft.hours}h
-              </span>
-              <span className="bg-primary-foreground text-primary px-2 py-1 rounded">
-                {timeLeft.minutes}m
-              </span>
-              <span className="bg-primary-foreground text-primary px-2 py-1 rounded">
-                {timeLeft.seconds}s
-              </span>
+      <div ref={bannerRef} className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground py-4 px-4">
+        <div className="container mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+            <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4 flex-1">
+              <p className="font-semibold text-sm md:text-base text-center md:text-left">{campaign.banner_message}</p>
+              
+              <div className="flex items-center gap-2">
+                <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
+                  <span className="text-2xl font-bold font-mono leading-none">{timeLeft.days}</span>
+                  <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Days</span>
+                </div>
+                <span className="text-xl font-bold opacity-50">:</span>
+                <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
+                  <span className="text-2xl font-bold font-mono leading-none">{timeLeft.hours}</span>
+                  <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Hours</span>
+                </div>
+                <span className="text-xl font-bold opacity-50">:</span>
+                <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
+                  <span className="text-2xl font-bold font-mono leading-none">{timeLeft.minutes}</span>
+                  <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Mins</span>
+                </div>
+                <span className="text-xl font-bold opacity-50">:</span>
+                <div className="flex flex-col items-center min-w-[60px] bg-primary-foreground/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary-foreground/20">
+                  <span className="text-2xl font-bold font-mono leading-none">{timeLeft.seconds}</span>
+                  <span className="text-[10px] uppercase tracking-wider opacity-80 mt-1">Secs</span>
+                </div>
+              </div>
             </div>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => setDialogOpen(true)}
-              variant="secondary"
-              size="sm"
-              className="whitespace-nowrap"
-            >
-              Claim Your Discount
-            </Button>
-            <Button
-              onClick={() => setDismissed(true)}
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handleClaimClick}
+                variant="secondary"
+                size="sm"
+                className="whitespace-nowrap font-semibold shadow-lg hover:shadow-xl transition-shadow"
+              >
+                Claim Your Discount
+              </Button>
+              <Button
+                onClick={handleDismiss}
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 hover:bg-primary-foreground/20"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
