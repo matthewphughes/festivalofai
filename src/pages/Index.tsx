@@ -5,6 +5,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import StarField from "@/components/StarField";
 import CountdownTimer from "@/components/CountdownTimer";
+import VideoTestimonialCard from "@/components/VideoTestimonialCard";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -115,6 +116,39 @@ const benefits = [
   "Lunch, refreshments, and evening reception",
   "Free parking at the National Space Centre",
   "Early access to 2027 tickets"
+];
+
+const videoTestimonials = [
+  {
+    quote: "That was the most useful day I've ever spent on AI.",
+    author: "Sarah M., Tech Entrepreneur",
+    year: "2025"
+  },
+  {
+    quote: "Finally, an AI event that focuses on what really matters - practical application.",
+    author: "David K., Business Owner",
+    year: "2025"
+  },
+  {
+    quote: "The first Festival of AI set the standard for practical, actionable AI events.",
+    author: "James R., Marketing Director",
+    year: "2024"
+  },
+  {
+    quote: "Incredible networking opportunities and insights I can actually use.",
+    author: "Emma L., Product Manager",
+    year: "2025"
+  },
+  {
+    quote: "Best investment in my AI education. The speakers were world-class.",
+    author: "Michael T., Developer",
+    year: "2024"
+  },
+  {
+    quote: "I left with actionable strategies that I implemented the very next week.",
+    author: "Rachel S., Marketing Lead",
+    year: "2025"
+  }
 ];
 
 const highlights = [
@@ -476,6 +510,33 @@ const Index = () => {
             </div>
           </section>
 
+          {/* Video Testimonials Section - Only visible to admins */}
+          {isAdmin && (
+            <section className="mb-24 px-4">
+              <div className="container mx-auto">
+                <div className="text-center mb-12">
+                  <h2 className="text-5xl font-bold mb-4">
+                    Don't Just Take <span className="text-accent">Our Word</span>
+                  </h2>
+                  <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                    Hear from past attendees about their transformative experience
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {videoTestimonials.map((testimonial, index) => (
+                    <VideoTestimonialCard
+                      key={index}
+                      quote={testimonial.quote}
+                      author={testimonial.author}
+                      year={testimonial.year}
+                    />
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
+
           {/* Previous Speakers Showcase */}
           <section className="mb-24 px-4">
             <div className="container mx-auto">
@@ -824,7 +885,7 @@ const Index = () => {
           <section className="mb-24 px-4">
             <div className="container mx-auto max-w-3xl">
               <div className="text-center mb-12">
-                <h2 className="text-4xl font-bold mb-4">
+                <h2 className="text-3xl font-bold mb-4">
                   Frequently Asked <span className="text-accent">Questions</span>
                 </h2>
                 <p className="text-lg text-muted-foreground">
