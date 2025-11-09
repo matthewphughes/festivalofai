@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import DiscountBanner from "./components/DiscountBanner";
+import { CartProvider } from "./contexts/CartContext";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Speakers from "./pages/Speakers";
@@ -36,6 +38,7 @@ import AdminCoupons from "./pages/AdminCoupons";
 import AdminOrders from "./pages/AdminOrders";
 import AdminEmailSettings from "./pages/AdminEmailSettings";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import AdminDiscountCampaigns from "./pages/AdminDiscountCampaigns";
 import Checkout from "./pages/Checkout";
 
 const queryClient = new QueryClient();
@@ -46,8 +49,10 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <Routes>
+        <CartProvider>
+          <BrowserRouter>
+            <DiscountBanner />
+            <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/about" element={<About />} />
           <Route path="/speakers" element={<Speakers />} />
@@ -80,12 +85,14 @@ const App = () => (
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/email-settings" element={<AdminEmailSettings />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
+          <Route path="/admin/discount-campaigns" element={<AdminDiscountCampaigns />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/thank-you" element={<ThankYou />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      </CartProvider>
     </TooltipProvider>
     </HelmetProvider>
   </QueryClientProvider>

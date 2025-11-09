@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Users, Video, Calendar, ChevronRight, BarChart3, Settings, Mail, ShoppingBag, Tag, Receipt, UserCircle, Mic, MessageSquare, Gift, ChevronDown, DollarSign, TrendingUp, Ticket } from "lucide-react";
+import { Users, Video, Calendar, ChevronRight, BarChart3, Settings, Mail, ShoppingBag, Tag, Receipt, UserCircle, Mic, MessageSquare, Gift, ChevronDown, DollarSign, TrendingUp, Ticket, Megaphone } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
@@ -274,6 +274,18 @@ const Admin = () => {
                     <span className="flex items-center gap-2">
                       <Tag className="h-4 w-4" />
                       Coupons
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+
+                  <Button
+                    onClick={() => navigate("/admin/discount-campaigns")}
+                    variant="ghost"
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Megaphone className="h-4 w-4" />
+                      Discount Campaigns
                     </span>
                     <ChevronRight className="h-4 w-4" />
                   </Button>

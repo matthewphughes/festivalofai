@@ -68,6 +68,89 @@ export type Database = {
         }
         Relationships: []
       }
+      discount_campaigns: {
+        Row: {
+          banner_message: string
+          campaign_name: string
+          countdown_end_date: string
+          created_at: string | null
+          currency: string | null
+          discount_amount: number | null
+          discount_code: string
+          discount_percentage: number | null
+          email_content: string
+          email_subject: string
+          id: string
+          is_active: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          banner_message?: string
+          campaign_name: string
+          countdown_end_date: string
+          created_at?: string | null
+          currency?: string | null
+          discount_amount?: number | null
+          discount_code: string
+          discount_percentage?: number | null
+          email_content: string
+          email_subject?: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          banner_message?: string
+          campaign_name?: string
+          countdown_end_date?: string
+          created_at?: string | null
+          currency?: string | null
+          discount_amount?: number | null
+          discount_code?: string
+          discount_percentage?: number | null
+          email_content?: string
+          email_subject?: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      discount_claims: {
+        Row: {
+          campaign_id: string | null
+          claimed_at: string | null
+          email: string
+          email_sent: boolean | null
+          id: string
+          name: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          claimed_at?: string | null
+          email: string
+          email_sent?: boolean | null
+          id?: string
+          name: string
+        }
+        Update: {
+          campaign_id?: string | null
+          claimed_at?: string | null
+          email?: string
+          email_sent?: boolean | null
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_claims_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "discount_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_settings: {
         Row: {
           created_at: string
