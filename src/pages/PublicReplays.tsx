@@ -84,11 +84,28 @@ const PublicReplays = () => {
   useEffect(() => {
     fetchReplays();
     checkAdminStatus();
-    if (isAdmin) {
-      fetchSpeakers();
-      fetchStripePrices();
+  }, []);
+
+  const checkAdminStatus = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      
+      const adminStatus = !!data;
+      setIsAdmin(adminStatus);
+      
+      // Only fetch admin-specific data if user is admin
+      if (adminStatus) {
+        fetchSpeakers();
+        fetchStripePrices();
+      }
     }
-  }, [isAdmin]);
+  };
 
   const fetchStripePrices = async () => {
     try {
@@ -110,25 +127,6 @@ const PublicReplays = () => {
     }
   };
 
-  const checkAdminStatus = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-      setIsAdmin(!!data);
-    }
-  };
-
-  useEffect(() => {
-    if (selectedReplay) {
-      setPurchaseDialogOpen(true);
-    }
-  }, [selectedReplay]);
-
   const fetchSpeakers = async () => {
     const { data, error } = await supabase
       .from("speakers")
@@ -141,6 +139,12 @@ const PublicReplays = () => {
       setSpeakers(data || []);
     }
   };
+
+  useEffect(() => {
+    if (selectedReplay) {
+      setPurchaseDialogOpen(true);
+    }
+  }, [selectedReplay]);
 
   const fetchReplays = async () => {
     setLoading(true);
