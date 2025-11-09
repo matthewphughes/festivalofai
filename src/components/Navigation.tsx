@@ -9,6 +9,7 @@ import logoWhite from "@/assets/logo-white.png";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { CartIcon } from "./CartIcon";
+import DiscountBanner from "./DiscountBanner";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -84,8 +85,10 @@ const Navigation = () => {
   const isArchiveActive = archiveLinks.some(link => location.pathname === link.path);
 
   return (
-    <nav className={cn("fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border transition-shadow", scrolled && "shadow-lg")}>
-      <div className="container mx-auto px-4">
+    <>
+      <DiscountBanner />
+      <nav className={cn("fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border transition-shadow", scrolled && "shadow-lg")}>
+        <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-24 py-2">
           {/* Logo */}
           <Link to="/" className="flex items-center group">
@@ -336,8 +339,9 @@ const Navigation = () => {
             </div>
           </div>
         )}
-      </div>
-    </nav>
+        </div>
+      </nav>
+    </>
   );
 };
 
