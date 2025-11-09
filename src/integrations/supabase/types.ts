@@ -450,6 +450,42 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_product_replays: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          replay_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          replay_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          replay_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stripe_product_replays_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "stripe_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stripe_product_replays_replay_id_fkey"
+            columns: ["replay_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stripe_products: {
         Row: {
           active: boolean | null

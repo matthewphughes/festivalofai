@@ -54,6 +54,7 @@ const AdminStripeProducts = () => {
     product_type: "individual_replay" as "individual_replay" | "year_bundle" | "ticket" | "bundle",
     event_year: new Date().getFullYear(),
     replay_id: "",
+    replay_ids: [] as string[], // For bundles with multiple replays
     amount: 0,
     currency: "gbp",
   });
@@ -218,6 +219,7 @@ const AdminStripeProducts = () => {
       product_type: product.product_type,
       event_year: product.event_year,
       replay_id: product.replay_id || "",
+      replay_ids: [],
       amount: product.amount,
       currency: product.currency,
     });
@@ -230,6 +232,7 @@ const AdminStripeProducts = () => {
       product_type: "individual_replay",
       event_year: new Date().getFullYear(),
       replay_id: "",
+      replay_ids: [],
       amount: 0,
       currency: "gbp",
     });
@@ -325,7 +328,56 @@ const AdminStripeProducts = () => {
                     </div>
                   )}
 
-                  {(formData.product_type === "year_bundle" || formData.product_type === "ticket" || formData.product_type === "bundle") && (
+                  {(formData.product_type === "year_bundle" || formData.product_type === "bundle") && (
+                    <>
+                      <div>
+                        <Label>Event Year</Label>
+                        <Input
+                          type="number"
+                          value={formData.event_year}
+                          onChange={(e) => setFormData({ ...formData, event_year: parseInt(e.target.value) })}
+                        />
+                      </div>
+                      <div>
+                        <Label>Associated Replays (Optional - Select Multiple)</Label>
+                        <div className="border rounded-md p-3 max-h-48 overflow-y-auto space-y-2">
+                          {replays
+                            .filter(r => r.event_year === formData.event_year)
+                            .map((replay) => (
+                              <div key={replay.id} className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  id={`replay-${replay.id}`}
+                                  checked={formData.replay_ids.includes(replay.id)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setFormData({
+                                        ...formData,
+                                        replay_ids: [...formData.replay_ids, replay.id]
+                                      });
+                                    } else {
+                                      setFormData({
+                                        ...formData,
+                                        replay_ids: formData.replay_ids.filter(id => id !== replay.id)
+                                      });
+                                    }
+                                  }}
+                                  className="h-4 w-4"
+                                />
+                                <label htmlFor={`replay-${replay.id}`} className="text-sm cursor-pointer">
+                                  {replay.title}
+                                </label>
+                              </div>
+                            ))}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {formData.replay_ids.length} replay(s) selected
+                        </p>
+                      </div>
+                    </>
+                  )}
+
+                  {formData.product_type === "ticket" && (
                     <div>
                       <Label>Event Year</Label>
                       <Input
