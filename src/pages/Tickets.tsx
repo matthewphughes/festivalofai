@@ -14,11 +14,14 @@ import { Check, CreditCard, Calendar } from "lucide-react";
 import { addDays, nextMonday, set } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useCart } from "@/contexts/CartContext";
 
 const Tickets = () => {
   const { toast } = useToast();
+  const { addToCart } = useCart();
   const [loadingTicket, setLoadingTicket] = useState<string | null>(null);
+  const [products, setProducts] = useState<any[]>([]);
 
   // Calculate next Monday at 12:00 PM (lunchtime)
   const getNextMondayLunchtime = () => {
@@ -29,54 +32,43 @@ const Tickets = () => {
 
   const superEarlyBirdEndDate = getNextMondayLunchtime();
 
-  // Stripe price IDs for each ticket type
-  const TICKET_PRICE_IDS = {
-    standard: "price_1SQckxEFw97UKMysNftdefca",
-    virtual: "price_1SQckzEFw97UKMysjNFfteCQ",
-    workshop: "price_1SQcl0EFw97UKMysV6lBdWb5",
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    const { data, error } = await supabase
+      .from("stripe_products")
+      .select("*")
+      .eq("active", true)
+      .eq("product_type", "ticket");
+
+    if (error) {
+      console.error("Failed to load products", error);
+    } else {
+      setProducts(data || []);
+    }
   };
 
-  const handleCheckout = async (priceId: string, ticketName: string) => {
+  const handleAddToCart = async (ticketName: string) => {
     setLoadingTicket(ticketName);
     
     try {
-      // Check if user is authenticated
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
+      const product = products.find(p => 
+        p.product_name.toLowerCase().includes(ticketName.toLowerCase())
+      );
+
+      if (!product) {
         toast({
-          title: "Authentication Required",
-          description: "Please sign in to purchase tickets.",
+          title: "Product Not Found",
+          description: "This ticket is not available yet. Please contact support.",
           variant: "destructive",
         });
         setLoadingTicket(null);
         return;
       }
 
-      // Call the create-checkout edge function
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { price_id: priceId },
-      });
-
-      if (error) {
-        console.error('Checkout error:', error);
-        toast({
-          title: "Checkout Error",
-          description: error.message || "Failed to create checkout session. Please try again.",
-          variant: "destructive",
-        });
-        setLoadingTicket(null);
-        return;
-      }
-
-      if (data?.url) {
-        // Open Stripe checkout in a new tab
-        window.open(data.url, '_blank');
-        toast({
-          title: "Redirecting to Checkout",
-          description: "Opening Stripe checkout in a new tab...",
-        });
-      }
+      await addToCart(product.id);
     } catch (error) {
       console.error('Unexpected error:', error);
       toast({
@@ -96,7 +88,6 @@ const Tickets = () => {
       originalPrice: "£497",
       discount: "70%",
       description: "In-person access to Festival of AI 2026",
-      priceId: TICKET_PRICE_IDS.standard,
       features: [
         "Full day access to all sessions",
         "Networking reception",
@@ -113,7 +104,6 @@ const Tickets = () => {
       originalPrice: "£697",
       discount: "72%",
       description: "Full access including exclusive workshops",
-      priceId: TICKET_PRICE_IDS.workshop,
       features: [
         "Full day access to all sessions",
         "Access to all workshops",
@@ -225,11 +215,11 @@ const Tickets = () => {
                         : "bg-primary hover:bg-primary/90"
                     }`}
                     size="lg"
-                    onClick={() => handleCheckout(tier.priceId, tier.name)}
+                    onClick={() => handleAddToCart(tier.name)}
                     disabled={loadingTicket === tier.name}
                   >
                     <CreditCard className="w-4 h-4 mr-2" />
-                    {loadingTicket === tier.name ? "Processing..." : "Pay in Full"}
+                    {loadingTicket === tier.name ? "Adding..." : "Add to Cart"}
                   </Button>
                   <Button
                     variant="outline"
