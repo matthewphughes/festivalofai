@@ -173,6 +173,23 @@ serve(async (req) => {
 
     logStep("Purchase confirmation complete");
 
+    // Send order confirmation email
+    const customerEmail = guestEmail || paymentIntent.receipt_email || null;
+    if (customerEmail) {
+      try {
+        await supabaseClient.functions.invoke("send-order-confirmation", {
+          body: {
+            payment_intent_id: paymentIntent.id,
+            customer_email: customerEmail,
+          },
+        });
+        logStep("Order confirmation email sent");
+      } catch (emailError) {
+        logStep("Email sending failed", { error: emailError });
+        // Don't fail the entire request if email fails
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: true,

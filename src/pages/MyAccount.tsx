@@ -373,11 +373,18 @@ const MyAccount = () => {
           {/* Purchase History */}
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Purchase History
-              </CardTitle>
-              <CardDescription>Your transaction history and access grants</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    Purchase History
+                  </CardTitle>
+                  <CardDescription>Your transaction history and access grants</CardDescription>
+                </div>
+                <Button onClick={() => navigate("/order-history")} variant="outline">
+                  View Full History
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {purchaseHistory.length > 0 ? (

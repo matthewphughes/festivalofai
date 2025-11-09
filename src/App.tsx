@@ -16,6 +16,7 @@ import ThankYou from "./pages/ThankYou";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import MyAccount from "./pages/MyAccount";
+import OrderHistory from "./pages/OrderHistory";
 import Replays from "./pages/Replays";
 import PublicReplays from "./pages/PublicReplays";
 import Admin from "./pages/Admin";
@@ -61,6 +62,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/my-account" element={<MyAccount />} />
+          <Route path="/order-history" element={<OrderHistory />} />
           <Route path="/buy-replays" element={<PublicReplays />} />
           <Route path="/replays" element={<Replays />} />
           <Route path="/admin" element={<Admin />} />
