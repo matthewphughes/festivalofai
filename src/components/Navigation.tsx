@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { CartIcon } from "./CartIcon";
 import DiscountBanner from "./DiscountBanner";
+import { ThemeToggle } from "./ThemeToggle";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -171,6 +172,8 @@ const Navigation = () => {
             </Button>
 
             <CartIcon />
+
+            <ThemeToggle />
 
             {isLoggedIn && (
               <DropdownMenu>
