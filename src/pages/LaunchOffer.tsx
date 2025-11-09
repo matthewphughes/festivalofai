@@ -173,7 +173,7 @@ const LaunchOffer = () => {
     },
     {
       question: "What's included in the Workshop ticket vs Standard?",
-      answer: "Workshop tickets include everything in Standard plus exclusive hands-on workshops, masterclasses with experts, advanced tool demonstrations, priority seating, and all workshop materials and resources."
+      answer: "Workshop tickets include a second full day (October 15th, 2026) dedicated to hands-on workshops and masterclasses. You'll get everything in the Standard ticket for October 16th, plus an exclusive workshop day on October 15th with expert-led sessions, advanced tool demonstrations, priority seating, and all workshop materials and resources."
     },
     {
       question: "Is there parking available?",
@@ -195,13 +195,14 @@ const LaunchOffer = () => {
   const ticketTypes = [
     {
       name: "Festival of AI 2026",
+      date: "October 16th, 2026",
       stripe_product_id: "prod_TOJtOyxypO8VCB",
       price: "£197",
       regularPrice: "£497",
       savings: "£300",
       discount: "60%",
       features: [
-        "Full day access to all sessions",
+        "Full day access to all sessions (Oct 16th)",
         "Networking reception",
         "Gift bag",
         "Workbook",
@@ -210,6 +211,7 @@ const LaunchOffer = () => {
     },
     {
       name: "Festival of AI 2026 + Workshop",
+      date: "October 15th-16th, 2026",
       stripe_product_id: "prod_TOJs4TpP9zprD9",
       price: "£297",
       regularPrice: "£697",
@@ -217,8 +219,9 @@ const LaunchOffer = () => {
       discount: "57%",
       popular: true,
       features: [
-        "Full day access to all sessions",
-        "Access to all workshops",
+        "TWO FULL DAYS: Oct 15th (Workshop) + Oct 16th (Festival)",
+        "Exclusive hands-on workshops (Oct 15th)",
+        "Full day access to all sessions (Oct 16th)",
         "Networking reception",
         "Gift bag",
         "Workbook",
@@ -344,8 +347,12 @@ const LaunchOffer = () => {
                       </Badge>
                     </div>
                   )}
-                  <CardContent className="p-4 sm:p-6">
-                    <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">{ticket.name}</h3>
+                   <CardContent className="p-4 sm:p-6">
+                    <h3 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">{ticket.name}</h3>
+                    <div className="flex items-center gap-2 mb-3 sm:mb-4 text-sm text-muted-foreground">
+                      <Calendar className="w-4 h-4 text-accent" />
+                      <span className="font-semibold">{ticket.date}</span>
+                    </div>
                     <div className="mb-3 sm:mb-4">
                       <div className="text-muted-foreground line-through text-base sm:text-lg mb-1">
                         {ticket.regularPrice}
