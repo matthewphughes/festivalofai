@@ -90,12 +90,12 @@ const LaunchOffer = () => {
 
   const fetchSpeakers = async () => {
     try {
+      // Fetch the specific speakers by name
       const { data, error } = await supabase
         .from("speakers")
         .select("*")
-        .contains("years", [2024])
-        .order("display_order", { ascending: true })
-        .limit(8);
+        .in("name", ["Heather Murray", "Rick Dubidat", "Matthew Hughes", "Laura Goodsell"])
+        .order("name", { ascending: true });
 
       if (error) throw error;
       setSpeakers(data || []);
@@ -457,14 +457,14 @@ const LaunchOffer = () => {
             </div>
           </section>
 
-          {/* Past Speakers Showcase */}
+          {/* Previous Speakers Showcase */}
           <section className="mb-16 sm:mb-24">
             <div className="text-center mb-8 sm:mb-12 px-4">
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
-                Learn from <span className="text-accent">the Best</span>
+                Previous <span className="text-accent">Speakers</span>
               </h2>
               <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-                Previous speakers from 2024-2025 who've shared their expertise
+                Join the caliber of experts who've shared their insights at Festival of AI
               </p>
             </div>
 
