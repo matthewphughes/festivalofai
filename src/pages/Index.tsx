@@ -383,24 +383,24 @@ const Index = () => {
         <div className="container mx-auto">
           
           {/* Hero Section */}
-          <section className="relative min-h-[80vh] flex items-center justify-center px-4 py-20">
-            <div className="container mx-auto">
-              <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <section className="relative min-h-[80vh] flex items-center justify-center px-3 sm:px-4 py-12 sm:py-20">
+            <div className="container mx-auto px-0">
+              <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
                 {/* Left Column - Text Content */}
-                <div className="text-left space-y-8">
-                  <div className="space-y-4">
+                <div className="text-left space-y-4 sm:space-y-8">
+                  <div className="space-y-3 sm:space-y-4">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <MapPin className="w-5 h-5" />
                       <span>National Space Centre, Leicester</span>
                     </div>
-                    <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-tight">
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight">
                       Festival of AI <span className="text-accent">2026</span>
                     </h1>
-                    <div className="flex items-center gap-2 text-xl text-accent">
+                    <div className="flex items-center gap-2 text-lg sm:text-xl text-accent">
                       <Calendar className="w-6 h-6" />
                       <span className="font-semibold">October 16th, 2026</span>
                     </div>
-                    <p className="text-xl text-muted-foreground max-w-xl">
+                    <p className="text-base sm:text-xl text-muted-foreground max-w-xl">
                       Join 200+ AI innovators for a day of practical insights, cutting-edge demonstrations, and transformative networking at the UK's most inspiring venue.
                     </p>
                   </div>
@@ -464,20 +464,20 @@ const Index = () => {
           </section>
 
           {/* NEW FOR 2026 Section */}
-          <section className="mb-24 px-4">
-            <div className="container mx-auto max-w-4xl">
-              <div className="text-center mb-8">
+          <section className="mb-16 sm:mb-24 px-3 sm:px-4">
+            <div className="container mx-auto max-w-4xl px-0">
+              <div className="text-center mb-6 sm:mb-8">
                 <Badge variant="outline" className="mb-4 text-accent border-accent">
                   NEW FOR 2026
                 </Badge>
-                <h2 className="text-4xl font-bold mb-4">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
                   Two Stages, <span className="text-accent">Beginner and Advanced</span>
                 </h2>
               </div>
               
-              <Card className="bg-card/50 backdrop-blur-sm border-border">
-                <CardContent className="p-8">
-                  <p className="text-lg text-center text-foreground/90 leading-relaxed">
+              <Card className="bg-card/50 backdrop-blur-sm border-border mx-3 sm:mx-0">
+                <CardContent className="p-4 sm:p-6 md:p-8">
+                  <p className="text-base sm:text-lg text-center text-foreground/90 leading-relaxed">
                     Choose between the two stages, switch at any time during the day, all sessions recorded so you can catch up on both stages
                   </p>
                 </CardContent>
@@ -486,23 +486,23 @@ const Index = () => {
           </section>
 
           {/* Why Attend Section */}
-          <section className="mb-24 px-4">
-            <div className="container mx-auto">
-              <h2 className="text-5xl font-bold text-center mb-12">
+          <section className="mb-16 sm:mb-24 px-3 sm:px-4">
+            <div className="container mx-auto px-0">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-8 sm:mb-12">
                 Why Attend <span className="text-accent">Festival of AI?</span>
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
                 {highlights.map((highlight, index) => (
                   <Card
                     key={index}
                     className="bg-card/50 backdrop-blur-sm border-border hover:border-primary transition-all duration-300 hover:scale-105"
                   >
-                    <CardContent className="p-6 text-center">
-                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 text-primary mb-4">
+                  <CardContent className="p-4 sm:p-6 text-center">
+                      <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-primary/20 text-primary mb-3 sm:mb-4">
                         {highlight.icon}
                       </div>
-                      <h3 className="text-xl font-bold mb-3">{highlight.title}</h3>
-                      <p className="text-base text-muted-foreground">{highlight.description}</p>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">{highlight.title}</h3>
+                    <p className="text-sm sm:text-base text-muted-foreground">{highlight.description}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -512,18 +512,18 @@ const Index = () => {
 
           {/* Video Testimonials Section - Only visible to admins */}
           {isAdmin && (
-            <section className="mb-24 px-4">
-              <div className="container mx-auto">
-                <div className="text-center mb-12">
-                  <h2 className="text-5xl font-bold mb-4">
+            <section className="mb-16 sm:mb-24 px-3 sm:px-4">
+              <div className="container mx-auto px-0">
+                <div className="text-center mb-8 sm:mb-12">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
                     Don't Just Take <span className="text-accent">Our Word</span>
                   </h2>
-                  <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                  <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
                     Hear from past attendees about their transformative experience
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {videoTestimonials.map((testimonial, index) => (
                     <VideoTestimonialCard
                       key={index}
@@ -538,13 +538,13 @@ const Index = () => {
           )}
 
           {/* Previous Speakers Showcase */}
-          <section className="mb-24 px-4">
-            <div className="container mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-5xl font-bold mb-4">
+          <section className="mb-16 sm:mb-24 px-3 sm:px-4">
+            <div className="container mx-auto px-0">
+              <div className="text-center mb-8 sm:mb-12">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
                   Previous <span className="text-accent">Speakers</span>
                 </h2>
-                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
                   Join the caliber of experts who've shared their insights at Festival of AI
                 </p>
               </div>
@@ -552,7 +552,7 @@ const Index = () => {
               {loading ? (
                 <div className="text-center text-muted-foreground">Loading speakers...</div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
                   {speakers.map((speaker) => (
                     <Card 
                       key={speaker.id} 
@@ -593,38 +593,38 @@ const Index = () => {
           </section>
 
           {/* Value Stack Section */}
-          <section className="mb-24 px-4">
-            <div className="container mx-auto">
-              <Card className="bg-gradient-to-br from-primary/20 via-card/50 to-secondary/20 backdrop-blur-sm border-primary">
-                <CardContent className="p-8 md:p-12">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <section className="mb-16 sm:mb-24 px-3 sm:px-4">
+            <div className="container mx-auto px-0">
+              <Card className="bg-gradient-to-br from-primary/20 via-card/50 to-secondary/20 backdrop-blur-sm border-primary mx-3 sm:mx-0">
+                <CardContent className="p-4 sm:p-6 md:p-8 lg:p-12">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-center">
                     <div>
-                      <h2 className="text-4xl font-bold mb-6">
+                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
                         What You <span className="text-accent">Get</span>
                       </h2>
-                      <ul className="space-y-4">
+                      <ul className="space-y-2 sm:space-y-3 md:space-y-4">
                         {benefits.map((benefit, index) => (
-                          <li key={index} className="flex items-start gap-3">
-                            <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0 mt-0.5" />
-                            <span className="text-lg">{benefit}</span>
+                          <li key={index} className="flex items-start gap-2 sm:gap-3">
+                            <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-accent flex-shrink-0 mt-0.5" />
+                            <span className="text-base sm:text-lg">{benefit}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
                     
                     <div className="text-center lg:text-left">
-                      <div className="space-y-4">
-                        <p className="text-xl font-semibold text-accent mb-4">Choose Your Ticket:</p>
+                      <div className="space-y-3 sm:space-y-4">
+                        <p className="text-lg sm:text-xl font-semibold text-accent mb-3 sm:mb-4">Choose Your Ticket:</p>
                         {ticketTypes.map((ticket) => (
-                          <div key={ticket.stripe_product_id} className="bg-background/90 backdrop-blur-sm rounded-lg p-6">
+                          <div key={ticket.stripe_product_id} className="bg-background/90 backdrop-blur-sm rounded-lg p-4 sm:p-6">
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
-                              <h3 className="text-xl font-bold">{ticket.name}</h3>
+                              <h3 className="text-lg sm:text-xl font-bold">{ticket.name}</h3>
                               {ticket.popular && (
                                 <Badge className="bg-accent text-accent-foreground self-start sm:self-auto">Popular</Badge>
                               )}
                             </div>
-                            <div className="flex items-baseline gap-3 mb-3">
-                              <span className="text-3xl font-black text-accent">{ticket.price}</span>
+                            <div className="flex items-baseline gap-2 sm:gap-3 mb-3">
+                              <span className="text-2xl sm:text-3xl font-black text-accent">{ticket.price}</span>
                               <span className="text-base text-muted-foreground line-through">{ticket.regularPrice}</span>
                               <span className="text-sm text-accent font-semibold bg-accent/20 px-2 py-1 rounded">{ticket.discount}</span>
                             </div>
@@ -657,58 +657,58 @@ const Index = () => {
           </section>
 
           {/* Venue Section */}
-          <section className="mb-24 px-4">
-            <div className="container mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-5xl font-bold mb-4">
+          <section className="mb-16 sm:mb-24 px-3 sm:px-4">
+            <div className="container mx-auto px-0">
+              <div className="text-center mb-8 sm:mb-12">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
                   An Inspiring <span className="text-accent">Location</span>
                 </h2>
-                <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+                <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-6 sm:mb-8 px-3">
                   The National Space Centre isn't just a venue—it's a statement. As the UK's largest planetarium and space attraction, it embodies the spirit of exploration and innovation that defines Festival of AI. Where better to explore the future of artificial intelligence than at a location dedicated to pushing the boundaries of human knowledge and achievement?
                 </p>
               </div>
 
               {/* Venue Gallery */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8">
                 <div className="rounded-lg overflow-hidden">
                   <img 
                     src={venueExterior} 
                     alt="National Space Centre Exterior"
-                    className="w-full h-64 object-cover hover:scale-110 transition-transform duration-300"
+                    className="w-full h-48 sm:h-56 md:h-64 object-cover hover:scale-110 transition-transform duration-300"
                   />
                 </div>
                 <div className="rounded-lg overflow-hidden">
                   <img 
                     src={venueRockets} 
                     alt="Rockets Display"
-                    className="w-full h-64 object-cover hover:scale-110 transition-transform duration-300"
+                    className="w-full h-48 sm:h-56 md:h-64 object-cover hover:scale-110 transition-transform duration-300"
                   />
                 </div>
                 <div className="rounded-lg overflow-hidden">
                   <img 
                     src={venuePlanetarium} 
                     alt="Planetarium"
-                    className="w-full h-64 object-cover hover:scale-110 transition-transform duration-300"
+                    className="w-full h-48 sm:h-56 md:h-64 object-cover hover:scale-110 transition-transform duration-300"
                   />
                 </div>
                 <div className="rounded-lg overflow-hidden">
                   <img 
                     src={venueEventSpace} 
                     alt="Event Space"
-                    className="w-full h-64 object-cover hover:scale-110 transition-transform duration-300"
+                    className="w-full h-48 sm:h-56 md:h-64 object-cover hover:scale-110 transition-transform duration-300"
                   />
                 </div>
               </div>
 
               {/* Venue Features */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 {venueFeatures.map((feature, index) => (
                   <Card key={index} className="bg-card/50 backdrop-blur-sm border-border">
-                    <CardContent className="p-6 text-center">
-                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/20 text-accent mb-3">
+                    <CardContent className="p-4 sm:p-6 text-center">
+                      <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-accent/20 text-accent mb-2 sm:mb-3">
                         {feature.icon}
                       </div>
-                      <p className="font-semibold">{feature.text}</p>
+                      <p className="font-semibold text-sm sm:text-base">{feature.text}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -717,18 +717,18 @@ const Index = () => {
           </section>
 
           {/* Event Gallery Section */}
-          <section className="mb-24 px-4">
-            <div className="container mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-5xl font-bold mb-4">
+          <section className="mb-16 sm:mb-24 px-3 sm:px-4">
+            <div className="container mx-auto px-0">
+              <div className="text-center mb-8 sm:mb-12 px-3">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
                   Festival of AI <span className="text-accent">2025 Highlights</span>
                 </h2>
-                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
                   Experience the energy, innovation, and connections from our 2025 event
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
                 {galleryImages.map((image, index) => (
                   <div 
                     key={index}
@@ -755,32 +755,32 @@ const Index = () => {
           />
 
           {/* Ticket Pricing Section */}
-          <section id="pricing" className="mb-24 px-4">
-            <div className="container mx-auto max-w-5xl">
+          <section id="pricing" className="mb-16 sm:mb-24 px-3 sm:px-4">
+            <div className="container mx-auto max-w-5xl px-0">
               {/* Scarcity & Urgency */}
-              <div className="text-center mb-8">
-                <Badge variant="secondary" className="mb-6 bg-accent/20 text-accent border-accent/50 text-lg px-6 py-2">
+              <div className="text-center mb-6 sm:mb-8">
+                <Badge variant="secondary" className="mb-4 sm:mb-6 bg-accent/20 text-accent border-accent/50 text-base sm:text-lg px-4 sm:px-6 py-1.5 sm:py-2">
                   <Gift className="w-5 h-5 mr-2 inline" />
                   Limited Time Launch Offer
                 </Badge>
 
-                <div className="mb-6">
+                <div className="mb-4 sm:mb-6">
                   <Card className="inline-block bg-destructive/10 border-destructive/50 backdrop-blur-sm">
-                    <CardContent className="p-4">
+                    <CardContent className="p-3 sm:p-4">
                       <div className="flex items-center gap-2 text-destructive">
                         <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                        <span className="font-bold">22 Super Early Bird Tickets remaining!</span>
+                        <span className="font-bold text-sm sm:text-base">22 Super Early Bird Tickets remaining!</span>
                       </div>
                     </CardContent>
                   </Card>
                 </div>
 
-                <div className="mb-10">
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <Clock className="w-6 h-6 text-accent" />
-                    <p className="text-lg text-accent font-semibold">Super Early Bird Offer Ends:</p>
+                <div className="mb-8 sm:mb-10">
+                  <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
+                    <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
+                    <p className="text-base sm:text-lg text-accent font-semibold">Super Early Bird Offer Ends:</p>
                   </div>
-                  <p className="text-2xl font-bold mb-4">Friday at 5PM</p>
+                  <p className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Friday at 5PM</p>
                   <div className="max-w-2xl mx-auto">
                     <CountdownTimer targetDate={offerEndDate} />
                   </div>
@@ -788,30 +788,30 @@ const Index = () => {
               </div>
 
               {/* Ticket Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 mb-6 sm:mb-8">
                 {ticketTypes.map((ticket) => (
                   <Card 
                     key={ticket.stripe_product_id} 
                     className={`bg-card/50 backdrop-blur-sm ${ticket.popular ? 'border-accent shadow-lg shadow-accent/20 scale-105 md:scale-110' : 'border-border'} hover:border-primary transition-all relative`}
                   >
                     {ticket.popular && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                        <Badge className="bg-accent text-accent-foreground font-bold px-3 py-1">
+                      <div className="absolute -top-2 sm:-top-3 left-1/2 -translate-x-1/2 z-10">
+                        <Badge className="bg-accent text-accent-foreground font-bold px-2 sm:px-3 py-1 text-xs sm:text-sm">
                           MOST POPULAR
                         </Badge>
                       </div>
                     )}
-                    <CardContent className="p-6">
-                      <h3 className="text-2xl font-bold mb-3">{ticket.name}</h3>
-                      <div className="flex items-center justify-center gap-2 mb-6 p-3 bg-accent/10 rounded-lg border border-accent/30">
+                    <CardContent className="p-4 sm:p-5 md:p-6">
+                      <h3 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">{ticket.name}</h3>
+                      <div className="flex items-center justify-center gap-2 mb-4 sm:mb-6 p-2 sm:p-3 bg-accent/10 rounded-lg border border-accent/30">
                         <Calendar className="w-5 h-5 text-accent" />
-                        <span className="font-bold text-lg text-accent">{ticket.date}</span>
+                        <span className="font-bold text-base sm:text-lg text-accent">{ticket.date}</span>
                       </div>
-                      <div className="mb-4">
-                        <div className="text-muted-foreground line-through text-lg mb-1">
+                      <div className="mb-3 sm:mb-4">
+                        <div className="text-muted-foreground line-through text-base sm:text-lg mb-1">
                           {ticket.regularPrice}
                         </div>
-                        <div className="text-4xl font-black text-accent mb-1">
+                        <div className="text-3xl sm:text-4xl font-black text-accent mb-1">
                           {ticket.price}
                         </div>
                         <div className="text-sm text-accent font-semibold flex items-center gap-1">
@@ -819,7 +819,7 @@ const Index = () => {
                           <span className="bg-accent/20 px-2 py-0.5 rounded text-xs font-bold">{ticket.discount}</span>
                         </div>
                       </div>
-                      <ul className="space-y-2 mb-6">
+                      <ul className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6">
                         {ticket.features.map((feature, idx) => (
                           <li key={idx} className="flex items-start gap-2 text-sm">
                             <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
@@ -882,9 +882,9 @@ const Index = () => {
           </section>
 
           {/* FAQ Section */}
-          <section className="mb-24 px-4">
-            <div className="container mx-auto max-w-3xl">
-              <div className="text-center mb-12">
+          <section className="mb-16 sm:mb-24 px-3 sm:px-4">
+            <div className="container mx-auto max-w-3xl px-0">
+              <div className="text-center mb-8 sm:mb-12 px-3">
                 <h2 className="text-3xl font-bold mb-4">
                   Frequently Asked <span className="text-accent">Questions</span>
                 </h2>
@@ -893,14 +893,14 @@ const Index = () => {
                 </p>
               </div>
 
-              <Accordion type="single" collapsible className="space-y-4">
+              <Accordion type="single" collapsible className="space-y-3 sm:space-y-4">
                 {faqs.map((faq, index) => (
-                  <Card key={index} className="bg-card/50 backdrop-blur-sm border-border">
+                  <Card key={index} className="bg-card/50 backdrop-blur-sm border-border mx-3 sm:mx-0">
                     <AccordionItem value={`item-${index}`} className="border-none">
-                      <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-accent/5 rounded-lg transition-all">
-                        <span className="text-left font-semibold">{faq.question}</span>
+                      <AccordionTrigger className="px-4 sm:px-6 py-3 sm:py-4 hover:no-underline hover:bg-accent/5 rounded-lg transition-all">
+                        <span className="text-left font-semibold text-sm sm:text-base">{faq.question}</span>
                       </AccordionTrigger>
-                      <AccordionContent className="px-6 pb-4 text-muted-foreground">
+                      <AccordionContent className="px-4 sm:px-6 pb-3 sm:pb-4 text-muted-foreground text-sm sm:text-base">
                         {faq.answer}
                       </AccordionContent>
                     </AccordionItem>
@@ -911,15 +911,15 @@ const Index = () => {
           </section>
 
           {/* Risk-Free Guarantee Section */}
-          <section className="mb-24 px-4">
-            <div className="container mx-auto max-w-3xl">
-              <Card className="bg-card/50 backdrop-blur-sm border-border">
-                <CardContent className="p-8 text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/20 text-accent mb-4">
-                    <Shield className="w-8 h-8" />
+          <section className="mb-16 sm:mb-24 px-3 sm:px-4">
+            <div className="container mx-auto max-w-3xl px-0">
+              <Card className="bg-card/50 backdrop-blur-sm border-border mx-3 sm:mx-0">
+                <CardContent className="p-6 sm:p-8 text-center">
+                  <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-accent/20 text-accent mb-3 sm:mb-4">
+                    <Shield className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-4">Risk-Free Guarantee</h3>
-                  <p className="text-lg text-muted-foreground">
+                  <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Risk-Free Guarantee</h3>
+                  <p className="text-base sm:text-lg text-muted-foreground">
                     We're so confident you'll love Festival of AI that we offer a full refund up until June 30th, 2026. No questions asked. After that date, tickets are non-refundable but can be transferred to another person free of charge.
                   </p>
                 </CardContent>
@@ -928,18 +928,18 @@ const Index = () => {
           </section>
 
           {/* Final CTA Section */}
-          <section className="mb-24 px-4">
-            <div className="container mx-auto max-w-4xl">
-              <Card className="bg-gradient-to-r from-primary/20 to-secondary/20 border-accent backdrop-blur-sm">
-                <CardContent className="p-12 text-center space-y-6">
-                  <h2 className="text-4xl font-bold">
+          <section className="mb-16 sm:mb-24 px-3 sm:px-4">
+            <div className="container mx-auto max-w-4xl px-0">
+              <Card className="bg-gradient-to-r from-primary/20 to-secondary/20 border-accent backdrop-blur-sm mx-3 sm:mx-0">
+                <CardContent className="p-6 sm:p-8 md:p-12 text-center space-y-4 sm:space-y-6">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">
                     Don't Miss the Super Early Bird Offer
                   </h2>
-                  <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                  <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
                     Save up to £400 on your Festival of AI 2026 ticket. Limited time only - secure your spot before Friday at 5PM!
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-                    <span className="text-2xl font-bold text-accent">From just £197</span>
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center items-center">
+                    <span className="text-xl sm:text-2xl font-bold text-accent">From just £197</span>
                     <span className="text-muted-foreground line-through">£497</span>
                   </div>
                   <Button
