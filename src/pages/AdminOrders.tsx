@@ -7,13 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Search, Plus } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import { Download, Search, Plus, Edit, Trash2, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
   Pagination,
@@ -23,6 +26,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { OrderBulkActionsBar } from "@/components/admin/OrderBulkActionsBar";
 
 
 type User = {
@@ -52,6 +56,7 @@ type EnrichedOrder = {
   granted_at: string | null;
   coupon_code: string | null;
   discount_amount: number | null;
+  notes: string | null;
   profile?: {
     id: string;
     email: string;
@@ -80,6 +85,15 @@ const AdminOrders = () => {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedProductId, setSelectedProductId] = useState("");
   const [eventYear, setEventYear] = useState(new Date().getFullYear().toString());
+  const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
+  const [notesDialogOpen, setNotesDialogOpen] = useState(false);
+  const [bulkNotes, setBulkNotes] = useState("");
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<EnrichedOrder | null>(null);
+  const [editEventYear, setEditEventYear] = useState("");
+  const [editProductId, setEditProductId] = useState("");
+  const [editNotes, setEditNotes] = useState("");
 
   // Check admin access
   const { data: isAdmin, isLoading: checkingAdmin } = useQuery({
@@ -297,6 +311,140 @@ const AdminOrders = () => {
     return `${symbol}${value}`;
   };
 
+  const handleSelectOrder = (orderId: string, checked: boolean) => {
+    const newSelection = new Set(selectedOrders);
+    if (checked) {
+      newSelection.add(orderId);
+    } else {
+      newSelection.delete(orderId);
+    }
+    setSelectedOrders(newSelection);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked && paginatedOrders) {
+      setSelectedOrders(new Set(paginatedOrders.map(o => o.id)));
+    } else {
+      setSelectedOrders(new Set());
+    }
+  };
+
+  const handleExportSelected = () => {
+    if (!ordersData || selectedOrders.size === 0) return;
+
+    const selectedOrdersData = ordersData.filter(o => selectedOrders.has(o.id));
+    const headers = ["Order ID", "Date", "Customer Email", "Customer Name", "Product", "Amount", "Currency", "Payment Intent", "Type", "Event Year", "Notes"];
+    const rows = selectedOrdersData.map(order => [
+      order.id,
+      format(new Date(order.purchased_at), "yyyy-MM-dd HH:mm:ss"),
+      order.profile?.email || "N/A",
+      order.profile?.full_name || "N/A",
+      order.product?.product_name || order.session?.title || "N/A",
+      order.product?.amount ? (order.product.amount / 100).toFixed(2) : "0.00",
+      order.product?.currency?.toUpperCase() || "N/A",
+      order.stripe_payment_intent || "N/A",
+      order.order_type || (order.is_admin_grant ? "Admin Grant" : "Paid"),
+      order.event_year,
+      order.notes || "",
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `selected-orders-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    toast.success(`Exported ${selectedOrders.size} orders`);
+  };
+
+  const handleBulkAddNotes = async () => {
+    if (!bulkNotes.trim() || selectedOrders.size === 0) {
+      toast.error("Please enter notes");
+      return;
+    }
+
+    try {
+      const updates = Array.from(selectedOrders).map(orderId => 
+        supabase
+          .from("replay_purchases")
+          .update({ notes: bulkNotes })
+          .eq("id", orderId)
+      );
+
+      await Promise.all(updates);
+      toast.success(`Added notes to ${selectedOrders.size} orders`);
+      setNotesDialogOpen(false);
+      setBulkNotes("");
+      setSelectedOrders(new Set());
+      window.location.reload();
+    } catch (error: any) {
+      console.error("Error adding notes:", error);
+      toast.error("Failed to add notes");
+    }
+  };
+
+  const handleEditOrder = (order: EnrichedOrder) => {
+    setEditingOrder(order);
+    setEditEventYear(order.event_year.toString());
+    setEditProductId(order.product_id || "");
+    setEditNotes(order.notes || "");
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateOrder = async () => {
+    if (!editingOrder) return;
+
+    try {
+      const { error } = await supabase
+        .from("replay_purchases")
+        .update({
+          event_year: parseInt(editEventYear),
+          product_id: editProductId || null,
+          notes: editNotes,
+        })
+        .eq("id", editingOrder.id);
+
+      if (error) throw error;
+
+      toast.success("Order updated successfully");
+      setEditDialogOpen(false);
+      setEditingOrder(null);
+      window.location.reload();
+    } catch (error: any) {
+      console.error("Error updating order:", error);
+      toast.error("Failed to update order");
+    }
+  };
+
+  const handleDeleteOrder = async () => {
+    if (!editingOrder) return;
+
+    try {
+      const { error } = await supabase
+        .from("replay_purchases")
+        .delete()
+        .eq("id", editingOrder.id);
+
+      if (error) throw error;
+
+      toast.success("Order deleted successfully");
+      setDeleteDialogOpen(false);
+      setEditingOrder(null);
+      window.location.reload();
+    } catch (error: any) {
+      console.error("Error deleting order:", error);
+      toast.error("Failed to delete order");
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -310,6 +458,14 @@ const AdminOrders = () => {
         <main className="flex-1 container mx-auto px-4 py-8 mt-20">
           <Card>
             <CardHeader>
+              <div className="flex items-center gap-2 mb-4">
+                <Link to="/admin">
+                  <Button variant="ghost" size="sm">
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to Dashboard
+                  </Button>
+                </Link>
+              </div>
               <CardTitle>Order Management</CardTitle>
               <CardDescription>View and manage all customer orders and admin grants</CardDescription>
             </CardHeader>
@@ -414,17 +570,31 @@ const AdminOrders = () => {
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead className="w-12">
+                            <Checkbox
+                              checked={paginatedOrders && paginatedOrders.length > 0 && paginatedOrders.every(o => selectedOrders.has(o.id))}
+                              onCheckedChange={handleSelectAll}
+                            />
+                          </TableHead>
                           <TableHead>Date</TableHead>
                           <TableHead>Customer</TableHead>
                           <TableHead>Product</TableHead>
                           <TableHead>Amount</TableHead>
                           <TableHead>Type</TableHead>
                           <TableHead>Payment Intent</TableHead>
+                          <TableHead>Notes</TableHead>
+                          <TableHead>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {paginatedOrders.map((order) => (
                           <TableRow key={order.id}>
+                            <TableCell>
+                              <Checkbox
+                                checked={selectedOrders.has(order.id)}
+                                onCheckedChange={(checked) => handleSelectOrder(order.id, checked as boolean)}
+                              />
+                            </TableCell>
                             <TableCell className="whitespace-nowrap">
                               {format(new Date(order.purchased_at), "MMM d, yyyy HH:mm")}
                             </TableCell>
@@ -453,6 +623,32 @@ const AdminOrders = () => {
                             </TableCell>
                             <TableCell className="font-mono text-xs">
                               {order.stripe_payment_intent || "N/A"}
+                            </TableCell>
+                            <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
+                              {order.notes || "-"}
+                            </TableCell>
+                            <TableCell>
+                              {order.order_type === "manual" && (
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleEditOrder(order)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => {
+                                      setEditingOrder(order);
+                                      setDeleteDialogOpen(true);
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -507,6 +703,107 @@ const AdminOrders = () => {
             </CardContent>
           </Card>
         </main>
+
+        <OrderBulkActionsBar
+          selectedCount={selectedOrders.size}
+          onClearSelection={() => setSelectedOrders(new Set())}
+          onExportSelected={handleExportSelected}
+          onAddNotes={() => setNotesDialogOpen(true)}
+        />
+
+        <Dialog open={notesDialogOpen} onOpenChange={setNotesDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Notes to Selected Orders</DialogTitle>
+              <DialogDescription>
+                Add notes to {selectedOrders.size} selected order{selectedOrders.size !== 1 ? 's' : ''}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Notes</Label>
+                <Textarea
+                  value={bulkNotes}
+                  onChange={(e) => setBulkNotes(e.target.value)}
+                  placeholder="Enter notes for selected orders..."
+                  rows={4}
+                />
+              </div>
+              <Button onClick={handleBulkAddNotes} className="w-full">
+                Add Notes
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Manual Order</DialogTitle>
+              <DialogDescription>
+                Update the details of this manual order
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Product</Label>
+                <Select value={editProductId} onValueChange={setEditProductId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a product" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {products?.map((product) => (
+                      <SelectItem key={product.id} value={product.id}>
+                        {product.product_name} - £{(product.amount / 100).toFixed(2)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Event Year</Label>
+                <Input
+                  type="number"
+                  value={editEventYear}
+                  onChange={(e) => setEditEventYear(e.target.value)}
+                  placeholder="2025"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Notes</Label>
+                <Textarea
+                  value={editNotes}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  placeholder="Order notes..."
+                  rows={3}
+                />
+              </div>
+
+              <Button onClick={handleUpdateOrder} className="w-full">
+                Update Order
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Manual Order</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this manual order? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteOrder} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <Footer />
       </div>

@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, TrendingUp, DollarSign, Users, ShoppingCart } from "lucide-react";
+import { Loader2, TrendingUp, DollarSign, Users, ShoppingCart, ArrowLeft } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 
 interface AnalyticsData {
@@ -138,6 +140,14 @@ const AdminAnalytics = () => {
       <Navigation />
 
       <div className="container mx-auto px-4 py-24">
+        <div className="flex items-center gap-2 mb-8">
+          <Link to="/admin">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+        </div>
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Analytics Dashboard</h1>
           <p className="text-muted-foreground">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Helmet } from "react-helmet-async";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
 
 interface SponsorRequest {
   id: string;
@@ -131,11 +132,16 @@ const AdminSponsorRequests = () => {
         <main className="pt-20 pb-12">
           <div className="container mx-auto px-4">
           <div className="max-w-7xl mx-auto">
+            <div className="flex items-center gap-2 mb-8">
+              <Link to="/admin">
+                <Button variant="ghost" size="sm">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Dashboard
+                </Button>
+              </Link>
+            </div>
             <div className="flex justify-between items-center mb-8">
               <h1 className="text-4xl font-bold">Sponsor Pack Requests</h1>
-              <Button variant="outline" onClick={() => navigate("/admin")}>
-                Back to Admin
-              </Button>
             </div>
 
             {/* Email Settings */}

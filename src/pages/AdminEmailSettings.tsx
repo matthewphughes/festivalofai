@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, Mail } from "lucide-react";
+import { Loader2, Mail, ArrowLeft } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { Link } from "react-router-dom";
 
 interface EmailSetting {
   setting_key: string;
@@ -110,6 +111,14 @@ const AdminEmailSettings = () => {
       <Navigation />
 
       <div className="container mx-auto px-4 py-24">
+        <div className="flex items-center gap-2 mb-8">
+          <Link to="/admin">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+        </div>
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Email Notification Settings</h1>
           <p className="text-muted-foreground">

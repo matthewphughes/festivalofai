@@ -7,9 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, ArrowLeft } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { Link } from "react-router-dom";
 
 const AdminSiteSettings = () => {
   const [loading, setLoading] = useState(false);
@@ -118,6 +119,14 @@ const AdminSiteSettings = () => {
       <Navigation />
       
       <div className="container mx-auto px-4 py-24 max-w-4xl">
+        <div className="flex items-center gap-2 mb-8">
+          <Link to="/admin">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+        </div>
       <h1 className="text-3xl font-bold mb-8">Site Settings</h1>
 
       <Card>

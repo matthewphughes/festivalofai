@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
@@ -328,15 +328,19 @@ const AdminSessions = () => {
       <Navigation />
       
       <main className="container mx-auto px-4 py-24">
+        <div className="flex items-center gap-2 mb-8">
+          <Link to="/admin">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+        </div>
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold mb-2">Manage Event Sessions</h1>
             <p className="text-muted-foreground">Create and manage event sessions, agenda items, and replays</p>
           </div>
-          <Button onClick={() => navigate("/admin")} variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
         </div>
 
         <Card>

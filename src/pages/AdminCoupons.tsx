@@ -9,10 +9,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Plus, Power, PowerOff, Trash2, Pencil } from "lucide-react";
+import { Loader2, Plus, Power, PowerOff, Trash2, Pencil, ArrowLeft } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { format } from "date-fns";
+import { Link } from "react-router-dom";
 
 interface Coupon {
   id: string;
@@ -233,9 +234,16 @@ const AdminCoupons = () => {
       <Navigation />
       
       <div className="container mx-auto px-4 py-24">
+        <div className="flex items-center gap-2 mb-8">
+          <Link to="/admin">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+        </div>
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Coupon Management</h1>
-          
           <Dialog open={dialogOpen} onOpenChange={(open) => {
             setDialogOpen(open);
             if (!open) {

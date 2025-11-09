@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Plus, RefreshCw, Edit, Trash2, ToggleLeft, ToggleRight, Video } from "lucide-react";
+import { Loader2, Plus, RefreshCw, Edit, Trash2, ToggleLeft, ToggleRight, Video, ArrowLeft } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface StripeProduct {
@@ -314,6 +314,14 @@ const AdminStripeProducts = () => {
     <div className="min-h-screen flex flex-col">
       <Navigation />
       <main className="flex-1 container py-8 mt-24">
+        <div className="flex items-center gap-2 mb-8">
+          <Link to="/admin">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+        </div>
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-4xl font-bold mb-2">Stripe Product Management</h1>
