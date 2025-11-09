@@ -25,6 +25,14 @@ const signUpSchema = z.object({
 const resetPasswordSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }).max(255, { message: "Email must be less than 255 characters" }),
 });
+
+const updatePasswordSchema = z.object({
+  newPassword: z.string().min(6, { message: "Password must be at least 6 characters" }).max(100, { message: "Password must be less than 100 characters" }),
+  confirmPassword: z.string().min(6, { message: "Password must be at least 6 characters" }).max(100, { message: "Password must be less than 100 characters" }),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 
@@ -38,6 +46,9 @@ const Auth = () => {
   const [fullName, setFullName] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [showPasswordUpdate, setShowPasswordUpdate] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
     // Check if user is already logged in
@@ -49,7 +60,9 @@ const Auth = () => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session && event === "SIGNED_IN") {
+      if (event === "PASSWORD_RECOVERY") {
+        setShowPasswordUpdate(true);
+      } else if (session && event === "SIGNED_IN") {
         navigate(returnUrl);
       }
     });
@@ -183,6 +196,40 @@ const Auth = () => {
     }
   };
 
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Validate passwords
+      const validationResult = updatePasswordSchema.safeParse({ newPassword, confirmPassword });
+      if (!validationResult.success) {
+        const firstError = validationResult.error.errors[0];
+        toast.error(firstError.message);
+        setLoading(false);
+        return;
+      }
+
+      const { error } = await supabase.auth.updateUser({
+        password: validationResult.data.newPassword,
+      });
+
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success("Password updated successfully!");
+        setShowPasswordUpdate(false);
+        setNewPassword("");
+        setConfirmPassword("");
+        navigate(returnUrl);
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -195,7 +242,50 @@ const Auth = () => {
             <p className="text-muted-foreground">Access event replays and exclusive content</p>
           </div>
 
-          <Tabs defaultValue="signin" className="w-full">
+          {showPasswordUpdate ? (
+            <Card>
+              <form onSubmit={handleUpdatePassword}>
+                <CardHeader>
+                  <CardTitle>Set New Password</CardTitle>
+                  <CardDescription>
+                    Enter your new password below
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="new-password">New Password</Label>
+                    <Input
+                      id="new-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password">Confirm Password</Label>
+                    <Input
+                      id="confirm-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Updating..." : "Update Password"}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+          ) : (
+            <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin" onClick={() => setShowForgotPassword(false)}>Sign In</TabsTrigger>
               <TabsTrigger value="signup" onClick={() => setShowForgotPassword(false)}>Sign Up</TabsTrigger>
@@ -418,6 +508,7 @@ const Auth = () => {
               </Card>
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </main>
 
