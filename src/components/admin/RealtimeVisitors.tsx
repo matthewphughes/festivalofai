@@ -21,15 +21,26 @@ export const RealtimeVisitors = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      const response = await supabase.functions.invoke("fetch-ga4-data", {
+      const url = new URL("https://ppvgibvylsxdybsxufxm.supabase.co/functions/v1/fetch-ga4-data");
+      url.searchParams.set("mode", "realtime");
+
+      console.log("Fetching realtime data from:", url.toString());
+
+      const response = await fetch(url.toString(), {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: { mode: "realtime" }
       });
 
-      if (response.error) throw response.error;
-      setRealtimeData(response.data);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Realtime fetch error:", errorText);
+        throw new Error(`Failed to fetch realtime data: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log("Realtime data received:", data);
+      setRealtimeData(data);
     } catch (error) {
       console.error("Failed to fetch realtime data:", error);
     } finally {
