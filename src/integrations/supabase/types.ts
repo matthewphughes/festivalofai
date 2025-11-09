@@ -119,6 +119,7 @@ export type Database = {
       replay_purchases: {
         Row: {
           coupon_code: string | null
+          custom_amount: number | null
           discount_amount: number | null
           event_year: number
           granted_at: string | null
@@ -135,6 +136,7 @@ export type Database = {
         }
         Insert: {
           coupon_code?: string | null
+          custom_amount?: number | null
           discount_amount?: number | null
           event_year: number
           granted_at?: string | null
@@ -151,6 +153,7 @@ export type Database = {
         }
         Update: {
           coupon_code?: string | null
+          custom_amount?: number | null
           discount_amount?: number | null
           event_year?: number
           granted_at?: string | null

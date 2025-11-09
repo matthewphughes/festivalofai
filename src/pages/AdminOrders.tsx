@@ -57,6 +57,7 @@ type EnrichedOrder = {
   coupon_code: string | null;
   discount_amount: number | null;
   notes: string | null;
+  custom_amount: number | null;
   profile?: {
     id: string;
     email: string;
@@ -84,6 +85,7 @@ const AdminOrders = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedProductId, setSelectedProductId] = useState("");
+  const [customAmount, setCustomAmount] = useState("");
   const [eventYear, setEventYear] = useState(new Date().getFullYear().toString());
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
   const [notesDialogOpen, setNotesDialogOpen] = useState(false);
@@ -236,6 +238,13 @@ const AdminOrders = () => {
       return;
     }
 
+    // Validate custom amount if provided
+    const amountInCents = customAmount ? Math.round(parseFloat(customAmount) * 100) : null;
+    if (customAmount && (isNaN(amountInCents!) || amountInCents! < 0)) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const adminId = sessionData.session?.user.id;
@@ -250,6 +259,7 @@ const AdminOrders = () => {
           is_admin_grant: true,
           granted_by: adminId,
           granted_at: new Date().toISOString(),
+          custom_amount: amountInCents,
         });
 
       if (error) throw error;
@@ -258,6 +268,7 @@ const AdminOrders = () => {
       setDialogOpen(false);
       setSelectedUserId("");
       setSelectedProductId("");
+      setCustomAmount("");
       setEventYear(new Date().getFullYear().toString());
       
       // Refresh orders
@@ -275,18 +286,21 @@ const AdminOrders = () => {
     }
 
     const headers = ["Order ID", "Date", "Customer Email", "Customer Name", "Product", "Amount", "Currency", "Payment Intent", "Type", "Event Year"];
-    const rows = ordersData.map(order => [
-      order.id,
-      format(new Date(order.purchased_at), "yyyy-MM-dd HH:mm:ss"),
-      order.profile?.email || "N/A",
-      order.profile?.full_name || "N/A",
-      order.product?.product_name || order.session?.title || "N/A",
-      order.product?.amount ? (order.product.amount / 100).toFixed(2) : "0.00",
-      order.product?.currency?.toUpperCase() || "N/A",
-      order.stripe_payment_intent || "N/A",
-      order.order_type || (order.is_admin_grant ? "Admin Grant" : "Paid"),
-      order.event_year,
-    ]);
+    const rows = ordersData.map(order => {
+      const displayAmount = order.custom_amount ?? order.product?.amount ?? 0;
+      return [
+        order.id,
+        format(new Date(order.purchased_at), "yyyy-MM-dd HH:mm:ss"),
+        order.profile?.email || "N/A",
+        order.profile?.full_name || "N/A",
+        order.product?.product_name || order.session?.title || "N/A",
+        (displayAmount / 100).toFixed(2),
+        order.product?.currency?.toUpperCase() || "N/A",
+        order.stripe_payment_intent || "N/A",
+        order.order_type || (order.is_admin_grant ? "Admin Grant" : "Paid"),
+        order.event_year,
+      ];
+    });
 
     const csvContent = [
       headers.join(","),
@@ -305,9 +319,10 @@ const AdminOrders = () => {
     toast.success("Orders exported successfully");
   };
 
-  const formatAmount = (amount: number | null, currency: string | null) => {
-    if (!amount) return "£0.00";
-    const value = (amount / 100).toFixed(2);
+  const formatAmount = (amount: number | null, customAmount: number | null, currency: string | null) => {
+    const displayAmount = customAmount !== null && customAmount !== undefined ? customAmount : amount;
+    if (!displayAmount) return "£0.00";
+    const value = (displayAmount / 100).toFixed(2);
     const symbol = currency?.toUpperCase() === "USD" ? "$" : "£";
     return `${symbol}${value}`;
   };
@@ -335,19 +350,22 @@ const AdminOrders = () => {
 
     const selectedOrdersData = ordersData.filter(o => selectedOrders.has(o.id));
     const headers = ["Order ID", "Date", "Customer Email", "Customer Name", "Product", "Amount", "Currency", "Payment Intent", "Type", "Event Year", "Notes"];
-    const rows = selectedOrdersData.map(order => [
-      order.id,
-      format(new Date(order.purchased_at), "yyyy-MM-dd HH:mm:ss"),
-      order.profile?.email || "N/A",
-      order.profile?.full_name || "N/A",
-      order.product?.product_name || order.session?.title || "N/A",
-      order.product?.amount ? (order.product.amount / 100).toFixed(2) : "0.00",
-      order.product?.currency?.toUpperCase() || "N/A",
-      order.stripe_payment_intent || "N/A",
-      order.order_type || (order.is_admin_grant ? "Admin Grant" : "Paid"),
-      order.event_year,
-      order.notes || "",
-    ]);
+    const rows = selectedOrdersData.map(order => {
+      const displayAmount = order.custom_amount ?? order.product?.amount ?? 0;
+      return [
+        order.id,
+        format(new Date(order.purchased_at), "yyyy-MM-dd HH:mm:ss"),
+        order.profile?.email || "N/A",
+        order.profile?.full_name || "N/A",
+        order.product?.product_name || order.session?.title || "N/A",
+        (displayAmount / 100).toFixed(2),
+        order.product?.currency?.toUpperCase() || "N/A",
+        order.stripe_payment_intent || "N/A",
+        order.order_type || (order.is_admin_grant ? "Admin Grant" : "Paid"),
+        order.event_year,
+        order.notes || "",
+      ];
+    });
 
     const csvContent = [
       headers.join(","),
@@ -541,6 +559,21 @@ const AdminOrders = () => {
                       </div>
 
                       <div className="space-y-2">
+                        <Label>Custom Amount (£)</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={customAmount}
+                          onChange={(e) => setCustomAmount(e.target.value)}
+                          placeholder="Leave empty to use product price"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Optional: Override the product's default price
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
                         <Label>Event Year</Label>
                         <Input
                           type="number"
@@ -636,7 +669,7 @@ const AdminOrders = () => {
                                 </TableCell>
                                 <TableCell>{product_name}</TableCell>
                                 <TableCell>
-                                  {formatAmount(order.product?.amount || null, order.product?.currency || null)}
+                                  {formatAmount(order.product?.amount || null, order.custom_amount || null, order.product?.currency || null)}
                                 </TableCell>
                                 <TableCell>
                                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -701,7 +734,7 @@ const AdminOrders = () => {
                                         {order.discount_amount && order.discount_amount > 0 && (
                                           <div>
                                             <span className="text-sm font-medium">Discount:</span>
-                                            <p className="text-sm text-muted-foreground">{formatAmount(order.discount_amount, order.product?.currency || null)}</p>
+                                            <p className="text-sm text-muted-foreground">{formatAmount(order.discount_amount, null, order.product?.currency || null)}</p>
                                           </div>
                                         )}
                                         {order.granted_by && (
