@@ -108,7 +108,6 @@ const venueFeatures = [
 
 const benefits = [
   "Choose your path: Beginner or Advanced stage",
-  "Two simultaneous stages with curated content for your level",
   "Access to all keynote sessions",
   "Lifetime access to session replays from both stages",
   "Exclusive networking opportunities with 200+ attendees",
@@ -377,7 +376,7 @@ const Index = () => {
                       size="lg"
                       onClick={() => {
                         trackButtonClick('Get Your 2026 Ticket - Hero', '/');
-                        navigate("/tickets");
+                        document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
                       }}
                       className="bg-primary hover:bg-primary/90 text-primary-foreground"
                     >
@@ -886,7 +885,7 @@ const Index = () => {
                     size="lg"
                     onClick={() => {
                       trackButtonClick('Get Your 2026 Ticket - Bottom CTA', '/');
-                      navigate("/tickets");
+                      document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
                     }}
                     className="bg-accent text-accent-foreground hover:bg-accent/90"
                   >
