@@ -48,7 +48,6 @@ const PublicReplays = () => {
       .select("*")
       .eq("published", true)
       .not("video_url", "is", null)
-      .not("price_id", "is", null)
       .order("event_year", { ascending: false });
 
     if (error) {
