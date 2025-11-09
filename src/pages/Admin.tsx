@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Users, Video, Calendar, ChevronRight, BarChart3, Settings, Mail, ShoppingBag, Tag, Receipt, UserCircle, Mic, MessageSquare, Gift, ChevronDown } from "lucide-react";
+import { Users, Video, Calendar, ChevronRight, BarChart3, Settings, Mail, ShoppingBag, Tag, Receipt, UserCircle, Mic, MessageSquare, Gift, ChevronDown, DollarSign, TrendingUp, Ticket } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
@@ -15,9 +15,10 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalUsers: 0,
-    totalReplays: 0,
-    publishedReplays: 0,
-    draftReplays: 0,
+    totalIncome: 0,
+    monthToDateIncome: 0,
+    totalTicketSales: 0,
+    totalReplaySales: 0,
   });
 
   useEffect(() => {
@@ -56,19 +57,56 @@ const Admin = () => {
       .from("profiles")
       .select("*", { count: 'exact', head: true });
 
-    // Fetch session stats
-    const { data: sessions } = await supabase
-      .from("sessions")
-      .select("published");
+    // Fetch purchases with product details
+    const { data: purchases, error: purchasesError } = await supabase
+      .from("replay_purchases")
+      .select(`
+        *,
+        stripe_products:product_id (
+          amount,
+          product_type
+        )
+      `);
 
-    const publishedCount = sessions?.filter(s => s.published).length || 0;
-    const totalCount = sessions?.length || 0;
+    if (purchasesError) {
+      console.error("Error fetching purchases:", purchasesError);
+    }
+
+    // Calculate financial stats
+    const totalIncome = purchases?.reduce((sum, p) => {
+      const amount = (p.stripe_products as any)?.amount || 0;
+      const discount = p.discount_amount || 0;
+      return sum + (amount - discount);
+    }, 0) || 0;
+
+    // Calculate month to date income
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthToDateIncome = purchases?.reduce((sum, p) => {
+      const purchaseDate = new Date(p.purchased_at);
+      if (purchaseDate >= firstDayOfMonth) {
+        const amount = (p.stripe_products as any)?.amount || 0;
+        const discount = p.discount_amount || 0;
+        return sum + (amount - discount);
+      }
+      return sum;
+    }, 0) || 0;
+
+    // Count ticket sales vs replay sales
+    const ticketSales = purchases?.filter(p => 
+      (p.stripe_products as any)?.product_type === "ticket"
+    ).length || 0;
+    
+    const replaySales = purchases?.filter(p => 
+      (p.stripe_products as any)?.product_type === "replay"
+    ).length || 0;
 
     setStats({
       totalUsers: userCount || 0,
-      totalReplays: totalCount,
-      publishedReplays: publishedCount,
-      draftReplays: totalCount - publishedCount,
+      totalIncome: totalIncome / 100, // Convert from pence to pounds
+      monthToDateIncome: monthToDateIncome / 100,
+      totalTicketSales: ticketSales,
+      totalReplaySales: replaySales,
     });
 
     setLoading(false);
@@ -88,7 +126,7 @@ const Admin = () => {
           <p className="text-center py-8 text-muted-foreground">Loading...</p>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -102,34 +140,45 @@ const Admin = () => {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Replays</CardTitle>
-                  <Video className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium">Total Income</CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalReplays}</div>
-                  <p className="text-xs text-muted-foreground">Event replay videos</p>
+                  <div className="text-2xl font-bold">£{stats.totalIncome.toFixed(2)}</div>
+                  <p className="text-xs text-muted-foreground">All-time revenue</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Published</CardTitle>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium">Month to Date</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.publishedReplays}</div>
-                  <p className="text-xs text-muted-foreground">Live on the platform</p>
+                  <div className="text-2xl font-bold">£{stats.monthToDateIncome.toFixed(2)}</div>
+                  <p className="text-xs text-muted-foreground">Income this month</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Drafts</CardTitle>
+                  <CardTitle className="text-sm font-medium">Ticket Sales</CardTitle>
+                  <Ticket className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.totalTicketSales}</div>
+                  <p className="text-xs text-muted-foreground">Tickets sold</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Replay Sales</CardTitle>
                   <Video className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.draftReplays}</div>
-                  <p className="text-xs text-muted-foreground">Unpublished replays</p>
+                  <div className="text-2xl font-bold">{stats.totalReplaySales}</div>
+                  <p className="text-xs text-muted-foreground">Replays purchased</p>
                 </CardContent>
               </Card>
             </div>
