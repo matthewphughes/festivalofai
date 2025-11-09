@@ -67,6 +67,16 @@ const AdminUsers = () => {
   const [bulkDefaultRole, setBulkDefaultRole] = useState("user");
   const [importing, setImporting] = useState(false);
 
+  // Bulk replay access states
+  const [bulkReplayDialogOpen, setBulkReplayDialogOpen] = useState(false);
+  const [bulkReplaySelections, setBulkReplaySelections] = useState<{
+    yearBundles: Set<number>;
+    individualReplays: Set<string>;
+  }>({
+    yearBundles: new Set(),
+    individualReplays: new Set(),
+  });
+
   useEffect(() => {
     checkAdminAccess();
   }, []);
@@ -414,6 +424,118 @@ const AdminUsers = () => {
     }
   };
 
+  // Handle bulk replay access dialog
+  const handleBulkReplayAccessOpen = async () => {
+    if (selectedUserIds.size === 0) {
+      toast.error("No users selected");
+      return;
+    }
+
+    // Fetch all sessions/replays
+    const { data: sessionsData } = await supabase
+      .from("sessions")
+      .select("id, title, event_year")
+      .order("event_year", { ascending: false });
+    
+    setReplays(sessionsData || []);
+    setBulkReplayDialogOpen(true);
+  };
+
+  // Toggle year bundle for bulk replay access
+  const toggleBulkYearBundle = (year: number) => {
+    const newYearBundles = new Set(bulkReplaySelections.yearBundles);
+    if (newYearBundles.has(year)) {
+      newYearBundles.delete(year);
+    } else {
+      newYearBundles.add(year);
+    }
+    setBulkReplaySelections({ ...bulkReplaySelections, yearBundles: newYearBundles });
+  };
+
+  // Toggle individual replay for bulk access
+  const toggleBulkReplay = (replayId: string) => {
+    const newReplays = new Set(bulkReplaySelections.individualReplays);
+    if (newReplays.has(replayId)) {
+      newReplays.delete(replayId);
+    } else {
+      newReplays.add(replayId);
+    }
+    setBulkReplaySelections({ ...bulkReplaySelections, individualReplays: newReplays });
+  };
+
+  // Grant bulk replay access
+  const handleBulkReplayAccessGrant = async () => {
+    if (selectedUserIds.size === 0) return;
+    if (bulkReplaySelections.yearBundles.size === 0 && bulkReplaySelections.individualReplays.size === 0) {
+      toast.error("Please select at least one replay or year bundle");
+      return;
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const userIds = Array.from(selectedUserIds);
+      const accessRecords = [];
+
+      // Grant year bundles
+      for (const year of bulkReplaySelections.yearBundles) {
+        for (const userId of userIds) {
+          accessRecords.push({
+            user_id: userId,
+            event_year: year,
+            replay_id: null,
+            is_admin_grant: true,
+            granted_by: session.user.id,
+            granted_at: new Date().toISOString(),
+          });
+        }
+      }
+
+      // Grant individual replays
+      for (const replayId of bulkReplaySelections.individualReplays) {
+        const replay = replays.find(r => r.id === replayId);
+        if (!replay) continue;
+
+        for (const userId of userIds) {
+          accessRecords.push({
+            user_id: userId,
+            event_year: replay.event_year,
+            replay_id: replayId,
+            is_admin_grant: true,
+            granted_by: session.user.id,
+            granted_at: new Date().toISOString(),
+          });
+        }
+      }
+
+      const { error } = await supabase
+        .from("replay_purchases")
+        .upsert(accessRecords, { 
+          onConflict: 'user_id,event_year,replay_id',
+          ignoreDuplicates: false 
+        });
+
+      if (error) throw error;
+
+      // Log the action
+      await logAction("bulk_grant_replay_access", null, {
+        user_count: userIds.length,
+        year_bundles: Array.from(bulkReplaySelections.yearBundles),
+        replay_count: bulkReplaySelections.individualReplays.size,
+      });
+
+      toast.success(`Replay access granted to ${userIds.length} user${userIds.length !== 1 ? 's' : ''}`);
+      
+      // Reset selections
+      setBulkReplayDialogOpen(false);
+      setBulkReplaySelections({ yearBundles: new Set(), individualReplays: new Set() });
+      clearSelection();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to grant replay access");
+    }
+  };
+
   // Parse bulk user data
   const handleParseBulkData = () => {
     try {
@@ -667,6 +789,7 @@ const AdminUsers = () => {
           selectedCount={selectedUserIds.size}
           onClearSelection={clearSelection}
           onBulkRoleAssign={handleBulkRoleAssign}
+          onBulkReplayAccess={handleBulkReplayAccessOpen}
         />
       </main>
 
@@ -884,6 +1007,67 @@ const AdminUsers = () => {
             >
               {importing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Import {parsedUsers.length} User{parsedUsers.length !== 1 ? 's' : ''}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Replay Access Dialog */}
+      <Dialog open={bulkReplayDialogOpen} onOpenChange={setBulkReplayDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Grant Replay Access</DialogTitle>
+            <DialogDescription>
+              Grant replay access to {selectedUserIds.size} selected user{selectedUserIds.size !== 1 ? 's' : ''}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-4">
+              {Array.from(new Set(replays.map(r => r.event_year))).sort((a, b) => b - a).map(year => (
+                <div key={`bulk-year-${year}`} className="space-y-3 border rounded-lg p-4">
+                  <div className="flex items-center space-x-3">
+                    <Checkbox
+                      id={`bulk-year-${year}`}
+                      checked={bulkReplaySelections.yearBundles.has(year)}
+                      onCheckedChange={() => toggleBulkYearBundle(year)}
+                    />
+                    <Label htmlFor={`bulk-year-${year}`} className="text-base font-semibold cursor-pointer">
+                      Full {year} Bundle
+                    </Label>
+                  </div>
+                  
+                  <div className="ml-6 space-y-2">
+                    <p className="text-sm text-muted-foreground mb-2">Individual Sessions:</p>
+                    {replays.filter(r => r.event_year === year).map(replay => (
+                      <div key={`bulk-replay-${replay.id}`} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`bulk-replay-${replay.id}`}
+                          checked={bulkReplaySelections.individualReplays.has(replay.id)}
+                          onCheckedChange={() => toggleBulkReplay(replay.id)}
+                        />
+                        <Label htmlFor={`bulk-replay-${replay.id}`} className="text-sm font-normal cursor-pointer">
+                          {replay.title}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setBulkReplayDialogOpen(false);
+                setBulkReplaySelections({ yearBundles: new Set(), individualReplays: new Set() });
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleBulkReplayAccessGrant}>
+              <Video className="mr-2 h-4 w-4" />
+              Grant Access
             </Button>
           </DialogFooter>
         </DialogContent>

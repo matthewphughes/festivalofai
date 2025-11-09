@@ -1,16 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { Users, Shield, Mic, User as UserIcon, X } from "lucide-react";
+import { Users, Shield, Mic, User as UserIcon, X, Video } from "lucide-react";
 
 interface BulkActionsBarProps {
   selectedCount: number;
   onClearSelection: () => void;
   onBulkRoleAssign: (role: string) => void;
+  onBulkReplayAccess: () => void;
 }
 
 export const BulkActionsBar = ({
   selectedCount,
   onClearSelection,
   onBulkRoleAssign,
+  onBulkReplayAccess,
 }: BulkActionsBarProps) => {
   if (selectedCount === 0) return null;
 
@@ -44,6 +46,14 @@ export const BulkActionsBar = ({
         >
           <Users className="mr-2 h-4 w-4" />
           Add Attendee Role
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={onBulkReplayAccess}
+        >
+          <Video className="mr-2 h-4 w-4" />
+          Grant Replay Access
         </Button>
       </div>
       
