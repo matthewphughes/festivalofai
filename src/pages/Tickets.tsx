@@ -89,9 +89,9 @@ const Tickets = () => {
     {
       name: "Festival of AI 2026",
       stripe_product_id: "prod_TOJtOyxypO8VCB",
-      price: "£147",
+      price: "£197",
       originalPrice: "£497",
-      discount: "70%",
+      discount: "60%",
       description: "In-person access to Festival of AI 2026",
       features: [
         "Full day access to all sessions",
@@ -106,9 +106,9 @@ const Tickets = () => {
     {
       name: "Festival of AI 2026 + Workshop",
       stripe_product_id: "prod_TOJs4TpP9zprD9",
-      price: "£197",
+      price: "£297",
       originalPrice: "£697",
-      discount: "72%",
+      discount: "57%",
       description: "Full access including exclusive workshops",
       features: [
         "Full day access to all sessions",
