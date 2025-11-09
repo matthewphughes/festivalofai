@@ -246,7 +246,7 @@ const LaunchOffer = () => {
       savings: "£300",
       discount: "60%",
       features: [
-        "Access all sessions on both ticket types",
+        "Access all sessions",
         "Beginner Stage OR Advanced Stage sessions",
         "All sessions Recorded",
         "Networking reception",
@@ -266,7 +266,7 @@ const LaunchOffer = () => {
       popular: true,
       features: [
         "Additional Workshop Day Oct 15th",
-        "Access all sessions on both ticket types",
+        "Access all sessions",
         "Beginner Stage OR Advanced Stage sessions",
         "All sessions Recorded",
         "Networking reception",
