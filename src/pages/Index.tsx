@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import StarField from "@/components/StarField";
@@ -17,6 +19,29 @@ import eventAtmosphere from "@/assets/event-atmosphere-1.jpg";
 import { Calendar, MapPin, Users, Lightbulb, Rocket, Zap, Play } from "lucide-react";
 
 const Index = () => {
+  const [api, setApi] = useState<CarouselApi>();
+  
+  useEffect(() => {
+    if (!api) return;
+
+    const interval = setInterval(() => {
+      api.scrollNext();
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [api]);
+
+  const galleryImages = [
+    { src: eventSpeaker1, alt: "Speaker presenting at Festival of AI 2025", label: "Inspiring Speakers" },
+    { src: eventAudience1, alt: "Engaged audience", label: "Engaged Learning" },
+    { src: eventNetworking1, alt: "Networking opportunities", label: "Networking" },
+    { src: eventSpeaker2, alt: "Expert presentations", label: "Expert Insights" },
+    { src: eventAtmosphere, alt: "Festival atmosphere", label: "Amazing Atmosphere" },
+    { src: eventAudience2, alt: "Full venue", label: "Packed Sessions" },
+    { src: eventNetworking2, alt: "Community connections", label: "Build Connections" },
+    { src: eventSpeaker3, alt: "Industry leaders", label: "Industry Leaders" },
+  ];
+
   const highlights = [
     {
       icon: <Users className="w-8 h-8" />,
@@ -90,13 +115,13 @@ const Index = () => {
         }}
       >
         <div className="absolute inset-0 bg-background/40" />
-        <div className="container mx-auto px-4 relative z-10 text-center py-32">
+        <div className="container mx-auto px-4 relative z-10 text-center py-20 md:py-32">
           <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight">
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               FESTIVAL OF AI
             </span>
           </h1>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-8 text-xl md:text-2xl font-semibold">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-6 text-xl md:text-2xl font-semibold">
             <div className="flex items-center gap-2">
               <Calendar className="text-accent" />
               <span>October 16th, 2026</span>
@@ -107,107 +132,11 @@ const Index = () => {
               <span>National Space Center, Leicester UK</span>
             </div>
           </div>
-          <p className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto text-foreground/90">
+          <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-foreground/90">
             Discover practical AI that actually moves the needle for your business
           </p>
           
-          {/* Image Gallery Highlights from Last Year */}
-          <div className="mb-12 max-w-6xl mx-auto">
-            <h3 className="text-2xl font-bold text-center mb-6">Highlights from 2025</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {/* Large featured image */}
-              <div className="col-span-2 row-span-2 relative overflow-hidden rounded-lg group cursor-pointer">
-                <img 
-                  src={eventSpeaker1} 
-                  alt="Speaker presenting at Festival of AI 2025" 
-                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                  <p className="text-lg font-semibold">Inspiring Speakers</p>
-                </div>
-              </div>
-              
-              {/* Grid of smaller images */}
-              <div className="relative overflow-hidden rounded-lg group cursor-pointer aspect-square">
-                <img 
-                  src={eventAudience1} 
-                  alt="Engaged audience" 
-                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <p className="text-sm font-semibold">Engaged Learning</p>
-                </div>
-              </div>
-              
-              <div className="relative overflow-hidden rounded-lg group cursor-pointer aspect-square">
-                <img 
-                  src={eventNetworking1} 
-                  alt="Networking opportunities" 
-                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <p className="text-sm font-semibold">Networking</p>
-                </div>
-              </div>
-              
-              <div className="relative overflow-hidden rounded-lg group cursor-pointer aspect-square">
-                <img 
-                  src={eventSpeaker2} 
-                  alt="Expert presentations" 
-                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <p className="text-sm font-semibold">Expert Insights</p>
-                </div>
-              </div>
-              
-              <div className="relative overflow-hidden rounded-lg group cursor-pointer aspect-square">
-                <img 
-                  src={eventAtmosphere} 
-                  alt="Festival atmosphere" 
-                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <p className="text-sm font-semibold">Amazing Atmosphere</p>
-                </div>
-              </div>
-              
-              <div className="col-span-2 relative overflow-hidden rounded-lg group cursor-pointer aspect-video">
-                <img 
-                  src={eventAudience2} 
-                  alt="Full venue" 
-                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <p className="text-base font-semibold">Packed Sessions</p>
-                </div>
-              </div>
-              
-              <div className="relative overflow-hidden rounded-lg group cursor-pointer aspect-square">
-                <img 
-                  src={eventNetworking2} 
-                  alt="Community connections" 
-                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <p className="text-sm font-semibold">Build Connections</p>
-                </div>
-              </div>
-              
-              <div className="relative overflow-hidden rounded-lg group cursor-pointer aspect-square">
-                <img 
-                  src={eventSpeaker3} 
-                  alt="Industry leaders" 
-                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <p className="text-sm font-semibold">Industry Leaders</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Button
               asChild
               size="lg"
@@ -221,8 +150,54 @@ const Index = () => {
               variant="outline"
               className="text-lg px-8 py-6 border-accent text-accent hover:bg-accent hover:text-accent-foreground"
             >
+              <Link to="/buy-replays">Buy 2025 Replays</Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="text-lg px-8 py-6"
+            >
               <Link to="/about">Learn More</Link>
             </Button>
+          </div>
+          
+          {/* Carousel Gallery Highlights from 2025 */}
+          <div className="max-w-5xl mx-auto">
+            <h3 className="text-2xl font-bold text-center mb-6">Highlights from 2025</h3>
+            <Carousel
+              setApi={setApi}
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {galleryImages.map((image, index) => (
+                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                    <div className="p-1">
+                      <Card className="overflow-hidden border-2 border-border/50 hover:border-accent transition-colors">
+                        <CardContent className="p-0">
+                          <div className="relative aspect-video overflow-hidden group">
+                            <img 
+                              src={image.src} 
+                              alt={image.alt} 
+                              className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                              <p className="text-base font-semibold">{image.label}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-2" />
+              <CarouselNext className="right-2" />
+            </Carousel>
           </div>
         </div>
       </section>
