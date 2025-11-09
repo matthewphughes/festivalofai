@@ -18,7 +18,7 @@ interface StripeProduct {
   stripe_product_id: string;
   stripe_price_id: string;
   product_name: string;
-  product_type: "individual_replay" | "year_bundle";
+  product_type: "individual_replay" | "year_bundle" | "ticket" | "bundle";
   event_year: number;
   replay_id: string | null;
   amount: number;
@@ -52,7 +52,7 @@ const AdminStripeProducts = () => {
   // Form state
   const [formData, setFormData] = useState({
     product_name: "",
-    product_type: "individual_replay" as "individual_replay" | "year_bundle",
+    product_type: "individual_replay" as "individual_replay" | "year_bundle" | "ticket" | "bundle",
     event_year: new Date().getFullYear(),
     replay_id: "",
     amount: 0,
@@ -276,7 +276,7 @@ const AdminStripeProducts = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
-      <main className="flex-1 container py-8">
+      <main className="flex-1 container py-8 mt-24">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-4xl font-bold mb-2">Stripe Product Management</h1>
@@ -304,7 +304,7 @@ const AdminStripeProducts = () => {
                     <Label>Product Type</Label>
                     <Select
                       value={formData.product_type}
-                      onValueChange={(value: "individual_replay" | "year_bundle") =>
+                      onValueChange={(value: "individual_replay" | "year_bundle" | "ticket" | "bundle") =>
                         setFormData({ ...formData, product_type: value })
                       }
                     >
@@ -314,6 +314,8 @@ const AdminStripeProducts = () => {
                       <SelectContent>
                         <SelectItem value="individual_replay">Individual Replay</SelectItem>
                         <SelectItem value="year_bundle">Year Bundle</SelectItem>
+                        <SelectItem value="ticket">Ticket</SelectItem>
+                        <SelectItem value="bundle">Bundle</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -346,7 +348,7 @@ const AdminStripeProducts = () => {
                     </div>
                   )}
 
-                  {formData.product_type === "year_bundle" && (
+                  {(formData.product_type === "year_bundle" || formData.product_type === "ticket" || formData.product_type === "bundle") && (
                     <div>
                       <Label>Event Year</Label>
                       <Input
@@ -437,8 +439,10 @@ const AdminStripeProducts = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="individual_replay">Individual</SelectItem>
-                    <SelectItem value="year_bundle">Bundle</SelectItem>
+                    <SelectItem value="individual_replay">Individual Replay</SelectItem>
+                    <SelectItem value="year_bundle">Year Bundle</SelectItem>
+                    <SelectItem value="ticket">Ticket</SelectItem>
+                    <SelectItem value="bundle">Bundle</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -478,7 +482,10 @@ const AdminStripeProducts = () => {
                             {product.active ? "Active" : "Inactive"}
                           </Badge>
                           <Badge variant="outline">
-                            {product.product_type === "individual_replay" ? "🎬 Individual" : "📦 Bundle"}
+                            {product.product_type === "individual_replay" ? "🎬 Individual" : 
+                             product.product_type === "ticket" ? "🎟️ Ticket" :
+                             product.product_type === "bundle" ? "📦 Bundle" : 
+                             "📦 Year Bundle"}
                           </Badge>
                         </CardTitle>
                         <CardDescription>
