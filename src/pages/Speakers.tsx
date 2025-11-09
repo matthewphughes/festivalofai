@@ -6,21 +6,9 @@ import Footer from "@/components/Footer";
 import StarField from "@/components/StarField";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Linkedin, Twitter, Globe, Youtube, Instagram, Play, Clock, Lock } from "lucide-react";
+import { Linkedin, Twitter, Globe, Youtube, Instagram } from "lucide-react";
 import { toast } from "sonner";
-
-interface Replay {
-  id: string;
-  title: string;
-  description: string;
-  video_url: string;
-  thumbnail_url: string | null;
-  event_year: number;
-  duration_minutes: number | null;
-  published: boolean;
-}
 
 interface Speaker {
   id: string;
@@ -37,115 +25,33 @@ interface Speaker {
   instagram_url: string | null;
   website_url: string | null;
   slug: string;
-  replays?: Replay[];
 }
 
 
 const Speakers = () => {
   const navigate = useNavigate();
-  const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
   const [yearFilter, setYearFilter] = useState<"all" | "2025" | "2026">("all");
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
   const [loading, setLoading] = useState(true);
-  const [purchasedYears, setPurchasedYears] = useState<number[]>([]);
-  const [purchasedReplayIds, setPurchasedReplayIds] = useState<string[]>([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    checkAuthAndFetch();
+    fetchSpeakers();
   }, []);
-
-  const checkAuthAndFetch = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setIsAuthenticated(!!session);
-
-    if (session) {
-      await checkPurchasedYears();
-    }
-
-    await fetchSpeakers();
-  };
-
-  const checkPurchasedYears = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-
-    const { data, error } = await supabase
-      .from("replay_purchases")
-      .select("event_year, replay_id")
-      .eq("user_id", session.user.id);
-
-    if (error) {
-      console.error("Error fetching purchases:", error);
-      return;
-    }
-
-    // Get years from bundle purchases (where replay_id is null)
-    const bundleYears = data
-      ?.filter(p => p.replay_id === null)
-      .map(p => p.event_year) || [];
-    
-    // Get individual replay IDs
-    const individualReplayIds = data
-      ?.filter(p => p.replay_id !== null)
-      .map(p => p.replay_id as string) || [];
-    
-    const years = [...new Set(bundleYears)];
-    setPurchasedYears(years);
-    setPurchasedReplayIds(individualReplayIds);
-  };
 
   const fetchSpeakers = async () => {
     setLoading(true);
     
-    // Fetch speakers with their replays
     const { data, error } = await supabase
       .from("speakers")
-      .select(`
-        *,
-        replays:event_replays(
-          id,
-          title,
-          description,
-          video_url,
-          thumbnail_url,
-          event_year,
-          duration_minutes,
-          published
-        )
-      `)
+      .select("*")
       .order("name", { ascending: true });
 
     if (error) {
       toast.error("Failed to load speakers");
     } else {
-      // Filter to only show published replays for non-authenticated users
-      const processedSpeakers = (data || []).map(speaker => ({
-        ...speaker,
-        replays: (speaker.replays || []).filter((replay: Replay) => replay.published)
-      }));
-      setSpeakers(processedSpeakers);
+      setSpeakers(data || []);
     }
     setLoading(false);
-  };
-
-  const hasAccessToReplay = (replay: Replay) => {
-    // Check if user has purchased the year bundle or the individual replay
-    return purchasedYears.includes(replay.event_year) || 
-           purchasedReplayIds.includes(replay.id);
-  };
-
-  const handleBuyReplay = () => {
-    if (!isAuthenticated) {
-      navigate("/auth?redirect=/speakers");
-    } else {
-      navigate("/buy-replays");
-    }
-  };
-
-  const getYouTubeEmbedUrl = (url: string) => {
-    const videoId = url.split('v=')[1]?.split('&')[0];
-    return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
   };
 
   const filteredSpeakers = yearFilter === "all" 
@@ -212,7 +118,7 @@ const Speakers = () => {
                 <Card
                   key={speaker.id}
                   className="bg-card/50 backdrop-blur-sm border-border hover:border-primary transition-all duration-300 hover:scale-105 group cursor-pointer"
-                  onClick={() => setSelectedSpeaker(speaker)}
+                  onClick={() => navigate(`/speakers/${speaker.slug}`)}
                 >
                   <CardContent className="p-6">
                     <div className="relative mb-4 overflow-hidden rounded-lg">
@@ -300,129 +206,6 @@ const Speakers = () => {
               ))}
             </div>
           )}
-
-          {/* Speaker Profile Dialog */}
-          <Dialog open={!!selectedSpeaker} onOpenChange={() => setSelectedSpeaker(null)}>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <div className="flex items-center gap-4 mb-4">
-                  <img
-                    src={selectedSpeaker?.image_url || "/placeholder.svg"}
-                    alt={selectedSpeaker?.name}
-                    className="w-24 h-24 rounded-full object-cover"
-                  />
-                  <div>
-                    <DialogTitle className="text-2xl">{selectedSpeaker?.name}</DialogTitle>
-                    {selectedSpeaker?.title && (
-                      <p className="text-muted-foreground">{selectedSpeaker.title}</p>
-                    )}
-                    {selectedSpeaker?.company && (
-                      <p className="text-sm text-muted-foreground">{selectedSpeaker.company}</p>
-                    )}
-                  </div>
-                </div>
-              </DialogHeader>
-
-              <div className="space-y-4">
-                {/* Years */}
-                {selectedSpeaker?.years && selectedSpeaker.years.length > 0 && (
-                  <div className="flex gap-2">
-                    {selectedSpeaker.years.sort().map((year) => (
-                      <Badge key={year} variant="secondary">
-                        {year}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-
-                {selectedSpeaker?.bio && (
-                  <p className="text-sm text-muted-foreground">
-                    {selectedSpeaker.bio}
-                  </p>
-                )}
-
-                {/* Social Links */}
-                <div>
-                  <div className="flex gap-4">
-                    {selectedSpeaker?.linkedin_url && (
-                      <a
-                        href={selectedSpeaker.linkedin_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        <Linkedin className="h-6 w-6" />
-                      </a>
-                    )}
-                    {selectedSpeaker?.twitter_url && (
-                      <a
-                        href={selectedSpeaker.twitter_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        <Twitter className="h-6 w-6" />
-                      </a>
-                    )}
-                    {selectedSpeaker?.youtube_url && (
-                      <a
-                        href={selectedSpeaker.youtube_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        <Youtube className="h-6 w-6" />
-                      </a>
-                    )}
-                    {selectedSpeaker?.instagram_url && (
-                      <a
-                        href={selectedSpeaker.instagram_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        <Instagram className="h-6 w-6" />
-                      </a>
-                    )}
-                    {selectedSpeaker?.tiktok_url && (
-                      <a
-                        href={selectedSpeaker.tiktok_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                        </svg>
-                      </a>
-                    )}
-                    {selectedSpeaker?.website_url && (
-                      <a
-                        href={selectedSpeaker.website_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        <Globe className="h-6 w-6" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                {/* View Full Profile Button */}
-                <Button
-                  className="w-full"
-                  onClick={() => {
-                    if (selectedSpeaker?.slug) {
-                      window.location.href = `/speakers/${selectedSpeaker.slug}`;
-                    }
-                  }}
-                >
-                  View Full Profile
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
 
           {/* CTA */}
           <Card className="bg-gradient-to-r from-primary/20 to-secondary/20 border-primary">
