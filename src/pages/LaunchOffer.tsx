@@ -266,6 +266,8 @@ const LaunchOffer = () => {
       popular: true,
       features: [
         "Additional Workshop Day Oct 15th",
+        "Access all sessions on both ticket types",
+        "Beginner Stage OR Advanced Stage sessions",
         "All sessions Recorded",
         "Networking reception",
         "Gift bag",
