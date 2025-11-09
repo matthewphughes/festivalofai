@@ -670,7 +670,7 @@ export type Database = {
           display_order: number
           id: string
           is_published: boolean
-          quote: string
+          quote: string | null
           thumbnail_url: string | null
           updated_at: string
           video_url: string | null
@@ -682,7 +682,7 @@ export type Database = {
           display_order?: number
           id?: string
           is_published?: boolean
-          quote: string
+          quote?: string | null
           thumbnail_url?: string | null
           updated_at?: string
           video_url?: string | null
@@ -694,7 +694,7 @@ export type Database = {
           display_order?: number
           id?: string
           is_published?: boolean
-          quote?: string
+          quote?: string | null
           thumbnail_url?: string | null
           updated_at?: string
           video_url?: string | null

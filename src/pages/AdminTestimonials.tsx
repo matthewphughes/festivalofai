@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Trash2, Plus, Edit2, Save, X, GripVertical } from "lucide-react";
+import { Trash2, Plus, Edit2, Save, X, GripVertical, Upload, Image as ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
 import MinimalFooter from "@/components/MinimalFooter";
@@ -39,6 +39,8 @@ const AdminTestimonials = () => {
     video_url: "",
     is_published: true,
   });
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
 
   useEffect(() => {
     fetchTestimonials();
@@ -61,14 +63,50 @@ const AdminTestimonials = () => {
     }
   };
 
+  const handleThumbnailUpload = async (file: File) => {
+    try {
+      setUploadingThumbnail(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `testimonial-thumbnails/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('event-assets')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('event-assets')
+        .getPublicUrl(filePath);
+
+      setFormData({ ...formData, thumbnail_url: publicUrl });
+      toast.success("Thumbnail uploaded successfully");
+    } catch (error) {
+      console.error("Error uploading thumbnail:", error);
+      toast.error("Failed to upload thumbnail");
+    } finally {
+      setUploadingThumbnail(false);
+      setThumbnailFile(null);
+    }
+  };
+
   const handleCreate = async () => {
     try {
+      let thumbnailUrl = formData.thumbnail_url;
+
+      if (thumbnailFile) {
+        await handleThumbnailUpload(thumbnailFile);
+        return;
+      }
+
       const maxOrder = testimonials.length > 0 
         ? Math.max(...testimonials.map(t => t.display_order))
         : -1;
 
       const { error } = await supabase.from("testimonials").insert({
         ...formData,
+        quote: formData.quote || null,
         display_order: maxOrder + 1,
       });
 
@@ -86,9 +124,17 @@ const AdminTestimonials = () => {
 
   const handleUpdate = async (id: string) => {
     try {
+      if (thumbnailFile) {
+        await handleThumbnailUpload(thumbnailFile);
+        return;
+      }
+
       const { error } = await supabase
         .from("testimonials")
-        .update(formData)
+        .update({
+          ...formData,
+          quote: formData.quote || null,
+        })
         .eq("id", id);
 
       if (error) throw error;
@@ -149,6 +195,7 @@ const AdminTestimonials = () => {
       video_url: "",
       is_published: true,
     });
+    setThumbnailFile(null);
   };
 
   const togglePublished = async (id: string, currentStatus: boolean) => {
@@ -198,7 +245,7 @@ const AdminTestimonials = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="new-quote">Quote *</Label>
+                <Label htmlFor="new-quote">Quote</Label>
                 <Textarea
                   id="new-quote"
                   value={formData.quote}
@@ -230,15 +277,41 @@ const AdminTestimonials = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div>
-                  <Label htmlFor="new-thumbnail">Thumbnail URL</Label>
-                  <Input
-                    id="new-thumbnail"
-                    value={formData.thumbnail_url}
-                    onChange={(e) => setFormData({ ...formData, thumbnail_url: e.target.value })}
-                    placeholder="https://example.com/image.jpg"
-                  />
+                  <Label htmlFor="new-thumbnail-file">Upload Thumbnail</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="new-thumbnail-file"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setThumbnailFile(file);
+                        }
+                      }}
+                      disabled={uploadingThumbnail}
+                    />
+                    {thumbnailFile && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => handleThumbnailUpload(thumbnailFile)}
+                        disabled={uploadingThumbnail}
+                      >
+                        {uploadingThumbnail ? "Uploading..." : "Upload"}
+                      </Button>
+                    )}
+                  </div>
+                  {formData.thumbnail_url && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground truncate">
+                        {formData.thumbnail_url}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -293,7 +366,7 @@ const AdminTestimonials = () => {
                   {editingId === testimonial.id ? (
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor={`quote-${testimonial.id}`}>Quote *</Label>
+                        <Label htmlFor={`quote-${testimonial.id}`}>Quote</Label>
                         <Textarea
                           id={`quote-${testimonial.id}`}
                           value={formData.quote}
@@ -322,14 +395,41 @@ const AdminTestimonials = () => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-4">
                         <div>
-                          <Label htmlFor={`thumbnail-${testimonial.id}`}>Thumbnail URL</Label>
-                          <Input
-                            id={`thumbnail-${testimonial.id}`}
-                            value={formData.thumbnail_url}
-                            onChange={(e) => setFormData({ ...formData, thumbnail_url: e.target.value })}
-                          />
+                          <Label htmlFor={`thumbnail-file-${testimonial.id}`}>Upload Thumbnail</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              id={`thumbnail-file-${testimonial.id}`}
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  setThumbnailFile(file);
+                                }
+                              }}
+                              disabled={uploadingThumbnail}
+                            />
+                            {thumbnailFile && (
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleThumbnailUpload(thumbnailFile)}
+                                disabled={uploadingThumbnail}
+                              >
+                                {uploadingThumbnail ? "Uploading..." : "Upload"}
+                              </Button>
+                            )}
+                          </div>
+                          {formData.thumbnail_url && (
+                            <div className="mt-2 flex items-center gap-2">
+                              <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground truncate">
+                                {formData.thumbnail_url}
+                              </span>
+                            </div>
+                          )}
                         </div>
 
                         <div>
