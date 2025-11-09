@@ -146,26 +146,26 @@ const Tickets = () => {
       <StarField />
       <Navigation />
 
-      <main className="pt-32 pb-20 relative z-10">
+      <main className="pt-24 md:pt-32 pb-12 md:pb-20 relative z-10">
         <div className="container mx-auto px-4">
           {/* Header */}
-          <div className="text-center mb-16">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+          <div className="text-center mb-8 md:mb-16">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
               Get Your <span className="text-accent">Tickets</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-6 md:mb-8">
               Secure your spot at Festival of AI 2026 - October 16th at the National Space Centre, Leicester
             </p>
             
             {/* Countdown Timer */}
-            <div className="max-w-2xl mx-auto mb-8">
-              <div className="bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/30 rounded-2xl p-8">
-                <div className="text-center mb-6">
-                  <div className="inline-block bg-accent/20 text-accent border border-accent/50 px-4 py-2 rounded-full text-sm font-bold mb-4">
+            <div className="max-w-2xl mx-auto mb-6 md:mb-8">
+              <div className="bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/30 rounded-2xl p-4 md:p-8">
+                <div className="text-center mb-4 md:mb-6">
+                  <div className="inline-block bg-accent/20 text-accent border border-accent/50 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-bold mb-3 md:mb-4">
                     🎉 SUPER EARLY BIRD PRICING - Limited Time Only!
                   </div>
-                  <h3 className="text-2xl font-bold mb-2">Offer Ends In:</h3>
-                  <p className="text-sm text-muted-foreground">Friday at 5PM</p>
+                  <h3 className="text-xl md:text-2xl font-bold mb-1 md:mb-2">Offer Ends In:</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground">Friday at 5PM</p>
                 </div>
                 <CountdownTimer targetDate={superEarlyBirdEndDate} />
               </div>

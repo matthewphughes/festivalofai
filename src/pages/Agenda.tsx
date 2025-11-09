@@ -182,14 +182,14 @@ const Schedule = () => {
       <StarField />
       <Navigation />
 
-      <main className="pt-32 pb-20 relative z-10">
+      <main className="pt-24 md:pt-32 pb-12 md:pb-20 relative z-10">
         <div className="container mx-auto px-4 max-w-6xl">
           {/* Header */}
-          <div className="text-center mb-16">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+          <div className="text-center mb-8 md:mb-16">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
               Event <span className="text-accent">Schedule</span>
             </h1>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-lg md:text-xl text-muted-foreground">
               October 15-16th, 2026 | National Space Centre, Leicester
             </p>
           </div>

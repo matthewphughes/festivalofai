@@ -116,31 +116,31 @@ const Index = () => {
       >
         <div className="absolute inset-0 bg-background/40" />
         <div className="container mx-auto px-4 relative z-10 text-center py-20 md:py-32">
-          <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black mb-4 md:mb-6 tracking-tight">
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               FESTIVAL OF AI
             </span>
           </h1>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-6 text-xl md:text-2xl font-semibold">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4 mb-4 md:mb-6 text-base sm:text-xl md:text-2xl font-semibold">
             <div className="flex items-center gap-2">
-              <Calendar className="text-accent" />
-              <span>October 16th, 2026</span>
+              <Calendar className="text-accent w-5 h-5 md:w-6 md:h-6" />
+              <span className="text-sm sm:text-base md:text-xl">October 16th, 2026</span>
             </div>
             <div className="hidden md:block text-accent">|</div>
             <div className="flex items-center gap-2">
-              <MapPin className="text-accent" />
-              <span>National Space Centre, Leicester UK</span>
+              <MapPin className="text-accent w-5 h-5 md:w-6 md:h-6" />
+              <span className="text-sm sm:text-base md:text-xl">National Space Centre, Leicester UK</span>
             </div>
           </div>
-          <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-foreground/90">
+          <p className="text-lg sm:text-xl md:text-2xl mb-6 md:mb-8 max-w-3xl mx-auto text-foreground/90 px-4">
             Discover practical AI that actually moves the needle for your business
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-center mb-8 md:mb-12 px-4">
             <Button
               asChild
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-lg px-8 py-6 animate-pulse-glow"
+              className="bg-primary hover:bg-primary/90 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 animate-pulse-glow w-full sm:w-auto"
             >
               <Link to="/tickets">Get Your 2026 Ticket</Link>
             </Button>
@@ -148,15 +148,15 @@ const Index = () => {
               asChild
               size="lg"
               variant="outline"
-              className="text-lg px-8 py-6 border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+              className="text-base md:text-lg px-6 md:px-8 py-5 md:py-6 border-accent text-accent hover:bg-accent hover:text-accent-foreground w-full sm:w-auto"
             >
               <Link to="/buy-replays">Buy 2025 Replays</Link>
             </Button>
           </div>
           
           {/* Carousel Gallery Highlights from 2025 */}
-          <div className="max-w-5xl mx-auto">
-            <h3 className="text-2xl font-bold text-center mb-6">Highlights from 2025</h3>
+          <div className="max-w-5xl mx-auto px-4">
+            <h3 className="text-xl md:text-2xl font-bold text-center mb-4 md:mb-6">Highlights from 2025</h3>
             <Carousel
               setApi={setApi}
               opts={{
@@ -195,23 +195,23 @@ const Index = () => {
       </section>
 
       {/* Why Attend Section */}
-      <section className="py-20 relative z-10">
+      <section className="py-12 md:py-20 relative z-10">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-8 md:mb-16">
             Why Attend <span className="text-accent">Festival of AI?</span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {highlights.map((highlight, index) => (
               <Card
                 key={index}
                 className="bg-card/50 backdrop-blur-sm border-border hover:border-primary transition-all duration-300 hover:scale-105"
               >
-                <CardContent className="p-6 text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 text-primary mb-4">
+                <CardContent className="p-4 md:p-6 text-center">
+                  <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary/20 text-primary mb-3 md:mb-4">
                     {highlight.icon}
                   </div>
-                  <h3 className="text-xl font-bold mb-3">{highlight.title}</h3>
-                  <p className="text-muted-foreground">{highlight.description}</p>
+                  <h3 className="text-lg md:text-xl font-bold mb-2 md:mb-3">{highlight.title}</h3>
+                  <p className="text-sm md:text-base text-muted-foreground">{highlight.description}</p>
                 </CardContent>
               </Card>
             ))}

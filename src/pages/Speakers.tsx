@@ -63,14 +63,14 @@ const Speakers = () => {
       <StarField />
       <Navigation />
 
-      <main className="pt-32 pb-20 relative z-10">
+      <main className="pt-24 md:pt-32 pb-12 md:pb-20 relative z-10">
         <div className="container mx-auto px-4">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+          <div className="text-center mb-8 md:mb-12">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
               Our <span className="text-accent">Speakers</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
               Learn from world-class AI practitioners, innovators, and thought leaders who are shaping 
               the future of artificial intelligence.
             </p>
