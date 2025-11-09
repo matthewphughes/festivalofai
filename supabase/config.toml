@@ -11,3 +11,6 @@ verify_jwt = true
 
 [functions.create-checkout]
 verify_jwt = true
+
+[functions.get-stripe-publishable-key]
+verify_jwt = false

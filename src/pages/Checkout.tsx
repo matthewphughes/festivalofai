@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
@@ -15,8 +15,6 @@ import { Separator } from "@/components/ui/separator";
 import logoLight from "@/assets/logo-light.png";
 import logoDark from "@/assets/logo-dark.png";
 import { useTheme } from "next-themes";
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
 
 const CheckoutForm = ({ isGuest, userEmail }: { isGuest: boolean; userEmail: string | null }) => {
   const stripe = useStripe();
@@ -145,10 +143,39 @@ const Checkout = () => {
   const [isGuest, setIsGuest] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
+  const [stripeError, setStripeError] = useState<string | null>(null);
 
   useEffect(() => {
+    initializeStripe();
     checkAuthAndCreateIntent();
   }, []);
+
+  const initializeStripe = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("get-stripe-publishable-key");
+      
+      if (error) {
+        console.error("Failed to fetch Stripe key:", error);
+        setStripeError("Unable to initialize payment system");
+        return;
+      }
+
+      const { publishableKey } = data;
+      
+      if (!publishableKey || !publishableKey.startsWith("pk_")) {
+        console.error("Invalid Stripe publishable key received:", publishableKey?.substring(0, 7));
+        setStripeError("Payment system configuration error");
+        return;
+      }
+
+      console.log("Initializing Stripe with key:", publishableKey.substring(0, 7));
+      setStripePromise(loadStripe(publishableKey));
+    } catch (error: any) {
+      console.error("Stripe initialization error:", error);
+      setStripeError("Unable to initialize payment system");
+    }
+  };
 
   const checkAuthAndCreateIntent = async () => {
     try {
@@ -311,7 +338,14 @@ const Checkout = () => {
                   </p>
                 </div>
               )}
-              {clientSecret && (
+              {stripeError ? (
+                <div className="text-center p-6 bg-destructive/10 rounded-lg">
+                  <p className="text-destructive font-semibold mb-2">Payment system unavailable</p>
+                  <p className="text-sm text-muted-foreground">
+                    {stripeError}. Please contact support if this persists.
+                  </p>
+                </div>
+              ) : clientSecret && stripePromise ? (
                 <Elements 
                   stripe={stripePromise} 
                   options={{ 
@@ -330,6 +364,11 @@ const Checkout = () => {
                 >
                   <CheckoutForm isGuest={isGuest} userEmail={userEmail} />
                 </Elements>
+              ) : (
+                <div className="text-center p-6">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground mt-2">Loading payment form...</p>
+                </div>
               )}
             </CardContent>
           </Card>
