@@ -28,6 +28,84 @@ const CheckoutForm = ({ isGuest, userEmail }: { isGuest: boolean; userEmail: str
   const [createAccount, setCreateAccount] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [verifyingCoupon, setVerifyingCoupon] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+
+  const verifyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+
+    setVerifyingCoupon(true);
+
+    try {
+      const { data: coupon, error } = await supabase
+        .from("stripe_coupons")
+        .select("*")
+        .eq("code", couponCode.toUpperCase())
+        .eq("active", true)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (!coupon) {
+        toast.error("Invalid coupon code");
+        setVerifyingCoupon(false);
+        return;
+      }
+
+      // Check if coupon is valid (not expired, not max redemptions)
+      const now = new Date();
+      if (coupon.valid_until && new Date(coupon.valid_until) < now) {
+        toast.error("This coupon has expired");
+        setVerifyingCoupon(false);
+        return;
+      }
+
+      if (coupon.valid_from && new Date(coupon.valid_from) > now) {
+        toast.error("This coupon is not yet valid");
+        setVerifyingCoupon(false);
+        return;
+      }
+
+      if (coupon.max_redemptions && coupon.times_redeemed >= coupon.max_redemptions) {
+        toast.error("This coupon has reached its usage limit");
+        setVerifyingCoupon(false);
+        return;
+      }
+
+      // Calculate discount
+      let discountAmount = 0;
+      if (coupon.discount_type === "percentage") {
+        discountAmount = Math.round((total * coupon.discount_value) / 100);
+      } else {
+        // Fixed amount discount
+        discountAmount = coupon.discount_value;
+      }
+
+      // Don't allow discount to exceed total
+      if (discountAmount > total) {
+        discountAmount = total;
+      }
+
+      setDiscount(discountAmount);
+      setAppliedCoupon(couponCode.toUpperCase());
+      toast.success(`Coupon applied! You saved £${(discountAmount / 100).toFixed(2)}`);
+    } catch (error: any) {
+      console.error("Error verifying coupon:", error);
+      toast.error("Failed to verify coupon code");
+    } finally {
+      setVerifyingCoupon(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setDiscount(0);
+    setAppliedCoupon(null);
+    setCouponCode("");
+    toast.success("Coupon removed");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +143,7 @@ const CheckoutForm = ({ isGuest, userEmail }: { isGuest: boolean; userEmail: str
             body: {
               payment_intent_id: paymentIntentId,
               create_account: isGuest && createAccount,
+              coupon_code: appliedCoupon,
             },
           });
 
@@ -106,11 +185,40 @@ const CheckoutForm = ({ isGuest, userEmail }: { isGuest: boolean; userEmail: str
             value={couponCode}
             onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
             placeholder="DISCOUNT20"
+            disabled={!!appliedCoupon}
+            maxLength={50}
           />
+          {appliedCoupon ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={removeCoupon}
+              className="whitespace-nowrap"
+            >
+              Remove
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={verifyCoupon}
+              disabled={verifyingCoupon || !couponCode.trim()}
+              className="whitespace-nowrap"
+            >
+              {verifyingCoupon ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Verifying...
+                </>
+              ) : (
+                "Apply Code"
+              )}
+            </Button>
+          )}
         </div>
-        {discount > 0 && (
-          <p className="text-sm text-green-600">
-            Discount applied: -£{(discount / 100).toFixed(2)}
+        {discount > 0 && appliedCoupon && (
+          <p className="text-sm text-green-600 font-semibold">
+            ✓ Coupon "{appliedCoupon}" applied: -£{(discount / 100).toFixed(2)}
           </p>
         )}
       </div>
