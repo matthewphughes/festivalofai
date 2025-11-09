@@ -57,7 +57,7 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    console.log(`Managing coupon: ${operation}`);
+    console.log(`Managing coupon operation: ${operation}`);
 
     switch (operation) {
       case "create": {
