@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2, Upload } from "lucide-react";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
 
 const AdminSiteSettings = () => {
   const [loading, setLoading] = useState(false);
@@ -109,7 +111,10 @@ const AdminSiteSettings = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      
+      <div className="container mx-auto px-4 py-24 max-w-4xl">
       <h1 className="text-3xl font-bold mb-8">Site Settings</h1>
 
       <Card>
@@ -227,6 +232,9 @@ const AdminSiteSettings = () => {
           </Button>
         </CardContent>
       </Card>
+      </div>
+      
+      <Footer />
     </div>
   );
 };
