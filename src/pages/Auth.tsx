@@ -49,26 +49,35 @@ const Auth = () => {
   const [showPasswordUpdate, setShowPasswordUpdate] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isRecoveryFlow, setIsRecoveryFlow] = useState(false);
 
   useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
+    // Detect recovery from URL (hash or query)
+    const urlHasRecovery = window.location.hash.includes('type=recovery') || searchParams.get('type') === 'recovery';
+    if (urlHasRecovery) {
+      setIsRecoveryFlow(true);
+      setShowPasswordUpdate(true);
+    }
+
+    // Listen for auth changes FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setIsRecoveryFlow(true);
+        setShowPasswordUpdate(true);
+      } else if (event === "SIGNED_IN" && !urlHasRecovery && !isRecoveryFlow) {
         navigate(returnUrl);
       }
     });
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "PASSWORD_RECOVERY") {
-        setShowPasswordUpdate(true);
-      } else if (session && event === "SIGNED_IN") {
+    // Then check for existing session (avoid redirect during recovery)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session && !urlHasRecovery && !isRecoveryFlow) {
         navigate(returnUrl);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, returnUrl]);
+  }, [navigate, returnUrl, searchParams, isRecoveryFlow]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,6 +230,7 @@ const Auth = () => {
         setShowPasswordUpdate(false);
         setNewPassword("");
         setConfirmPassword("");
+        window.history.replaceState(null, '', window.location.pathname);
         navigate(returnUrl);
       }
     } catch (error) {
