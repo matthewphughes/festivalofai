@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ interface Campaign {
 }
 
 const DiscountBanner = () => {
+  const bannerRef = useRef<HTMLDivElement>(null);
   const [dismissed, setDismissed] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
@@ -73,6 +74,24 @@ const DiscountBanner = () => {
 
     return () => clearInterval(timer);
   }, [campaign]);
+
+  // Update CSS variable for banner height
+  const visible = Boolean(campaign && !dismissed && timeLeft);
+  
+  useEffect(() => {
+    const updateHeight = () => {
+      const height = visible && bannerRef.current ? bannerRef.current.offsetHeight : 0;
+      document.documentElement.style.setProperty('--discount-banner-height', `${height}px`);
+    };
+
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+
+    return () => {
+      document.documentElement.style.setProperty('--discount-banner-height', '0px');
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, [visible]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,7 +144,7 @@ const DiscountBanner = () => {
 
   return (
     <>
-      <div className="bg-primary text-primary-foreground py-3 px-4 relative">
+      <div ref={bannerRef} className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground py-3 px-4">
         <div className="container mx-auto flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <p className="font-semibold text-sm md:text-base truncate">{campaign.banner_message}</p>
