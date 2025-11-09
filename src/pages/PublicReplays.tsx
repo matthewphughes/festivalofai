@@ -44,9 +44,11 @@ const PublicReplays = () => {
   const fetchReplays = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from("event_replays")
+      .from("sessions")
       .select("*")
       .eq("published", true)
+      .not("video_url", "is", null)
+      .not("price_id", "is", null)
       .order("event_year", { ascending: false });
 
     if (error) {

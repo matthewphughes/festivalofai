@@ -54,13 +54,13 @@ const Admin = () => {
       .from("profiles")
       .select("*", { count: 'exact', head: true });
 
-    // Fetch replay stats
-    const { data: replays } = await supabase
-      .from("event_replays")
+    // Fetch session stats
+    const { data: sessions } = await supabase
+      .from("sessions")
       .select("published");
 
-    const publishedCount = replays?.filter(r => r.published).length || 0;
-    const totalCount = replays?.length || 0;
+    const publishedCount = sessions?.filter(s => s.published).length || 0;
+    const totalCount = sessions?.length || 0;
 
     setStats({
       totalUsers: userCount || 0,
@@ -135,15 +135,31 @@ const Admin = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Event Replays</CardTitle>
-                  <CardDescription>Manage event replay videos</CardDescription>
+                  <CardTitle>Event Sessions</CardTitle>
+                  <CardDescription>Manage event sessions and replays</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Create, edit, and publish event replay videos for users to view.
+                    Create, edit, and manage event sessions with dates, times, and replays.
                   </p>
-                  <Button onClick={() => navigate("/admin/replays")} className="w-full">
-                    Manage Replays
+                  <Button onClick={() => navigate("/admin/sessions")} className="w-full">
+                    Manage Sessions
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Agenda Builder</CardTitle>
+                  <CardDescription>Curate the public agenda</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Select which sessions appear on the public agenda and set their order.
+                  </p>
+                  <Button onClick={() => navigate("/admin/agenda-builder")} className="w-full">
+                    Build Agenda
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </CardContent>

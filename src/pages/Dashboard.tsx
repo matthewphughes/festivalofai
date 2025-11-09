@@ -50,11 +50,12 @@ const Dashboard = () => {
     const isUserAdmin = roles?.some(r => r.role === "admin") || false;
     setIsAdmin(isUserAdmin);
 
-    // Get replay count
+    // Get session replay count
     const { count } = await supabase
-      .from("event_replays")
+      .from("sessions")
       .select("*", { count: 'exact', head: true })
-      .eq("published", true);
+      .eq("published", true)
+      .not("video_url", "is", null);
 
     setReplayCount(count || 0);
     setLoading(false);

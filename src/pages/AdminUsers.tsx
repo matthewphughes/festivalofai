@@ -130,12 +130,12 @@ const AdminUsers = () => {
       roles: user.roles,
     });
 
-    // Fetch replays
-    const { data: replaysData } = await supabase
-      .from("event_replays")
+    // Fetch sessions
+    const { data: sessionsData } = await supabase
+      .from("sessions")
       .select("id, title, event_year")
       .order("event_year", { ascending: false });
-    setReplays(replaysData || []);
+    setReplays(sessionsData || []);
 
     // Fetch user's replay access
     const { data: accessData } = await supabase

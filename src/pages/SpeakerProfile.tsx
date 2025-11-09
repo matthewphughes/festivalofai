@@ -115,16 +115,7 @@ const SpeakerProfile = () => {
       .from("speakers")
       .select(`
         *,
-        replays:event_replays(
-          id,
-          title,
-          description,
-          video_url,
-          thumbnail_url,
-          event_year,
-          duration_minutes,
-          published
-        )
+        replays:sessions!speaker_id(id, title, description, video_url, thumbnail_url, event_year, published, duration_minutes)
       `)
       .eq("slug", slug)
       .single();

@@ -92,59 +92,6 @@ export type Database = {
         }
         Relationships: []
       }
-      event_replays: {
-        Row: {
-          created_at: string
-          description: string | null
-          duration_minutes: number | null
-          event_year: number
-          id: string
-          published: boolean | null
-          speaker_id: string | null
-          speaker_name: string | null
-          thumbnail_url: string | null
-          title: string
-          updated_at: string
-          video_url: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          duration_minutes?: number | null
-          event_year: number
-          id?: string
-          published?: boolean | null
-          speaker_id?: string | null
-          speaker_name?: string | null
-          thumbnail_url?: string | null
-          title: string
-          updated_at?: string
-          video_url: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          duration_minutes?: number | null
-          event_year?: number
-          id?: string
-          published?: boolean | null
-          speaker_id?: string | null
-          speaker_name?: string | null
-          thumbnail_url?: string | null
-          title?: string
-          updated_at?: string
-          video_url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "event_replays_speaker_id_fkey"
-            columns: ["speaker_id"]
-            isOneToOne: false
-            referencedRelation: "speakers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           created_at: string
@@ -202,7 +149,81 @@ export type Database = {
             foreignKeyName: "replay_purchases_replay_id_fkey"
             columns: ["replay_id"]
             isOneToOne: false
-            referencedRelation: "event_replays"
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sessions: {
+        Row: {
+          agenda_display_order: number | null
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          event_year: number
+          id: string
+          on_agenda: boolean | null
+          price_id: string | null
+          published: boolean | null
+          session_date: string | null
+          session_time: string | null
+          session_type: string | null
+          speaker_id: string | null
+          speaker_name: string | null
+          thumbnail_url: string | null
+          title: string
+          track: string | null
+          updated_at: string
+          video_url: string
+        }
+        Insert: {
+          agenda_display_order?: number | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          event_year: number
+          id?: string
+          on_agenda?: boolean | null
+          price_id?: string | null
+          published?: boolean | null
+          session_date?: string | null
+          session_time?: string | null
+          session_type?: string | null
+          speaker_id?: string | null
+          speaker_name?: string | null
+          thumbnail_url?: string | null
+          title: string
+          track?: string | null
+          updated_at?: string
+          video_url: string
+        }
+        Update: {
+          agenda_display_order?: number | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          event_year?: number
+          id?: string
+          on_agenda?: boolean | null
+          price_id?: string | null
+          published?: boolean | null
+          session_date?: string | null
+          session_time?: string | null
+          session_type?: string | null
+          speaker_id?: string | null
+          speaker_name?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          track?: string | null
+          updated_at?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_replays_speaker_id_fkey"
+            columns: ["speaker_id"]
+            isOneToOne: false
+            referencedRelation: "speakers"
             referencedColumns: ["id"]
           },
         ]

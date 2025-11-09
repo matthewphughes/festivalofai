@@ -122,15 +122,15 @@ const MyAccount = () => {
       .map(p => p.replay_id);
 
     if (replayIds.length > 0) {
-      const { data: replays } = await supabase
-        .from("event_replays")
+      const { data: sessions } = await supabase
+        .from("sessions")
         .select("id, title, event_year")
         .in("id", replayIds);
 
-      const individualReplays = replays?.map(r => ({
-        id: r.id,
-        title: r.title,
-        event_year: r.event_year,
+      const individualReplays = sessions?.map(s => ({
+        id: s.id,
+        title: s.title,
+        event_year: s.event_year,
         is_bundle: false
       })) || [];
 
@@ -156,13 +156,13 @@ const MyAccount = () => {
 
     let replayTitles: { [key: string]: string } = {};
     if (replayIds.length > 0) {
-      const { data: replays } = await supabase
-        .from("event_replays")
+      const { data: sessions } = await supabase
+        .from("sessions")
         .select("id, title")
         .in("id", replayIds);
 
-      replays?.forEach(r => {
-        replayTitles[r.id] = r.title;
+      sessions?.forEach(s => {
+        replayTitles[s.id] = s.title;
       });
     }
 

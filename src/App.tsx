@@ -8,7 +8,7 @@ import Index from "./pages/Index";
 import About from "./pages/About";
 import Speakers from "./pages/Speakers";
 import SpeakerProfile from "./pages/SpeakerProfile";
-import Schedule from "./pages/Schedule";
+import Agenda from "./pages/Agenda";
 import PreviousEvents from "./pages/PreviousEvents";
 import Venue from "./pages/Venue";
 import Tickets from "./pages/Tickets";
@@ -19,7 +19,8 @@ import MyAccount from "./pages/MyAccount";
 import Replays from "./pages/Replays";
 import PublicReplays from "./pages/PublicReplays";
 import Admin from "./pages/Admin";
-import AdminReplays from "./pages/AdminReplays";
+import AdminSessions from "./pages/AdminSessions";
+import AdminAgendaBuilder from "./pages/AdminAgendaBuilder";
 import AdminUsers from "./pages/AdminUsers";
 import AdminSpeakers from "./pages/AdminSpeakers";
 import NotFound from "./pages/NotFound";
@@ -44,7 +45,9 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/speakers" element={<Speakers />} />
           <Route path="/speakers/:slug" element={<SpeakerProfile />} />
-          <Route path="/schedule" element={<Schedule />} />
+          <Route path="/agenda" element={<Agenda />} />
+          <Route path="/admin/sessions" element={<AdminSessions />} />
+          <Route path="/admin/agenda-builder" element={<AdminAgendaBuilder />} />
           <Route path="/previous-events" element={<PreviousEvents />} />
           <Route path="/venue" element={<Venue />} />
           <Route path="/accommodation" element={<Accommodation />} />
@@ -58,7 +61,7 @@ const App = () => (
           <Route path="/buy-replays" element={<PublicReplays />} />
           <Route path="/replays" element={<Replays />} />
           <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/replays" element={<AdminReplays />} />
+          
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/admin/speakers" element={<AdminSpeakers />} />
           <Route path="/admin/contacts" element={<AdminContacts />} />

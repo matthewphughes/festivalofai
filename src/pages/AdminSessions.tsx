@@ -14,43 +14,55 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, Video } from "lucide-react";
 import { toast } from "sonner";
 
-const replaySchema = z.object({
+const sessionSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
   description: z.string().trim().max(2000, "Description must be less than 2000 characters").optional(),
-  video_url: z.string().url("Invalid URL").refine(
+  session_date: z.string().optional(),
+  session_time: z.string().optional(),
+  video_url: z.union([z.string().url("Invalid URL").refine(
     (url) => url.includes('youtube.com') || url.includes('youtu.be'),
     { message: "Must be a YouTube URL" }
-  ),
+  ), z.literal("")]).optional(),
   thumbnail_url: z.union([z.string().url("Invalid URL"), z.literal("")]).optional(),
   event_year: z.number().int().min(2020, "Year must be 2020 or later").max(2030, "Year must be 2030 or earlier"),
   speaker_id: z.string().uuid().optional(),
   duration_minutes: z.number().int().positive("Duration must be a positive number").max(600, "Duration must be less than 600 minutes").nullable().optional(),
   published: z.boolean(),
+  on_agenda: z.boolean(),
+  session_type: z.enum(["keynote", "workshop", "break", "closing", "session"]).optional(),
+  track: z.string().optional(),
+  price_id: z.string().optional(),
 });
 
-interface Replay {
+interface Session {
   id: string;
   title: string;
   description: string;
-  video_url: string;
+  video_url: string | null;
   thumbnail_url: string | null;
   event_year: number;
   speaker_id: string | null;
   speaker_name: string | null;
   duration_minutes: number | null;
   published: boolean;
+  on_agenda: boolean;
+  session_date: string | null;
+  session_time: string | null;
+  session_type: string | null;
+  track: string | null;
+  price_id: string | null;
 }
 
-const AdminReplays = () => {
+const AdminSessions = () => {
   const navigate = useNavigate();
-  const [replays, setReplays] = useState<Replay[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
   const [speakers, setSpeakers] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingReplay, setEditingReplay] = useState<Replay | null>(null);
+  const [editingSession, setEditingSession] = useState<Session | null>(null);
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -61,6 +73,12 @@ const AdminReplays = () => {
     speaker_id: "",
     duration_minutes: "",
     published: false,
+    on_agenda: false,
+    session_date: "",
+    session_time: "",
+    session_type: "",
+    track: "",
+    price_id: "",
   });
 
   useEffect(() => {
@@ -88,7 +106,7 @@ const AdminReplays = () => {
       return;
     }
 
-    await Promise.all([fetchReplays(), fetchSpeakers()]);
+    await Promise.all([fetchSessions(), fetchSpeakers()]);
   };
 
   const fetchSpeakers = async () => {
@@ -104,25 +122,25 @@ const AdminReplays = () => {
     }
   };
 
-  const fetchReplays = async () => {
+  const fetchSessions = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from("event_replays")
+      .from("sessions")
       .select(`
         *,
         speaker:speakers(name)
       `)
+      .order("session_date", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false });
 
     if (error) {
-      toast.error("Failed to load replays");
+      toast.error("Failed to load sessions");
     } else {
-      // Flatten speaker data
-      const formattedReplays = (data || []).map((replay: any) => ({
-        ...replay,
-        speaker_name: replay.speaker?.name || null,
+      const formattedSessions = (data || []).map((session: any) => ({
+        ...session,
+        speaker_name: session.speaker?.name || null,
       }));
-      setReplays(formattedReplays);
+      setSessions(formattedSessions);
     }
     setLoading(false);
   };
@@ -131,13 +149,11 @@ const AdminReplays = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error('Please upload an image file');
       return;
     }
 
-    // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Image must be less than 5MB');
       return;
@@ -148,7 +164,7 @@ const AdminReplays = () => {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-      const filePath = `replay-thumbnails/${fileName}`;
+      const filePath = `session-thumbnails/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('event-assets')
@@ -172,62 +188,72 @@ const AdminReplays = () => {
     }
   };
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      const replayData = {
+      const sessionData = {
         title: formData.title,
         description: formData.description || undefined,
-        video_url: formData.video_url,
+        video_url: formData.video_url || undefined,
         thumbnail_url: formData.thumbnail_url || undefined,
         event_year: formData.event_year,
         speaker_id: formData.speaker_id || undefined,
         duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes) : null,
         published: formData.published,
+        on_agenda: formData.on_agenda,
+        session_date: formData.session_date || undefined,
+        session_time: formData.session_time || undefined,
+        session_type: formData.session_type || undefined,
+        track: formData.track || undefined,
+        price_id: formData.price_id || undefined,
       };
 
-      // Validate with Zod schema
-      const validated = replaySchema.parse(replayData);
+      const validated = sessionSchema.parse(sessionData);
 
       const dataToSave = {
         title: validated.title,
         description: validated.description || null,
-        video_url: validated.video_url,
+        video_url: validated.video_url || null,
         thumbnail_url: validated.thumbnail_url || null,
         event_year: validated.event_year,
         speaker_id: validated.speaker_id || null,
         duration_minutes: validated.duration_minutes ?? null,
         published: validated.published,
+        on_agenda: validated.on_agenda,
+        session_date: validated.session_date || null,
+        session_time: validated.session_time || null,
+        session_type: validated.session_type || null,
+        track: validated.track || null,
+        price_id: validated.price_id || null,
       };
 
-      if (editingReplay) {
+      if (editingSession) {
         const { error } = await supabase
-          .from("event_replays")
+          .from("sessions")
           .update(dataToSave)
-          .eq("id", editingReplay.id);
+          .eq("id", editingSession.id);
 
         if (error) {
-          toast.error("Failed to update replay");
+          toast.error("Failed to update session");
         } else {
-          toast.success("Replay updated successfully");
+          toast.success("Session updated successfully");
           setDialogOpen(false);
           resetForm();
-          fetchReplays();
+          fetchSessions();
         }
       } else {
         const { error } = await supabase
-          .from("event_replays")
+          .from("sessions")
           .insert([dataToSave]);
 
         if (error) {
-          toast.error("Failed to create replay");
+          toast.error("Failed to create session");
         } else {
-          toast.success("Replay created successfully");
+          toast.success("Session created successfully");
           setDialogOpen(false);
           resetForm();
-          fetchReplays();
+          fetchSessions();
         }
       }
     } catch (error) {
@@ -235,39 +261,45 @@ const AdminReplays = () => {
         const firstError = error.errors[0];
         toast.error(firstError.message);
       } else {
-        toast.error("Failed to save replay");
+        toast.error("Failed to save session");
       }
     }
   };
 
-  const handleEdit = (replay: Replay) => {
-    setEditingReplay(replay);
+  const handleEdit = (session: Session) => {
+    setEditingSession(session);
     setFormData({
-      title: replay.title,
-      description: replay.description || "",
-      video_url: replay.video_url,
-      thumbnail_url: replay.thumbnail_url || "",
-      event_year: replay.event_year,
-      speaker_id: replay.speaker_id || "",
-      duration_minutes: replay.duration_minutes?.toString() || "",
-      published: replay.published,
+      title: session.title,
+      description: session.description || "",
+      video_url: session.video_url || "",
+      thumbnail_url: session.thumbnail_url || "",
+      event_year: session.event_year,
+      speaker_id: session.speaker_id || "",
+      duration_minutes: session.duration_minutes?.toString() || "",
+      published: session.published,
+      on_agenda: session.on_agenda,
+      session_date: session.session_date || "",
+      session_time: session.session_time || "",
+      session_type: session.session_type || "",
+      track: session.track || "",
+      price_id: session.price_id || "",
     });
     setDialogOpen(true);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this replay?")) return;
+    if (!confirm("Are you sure you want to delete this session?")) return;
 
     const { error } = await supabase
-      .from("event_replays")
+      .from("sessions")
       .delete()
       .eq("id", id);
 
     if (error) {
-      toast.error("Failed to delete replay");
+      toast.error("Failed to delete session");
     } else {
-      toast.success("Replay deleted successfully");
-      fetchReplays();
+      toast.success("Session deleted successfully");
+      fetchSessions();
     }
   };
 
@@ -281,8 +313,14 @@ const AdminReplays = () => {
       speaker_id: "",
       duration_minutes: "",
       published: false,
+      on_agenda: false,
+      session_date: "",
+      session_time: "",
+      session_type: "",
+      track: "",
+      price_id: "",
     });
-    setEditingReplay(null);
+    setEditingSession(null);
   };
 
   return (
@@ -292,8 +330,8 @@ const AdminReplays = () => {
       <main className="container mx-auto px-4 py-24">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Manage Event Replays</h1>
-            <p className="text-muted-foreground">Create and manage event replay videos</p>
+            <h1 className="text-4xl font-bold mb-2">Manage Event Sessions</h1>
+            <p className="text-muted-foreground">Create and manage event sessions, agenda items, and replays</p>
           </div>
           <Button onClick={() => navigate("/admin")} variant="outline">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -305,8 +343,8 @@ const AdminReplays = () => {
           <CardHeader>
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle>Event Replays</CardTitle>
-                <CardDescription>All event replay videos</CardDescription>
+                <CardTitle>Event Sessions</CardTitle>
+                <CardDescription>All event sessions with scheduling and replay information</CardDescription>
               </div>
               <Dialog open={dialogOpen} onOpenChange={(open) => {
                 setDialogOpen(open);
@@ -315,15 +353,15 @@ const AdminReplays = () => {
                 <DialogTrigger asChild>
                   <Button>
                     <Plus className="mr-2 h-4 w-4" />
-                    Add Replay
+                    Add Session
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                   <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                      <DialogTitle>{editingReplay ? "Edit" : "Add"} Replay</DialogTitle>
+                      <DialogTitle>{editingSession ? "Edit" : "Add"} Session</DialogTitle>
                       <DialogDescription>
-                        {editingReplay ? "Update" : "Create a new"} event replay video
+                        {editingSession ? "Update" : "Create a new"} event session
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -379,17 +417,79 @@ const AdminReplays = () => {
                           />
                         </div>
                       </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="date">Session Date</Label>
+                          <Input
+                            id="date"
+                            type="date"
+                            value={formData.session_date}
+                            onChange={(e) => setFormData({ ...formData, session_date: e.target.value })}
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="time">Session Time</Label>
+                          <Input
+                            id="time"
+                            type="time"
+                            value={formData.session_time}
+                            onChange={(e) => setFormData({ ...formData, session_time: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="session_type">Session Type</Label>
+                          <Select
+                            value={formData.session_type}
+                            onValueChange={(value) => setFormData({ ...formData, session_type: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select type..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="keynote">Keynote</SelectItem>
+                              <SelectItem value="workshop">Workshop</SelectItem>
+                              <SelectItem value="session">Session</SelectItem>
+                              <SelectItem value="break">Break</SelectItem>
+                              <SelectItem value="closing">Closing</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="track">Track</Label>
+                          <Input
+                            id="track"
+                            value={formData.track}
+                            onChange={(e) => setFormData({ ...formData, track: e.target.value })}
+                            placeholder="e.g., Beginner, Advanced"
+                          />
+                        </div>
+                      </div>
+
                       <div className="grid gap-2">
-                        <Label htmlFor="video">Video URL</Label>
+                        <Label htmlFor="video">Replay Video URL (YouTube)</Label>
                         <Input
                           id="video"
                           type="url"
                           value={formData.video_url}
                           onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
                           placeholder="https://youtube.com/..."
-                          required
                         />
                       </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor="price_id">Stripe Price ID (for replay purchases)</Label>
+                        <Input
+                          id="price_id"
+                          value={formData.price_id}
+                          onChange={(e) => setFormData({ ...formData, price_id: e.target.value })}
+                          placeholder="price_..."
+                        />
+                      </div>
+
                       <div className="grid gap-2">
                         <Label htmlFor="thumbnail">Thumbnail Image</Label>
                         <Input
@@ -425,6 +525,14 @@ const AdminReplays = () => {
                       </div>
                       <div className="flex items-center space-x-2">
                         <Switch
+                          id="on_agenda"
+                          checked={formData.on_agenda}
+                          onCheckedChange={(checked) => setFormData({ ...formData, on_agenda: checked })}
+                        />
+                        <Label htmlFor="on_agenda">Show on Agenda</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Switch
                           id="published"
                           checked={formData.published}
                           onCheckedChange={(checked) => setFormData({ ...formData, published: checked })}
@@ -434,7 +542,7 @@ const AdminReplays = () => {
                     </div>
                     <DialogFooter>
                       <Button type="submit">
-                        {editingReplay ? "Update" : "Create"} Replay
+                        {editingSession ? "Update" : "Create"} Session
                       </Button>
                     </DialogFooter>
                   </form>
@@ -445,28 +553,44 @@ const AdminReplays = () => {
           <CardContent>
             {loading ? (
               <p className="text-center py-8 text-muted-foreground">Loading...</p>
-            ) : replays.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">No replays yet. Create your first one!</p>
+            ) : sessions.length === 0 ? (
+              <p className="text-center py-8 text-muted-foreground">No sessions yet. Create your first one!</p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Title</TableHead>
                     <TableHead>Speaker</TableHead>
-                    <TableHead>Year</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Agenda</TableHead>
+                    <TableHead>Replay</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {replays.map((replay) => (
-                    <TableRow key={replay.id}>
-                      <TableCell className="font-medium">{replay.title}</TableCell>
-                      <TableCell>{replay.speaker_name || "-"}</TableCell>
-                      <TableCell>{replay.event_year}</TableCell>
+                  {sessions.map((session) => (
+                    <TableRow key={session.id}>
+                      <TableCell className="font-medium">{session.title}</TableCell>
+                      <TableCell>{session.speaker_name || "-"}</TableCell>
+                      <TableCell>{session.session_date || "-"}</TableCell>
+                      <TableCell>{session.session_type || "-"}</TableCell>
                       <TableCell>
-                        <Badge variant={replay.published ? "default" : "secondary"}>
-                          {replay.published ? "Published" : "Draft"}
+                        <Badge variant={session.on_agenda ? "default" : "secondary"}>
+                          {session.on_agenda ? "Yes" : "No"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {session.video_url ? (
+                          <Video className="h-4 w-4 text-primary" />
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={session.published ? "default" : "secondary"}>
+                          {session.published ? "Published" : "Draft"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -474,14 +598,14 @@ const AdminReplays = () => {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleEdit(replay)}
+                            onClick={() => handleEdit(session)}
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button
                             size="sm"
-                            variant="outline"
-                            onClick={() => handleDelete(replay.id)}
+                            variant="destructive"
+                            onClick={() => handleDelete(session.id)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -501,4 +625,4 @@ const AdminReplays = () => {
   );
 };
 
-export default AdminReplays;
+export default AdminSessions;

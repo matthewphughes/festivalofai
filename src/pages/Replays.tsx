@@ -168,11 +168,12 @@ const Replays = () => {
     
     // Admins see all, regular users only see published
     const query = supabase
-      .from("event_replays")
+      .from("sessions")
       .select(`
         *,
         speaker:speakers(id, name, bio, title, company, image_url)
       `)
+      .not("video_url", "is", null)
       .order("event_year", { ascending: false });
 
     // Non-admins only see published replays
@@ -248,7 +249,7 @@ const Replays = () => {
       }
 
       const { error } = await supabase
-        .from("event_replays")
+        .from("sessions")
         .update({
           title: validationResult.data.title,
           speaker_id: editForm.speaker_id || null,
@@ -276,7 +277,7 @@ const Replays = () => {
 
   const togglePublished = async (replayId: string, currentPublished: boolean) => {
     const { error } = await supabase
-      .from("event_replays")
+      .from("sessions")
       .update({ published: !currentPublished })
       .eq("id", replayId);
 

@@ -106,8 +106,8 @@ const Navigation = () => {
                 Speakers
               </Link>
 
-              <Link to="/schedule" className={cn("text-foreground/80 hover:text-accent transition-colors font-medium px-2", isActive("/schedule") && "text-accent font-semibold")}>
-                Schedule
+              <Link to="/agenda" className={cn("text-foreground/80 hover:text-accent transition-colors font-medium px-2", isActive("/agenda") && "text-accent font-semibold")}>
+                Agenda
               </Link>
 
               <Link to="/sponsors" className={cn("text-foreground/80 hover:text-accent transition-colors font-medium px-2", isActive("/sponsors") && "text-accent font-semibold")}>
@@ -242,11 +242,11 @@ const Navigation = () => {
               </Link>
 
               <Link
-                to="/schedule"
+                to="/agenda"
                 className="text-foreground/80 hover:text-accent transition-colors font-medium py-2"
                 onClick={() => setIsOpen(false)}
               >
-                Schedule
+                Agenda
               </Link>
 
               <Link
