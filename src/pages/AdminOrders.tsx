@@ -14,7 +14,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Download, Search, Plus, Edit, Trash2, ArrowLeft, ChevronDown, ChevronRight } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useNavigate, Link } from "react-router-dom";
@@ -590,21 +589,13 @@ const AdminOrders = () => {
                       <TableBody>
                         {paginatedOrders.map((order) => {
                           const isExpanded = expandedRows.has(order.id);
+                          const user_email = order.profile?.email || "N/A";
+                          const user_full_name = order.profile?.full_name || "N/A";
+                          const product_name = order.product?.product_name || order.session?.title || "N/A";
+                          
                           return (
-                            <Collapsible
-                              key={order.id}
-                              open={isExpanded}
-                              onOpenChange={(open) => {
-                                const newExpanded = new Set(expandedRows);
-                                if (open) {
-                                  newExpanded.add(order.id);
-                                } else {
-                                  newExpanded.delete(order.id);
-                                }
-                                setExpandedRows(newExpanded);
-                              }}
-                            >
-                              <TableRow>
+                            <>
+                              <TableRow key={order.id}>
                                 <TableCell>
                                   <div className="flex items-center gap-2">
                                     <Checkbox
@@ -612,15 +603,26 @@ const AdminOrders = () => {
                                       onCheckedChange={(checked) => handleSelectOrder(order.id, checked as boolean)}
                                       onClick={(e) => e.stopPropagation()}
                                     />
-                                    <CollapsibleTrigger asChild>
-                                      <Button variant="ghost" size="sm" className="p-0 h-6 w-6">
-                                        {isExpanded ? (
-                                          <ChevronDown className="h-4 w-4" />
-                                        ) : (
-                                          <ChevronRight className="h-4 w-4" />
-                                        )}
-                                      </Button>
-                                    </CollapsibleTrigger>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="p-0 h-6 w-6"
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedRows);
+                                        if (isExpanded) {
+                                          newExpanded.delete(order.id);
+                                        } else {
+                                          newExpanded.add(order.id);
+                                        }
+                                        setExpandedRows(newExpanded);
+                                      }}
+                                    >
+                                      {isExpanded ? (
+                                        <ChevronDown className="h-4 w-4" />
+                                      ) : (
+                                        <ChevronRight className="h-4 w-4" />
+                                      )}
+                                    </Button>
                                   </div>
                                 </TableCell>
                                 <TableCell className="whitespace-nowrap">
@@ -628,13 +630,11 @@ const AdminOrders = () => {
                                 </TableCell>
                                 <TableCell>
                                   <div>
-                                    <div className="font-medium">{order.profile?.full_name || "N/A"}</div>
-                                    <div className="text-sm text-muted-foreground">{order.profile?.email}</div>
+                                    <div className="font-medium">{user_full_name}</div>
+                                    <div className="text-sm text-muted-foreground">{user_email}</div>
                                   </div>
                                 </TableCell>
-                                <TableCell>
-                                  {order.product?.product_name || order.session?.title || "N/A"}
-                                </TableCell>
+                                <TableCell>{product_name}</TableCell>
                                 <TableCell>
                                   {formatAmount(order.product?.amount || null, order.product?.currency || null)}
                                 </TableCell>
@@ -673,8 +673,8 @@ const AdminOrders = () => {
                                   )}
                                 </TableCell>
                               </TableRow>
-                              <CollapsibleContent asChild>
-                                <TableRow>
+                              {isExpanded && (
+                                <TableRow key={`${order.id}-expanded`}>
                                   <TableCell colSpan={7} className="bg-muted/50 border-t">
                                     <div className="p-4 space-y-3">
                                       <div className="grid grid-cols-2 gap-4">
@@ -728,8 +728,8 @@ const AdminOrders = () => {
                                     </div>
                                   </TableCell>
                                 </TableRow>
-                              </CollapsibleContent>
-                            </Collapsible>
+                              )}
+                            </>
                           );
                         })}
                       </TableBody>

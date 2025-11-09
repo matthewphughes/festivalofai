@@ -34,9 +34,11 @@ interface PurchaseHistory {
   purchased_at: string;
   event_year: number;
   replay_title?: string;
+  product_name?: string;
   is_bundle: boolean;
   is_admin_grant: boolean;
   stripe_payment_intent?: string;
+  order_type?: string | null;
 }
 
 const MyAccount = () => {
@@ -143,7 +145,16 @@ const MyAccount = () => {
   const fetchPurchaseHistory = async (userId: string) => {
     const { data: purchases } = await supabase
       .from("replay_purchases")
-      .select("id, purchased_at, event_year, replay_id, is_admin_grant, stripe_payment_intent")
+      .select(`
+        id, 
+        purchased_at, 
+        event_year, 
+        replay_id, 
+        product_id,
+        is_admin_grant, 
+        stripe_payment_intent,
+        order_type
+      `)
       .eq("user_id", userId)
       .order("purchased_at", { ascending: false });
 
@@ -166,14 +177,33 @@ const MyAccount = () => {
       });
     }
 
+    // Get product names for manual orders
+    const productIds = purchases
+      .filter(p => p.product_id !== null)
+      .map(p => p.product_id);
+
+    let productNames: { [key: string]: string } = {};
+    if (productIds.length > 0) {
+      const { data: products } = await supabase
+        .from("stripe_products")
+        .select("id, product_name")
+        .in("id", productIds);
+
+      products?.forEach(p => {
+        productNames[p.id] = p.product_name;
+      });
+    }
+
     const history = purchases.map(p => ({
       id: p.id,
       purchased_at: p.purchased_at,
       event_year: p.event_year,
       replay_title: p.replay_id ? replayTitles[p.replay_id] : undefined,
-      is_bundle: p.replay_id === null,
+      product_name: p.product_id ? productNames[p.product_id] : undefined,
+      is_bundle: p.replay_id === null && p.product_id === null,
       is_admin_grant: p.is_admin_grant,
-      stripe_payment_intent: p.stripe_payment_intent
+      stripe_payment_intent: p.stripe_payment_intent,
+      order_type: p.order_type
     }));
 
     setPurchaseHistory(history);
@@ -395,9 +425,11 @@ const MyAccount = () => {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <h4 className="font-medium">
-                              {purchase.is_bundle 
-                                ? `${purchase.event_year} Full Year Bundle`
-                                : purchase.replay_title || "Individual Replay"
+                              {purchase.product_name 
+                                ? purchase.product_name
+                                : purchase.is_bundle 
+                                  ? `${purchase.event_year} Full Year Bundle`
+                                  : purchase.replay_title || "Individual Replay"
                               }
                             </h4>
                             {purchase.is_admin_grant && (
