@@ -147,7 +147,6 @@ const LaunchOffer = () => {
     "Exclusive networking opportunities with 200+ attendees",
     "Hands-on AI tool demonstrations",
     "Lunch, refreshments, and evening reception",
-    "Certificate of attendance",
     "Free parking at the National Space Centre",
     "Early access to 2027 tickets"
   ];
@@ -338,7 +337,7 @@ const LaunchOffer = () => {
             </div>
 
             {/* Ticket Options */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-5xl mx-auto mb-6 sm:mb-8 px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 max-w-5xl mx-auto mb-6 sm:mb-8 px-4">
               {ticketTypes.map((ticket) => (
                 <Card 
                   key={ticket.stripe_product_id} 
