@@ -74,6 +74,7 @@ const LaunchOffer = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [dbTestimonials, setDbTestimonials] = useState<any[]>([]);
   
   // Countdown to Friday at 5PM
   const getNextFriday5PM = () => {
@@ -93,6 +94,7 @@ const LaunchOffer = () => {
     fetchSpeakers();
     fetchProducts();
     checkAdminStatus();
+    fetchTestimonials();
   }, []);
 
   const checkAdminStatus = async () => {
@@ -121,6 +123,21 @@ const LaunchOffer = () => {
       console.error("Failed to load products", error);
     } else {
       setProducts(data || []);
+    }
+  };
+
+  const fetchTestimonials = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("testimonials")
+        .select("*")
+        .eq("is_published", true)
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      setDbTestimonials(data || []);
+    } catch (error) {
+      console.error("Error fetching testimonials:", error);
     }
   };
 
@@ -510,8 +527,8 @@ const LaunchOffer = () => {
             </div>
           </section>
 
-          {/* Video Testimonials Section - Only visible to admins */}
-          {isAdmin && (
+          {/* Video Testimonials Section */}
+          {(isAdmin || dbTestimonials.length > 0) && (
             <section className="mb-16 sm:mb-24">
               <div className="text-center mb-8 sm:mb-12 px-4">
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
@@ -523,14 +540,27 @@ const LaunchOffer = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4">
-                {videoTestimonials.map((testimonial, index) => (
-                  <VideoTestimonialCard
-                    key={index}
-                    quote={testimonial.quote}
-                    author={testimonial.author}
-                    year={testimonial.year}
-                  />
-                ))}
+                {dbTestimonials.length > 0 ? (
+                  dbTestimonials.map((testimonial) => (
+                    <VideoTestimonialCard
+                      key={testimonial.id}
+                      quote={testimonial.quote}
+                      author={testimonial.author}
+                      year={testimonial.year}
+                      thumbnailUrl={testimonial.thumbnail_url}
+                      videoUrl={testimonial.video_url}
+                    />
+                  ))
+                ) : (
+                  videoTestimonials.map((testimonial, index) => (
+                    <VideoTestimonialCard
+                      key={index}
+                      quote={testimonial.quote}
+                      author={testimonial.author}
+                      year={testimonial.year}
+                    />
+                  ))
+                )}
               </div>
             </section>
           )}
