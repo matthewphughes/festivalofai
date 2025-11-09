@@ -5,7 +5,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Video, Calendar, ArrowRight, Settings, Building2, Mail, CreditCard, Ticket } from "lucide-react";
+import { Users, Video, Calendar, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
@@ -260,6 +260,24 @@ const Admin = () => {
                     </p>
                     <Button className="w-full">
                       Manage Coupons
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link to="/admin/orders">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader>
+                    <CardTitle>Order Management</CardTitle>
+                    <CardDescription>View and manage all orders</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      View all customer purchases, filter, search and export order data.
+                    </p>
+                    <Button className="w-full">
+                      Manage Orders
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </CardContent>
