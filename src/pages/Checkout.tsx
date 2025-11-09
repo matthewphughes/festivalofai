@@ -83,23 +83,15 @@ const CheckoutForm = ({ isGuest, userEmail }: { isGuest: boolean; userEmail: str
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {isGuest && (
-        <div className="space-y-4">
-          <div className="p-4 bg-muted rounded-lg">
-            <p className="text-sm mb-1">
-              <strong>Purchasing as:</strong>
-            </p>
-            <p className="text-sm text-muted-foreground">{userEmail}</p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="create-account"
-              checked={createAccount}
-              onCheckedChange={(checked) => setCreateAccount(checked as boolean)}
-            />
-            <Label htmlFor="create-account" className="text-sm">
-              Create an account to access your purchases
-            </Label>
-          </div>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="create-account"
+            checked={createAccount}
+            onCheckedChange={(checked) => setCreateAccount(checked as boolean)}
+          />
+          <Label htmlFor="create-account" className="text-sm">
+            Create an account to access your purchases
+          </Label>
         </div>
       )}
 
