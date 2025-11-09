@@ -462,19 +462,19 @@ const LaunchOffer = () => {
             </div>
 
             {/* NEW FOR 2026 Section */}
-            <div className="max-w-4xl mx-auto mt-12 sm:mt-16 mb-16 sm:mb-20 px-4">
-              <div className="text-center mb-6 sm:mb-8">
-                <Badge variant="outline" className="mb-4 text-accent border-accent">
+            <div className="max-w-5xl mx-auto mt-16 sm:mt-20 mb-16 sm:mb-20 px-4">
+              <div className="text-center mb-8 sm:mb-10">
+                <Badge variant="outline" className="mb-6 text-base sm:text-lg px-4 py-2 text-accent border-accent bg-accent/10">
                   NEW FOR 2026
                 </Badge>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
                   Two Stages, <span className="text-accent">Beginner and Advanced</span>
                 </h2>
               </div>
               
-              <Card className="bg-card/50 backdrop-blur-sm border-border">
-                <CardContent className="p-6 sm:p-8">
-                  <p className="text-base sm:text-lg text-center text-foreground/90 leading-relaxed">
+              <Card className="bg-gradient-to-br from-accent/10 via-primary/5 to-background border-2 border-accent/30 shadow-2xl shadow-accent/20">
+                <CardContent className="p-8 sm:p-12 md:p-16">
+                  <p className="text-xl sm:text-2xl md:text-3xl text-center text-foreground font-medium leading-relaxed">
                     Choose between the two stages, switch at any time during the day, all sessions recorded so you can catch up on both stages
                   </p>
                 </CardContent>
