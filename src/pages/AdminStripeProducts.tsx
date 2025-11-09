@@ -40,7 +40,6 @@ const AdminStripeProducts = () => {
   const [replays, setReplays] = useState<Replay[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
-  const [bulkCreating, setBulkCreating] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<StripeProduct | null>(null);
@@ -136,75 +135,6 @@ const AdminStripeProducts = () => {
     }
   };
 
-  const handleBulkCreate = async () => {
-    setBulkCreating(true);
-    let successCount = 0;
-    let errorCount = 0;
-
-    try {
-      // Create individual replay products - £37 each
-      for (const replay of replays) {
-        if (replay.event_year === 2025) {
-          try {
-            const { error } = await supabase.functions.invoke("manage-stripe-product", {
-              body: {
-                operation: "create",
-                data: {
-                  product_name: `FAI25 - ${replay.title}`,
-                  product_type: "individual_replay",
-                  event_year: replay.event_year,
-                  replay_id: replay.id,
-                  amount: 3700, // £37
-                  currency: "gbp",
-                },
-              },
-            });
-
-            if (error) throw error;
-            successCount++;
-            toast.success(`Created: ${replay.title}`);
-          } catch (error: any) {
-            errorCount++;
-            console.error(`Failed to create ${replay.title}:`, error);
-            toast.error(`Failed: ${replay.title}`);
-          }
-        }
-      }
-
-      // Create 2025 bundle - £99
-      try {
-        const { error } = await supabase.functions.invoke("manage-stripe-product", {
-          body: {
-            operation: "create",
-            data: {
-              product_name: "FAI25 - 2025 Full Event Replays Bundle",
-              product_type: "year_bundle",
-              event_year: 2025,
-              replay_id: null,
-              amount: 9900, // £99
-              currency: "gbp",
-            },
-          },
-        });
-
-        if (error) throw error;
-        successCount++;
-        toast.success("Created: 2025 Bundle");
-      } catch (error: any) {
-        errorCount++;
-        console.error("Failed to create bundle:", error);
-        toast.error("Failed: 2025 Bundle");
-      }
-
-      toast.success(`Bulk creation complete! ${successCount} created, ${errorCount} failed`);
-      fetchProducts();
-    } catch (error: any) {
-      toast.error("Bulk creation failed");
-      console.error(error);
-    } finally {
-      setBulkCreating(false);
-    }
-  };
 
   const handleCreate = async () => {
     try {
@@ -354,14 +284,6 @@ const AdminStripeProducts = () => {
             <p className="text-muted-foreground">Manage replay products and pricing</p>
           </div>
           <div className="flex gap-2">
-            <Button 
-              onClick={handleBulkCreate} 
-              disabled={bulkCreating || replays.length === 0} 
-              variant="secondary"
-            >
-              {bulkCreating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-              Bulk Create 2025 Products
-            </Button>
             <Button onClick={handleSync} disabled={syncing} variant="outline">
               {syncing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
               Sync with Stripe
