@@ -477,7 +477,7 @@ const AdminUsers = () => {
     }
   };
 
-  // Handle bulk import
+  // Handle bulk import with automatic batching
   const handleBulkImport = async () => {
     if (parsedUsers.length === 0) {
       toast.error("No users to import");
@@ -490,28 +490,53 @@ const AdminUsers = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
-      const response = await supabase.functions.invoke("bulk-create-users", {
-        body: {
-          users: parsedUsers,
-          defaultRole: bulkDefaultRole,
-        },
-      });
-
-      if (response.error) {
-        throw response.error;
+      // Split into batches of 100
+      const batchSize = 100;
+      const batches = [];
+      for (let i = 0; i < parsedUsers.length; i += batchSize) {
+        batches.push(parsedUsers.slice(i, i + batchSize));
       }
 
-      const { results, summary } = response.data;
+      let totalSuccessful = 0;
+      let totalFailed = 0;
+      const allFailures: any[] = [];
+
+      // Process each batch
+      for (let i = 0; i < batches.length; i++) {
+        const batch = batches[i];
+        
+        if (batches.length > 1) {
+          toast.info(`Processing batch ${i + 1} of ${batches.length} (${batch.length} users)...`);
+        }
+
+        const response = await supabase.functions.invoke("bulk-create-users", {
+          body: {
+            users: batch,
+            defaultRole: bulkDefaultRole,
+          },
+        });
+
+        if (response.error) {
+          throw response.error;
+        }
+
+        const { results, summary } = response.data;
+        totalSuccessful += summary.successful;
+        totalFailed += summary.failed;
+        
+        const failures = results.filter((r: any) => !r.success);
+        allFailures.push(...failures);
+      }
 
       // Show detailed results
-      const failed = results.filter((r: any) => !r.success);
-      if (failed.length > 0) {
-        const failedEmails = failed.map((r: any) => `${r.email}: ${r.error}`).join("\n");
-        toast.error(`${summary.failed} failed:\n${failedEmails}`);
+      if (allFailures.length > 0) {
+        const failedEmails = allFailures.map((r: any) => `${r.email}: ${r.error}`).join("\n");
+        console.log("Failed imports:", failedEmails);
+        toast.error(`${totalFailed} failed. Check console for details.`);
       }
 
-      if (summary.successful > 0) {
-        toast.success(`Successfully created ${summary.successful} user${summary.successful !== 1 ? 's' : ''}`);
+      if (totalSuccessful > 0) {
+        toast.success(`Successfully created ${totalSuccessful} user${totalSuccessful !== 1 ? 's' : ''}`);
         setBulkImportOpen(false);
         setBulkUserData("");
         setParsedUsers([]);
