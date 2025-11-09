@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import logoLight from "@/assets/logo-light.png";
 import logoDark from "@/assets/logo-dark.png";
 import { useTheme } from "next-themes";
+import CheckoutProgress from "@/components/checkout/CheckoutProgress";
 
 const CheckoutForm = ({ isGuest, userEmail }: { isGuest: boolean; userEmail: string }) => {
   const stripe = useStripe();
@@ -281,9 +282,15 @@ const Checkout = () => {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Cart
           </Button>
+          
+          <CheckoutProgress 
+            currentStep={showGuestEmailForm ? "email" : "payment"} 
+            isGuest={isGuest} 
+          />
+          
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-bold">Secure Checkout</h1>
-            {isGuest && (
+            {isGuest && !showGuestEmailForm && (
               <Button
                 variant="outline"
                 onClick={() => navigate("/auth")}

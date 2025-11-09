@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, Calendar, Mail, Download } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
+import CheckoutProgress from "@/components/checkout/CheckoutProgress";
 
 const ThankYou = () => {
   const navigate = useNavigate();
@@ -26,6 +27,11 @@ const ThankYou = () => {
 
       <main className="pt-32 pb-20 relative z-10">
         <div className="container mx-auto px-4 max-w-4xl">
+          {/* Progress Indicator */}
+          <div className="mb-12">
+            <CheckoutProgress currentStep="confirmation" isGuest={false} />
+          </div>
+          
           {/* Success Header */}
           <div className="text-center mb-12">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-500/20 mb-6">
