@@ -152,14 +152,6 @@ const Index = () => {
             >
               <Link to="/buy-replays">Buy 2025 Replays</Link>
             </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="text-lg px-8 py-6"
-            >
-              <Link to="/about">Learn More</Link>
-            </Button>
           </div>
           
           {/* Carousel Gallery Highlights from 2025 */}
