@@ -16,13 +16,12 @@ import logoLight from "@/assets/logo-light.png";
 import logoDark from "@/assets/logo-dark.png";
 import { useTheme } from "next-themes";
 
-const CheckoutForm = ({ isGuest, userEmail }: { isGuest: boolean; userEmail: string | null }) => {
+const CheckoutForm = ({ isGuest, userEmail }: { isGuest: boolean; userEmail: string }) => {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
   const { items, total, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
-  const [guestEmail, setGuestEmail] = useState("");
   const [createAccount, setCreateAccount] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
@@ -85,16 +84,11 @@ const CheckoutForm = ({ isGuest, userEmail }: { isGuest: boolean; userEmail: str
     <form onSubmit={handleSubmit} className="space-y-6">
       {isGuest && (
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={guestEmail}
-              onChange={(e) => setGuestEmail(e.target.value)}
-              required
-              placeholder="your@email.com"
-            />
+          <div className="p-4 bg-muted rounded-lg">
+            <p className="text-sm mb-1">
+              <strong>Purchasing as:</strong>
+            </p>
+            <p className="text-sm text-muted-foreground">{userEmail}</p>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -145,10 +139,13 @@ const Checkout = () => {
   const [loading, setLoading] = useState(true);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [stripeError, setStripeError] = useState<string | null>(null);
+  const [guestEmail, setGuestEmail] = useState("");
+  const [showGuestEmailForm, setShowGuestEmailForm] = useState(false);
+  const [creatingIntent, setCreatingIntent] = useState(false);
 
   useEffect(() => {
     initializeStripe();
-    checkAuthAndCreateIntent();
+    checkAuth();
   }, []);
 
   const initializeStripe = async () => {
@@ -177,10 +174,11 @@ const Checkout = () => {
     }
   };
 
-  const checkAuthAndCreateIntent = async () => {
+  const checkAuth = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      setIsGuest(!session);
+      const isGuestUser = !session;
+      setIsGuest(isGuestUser);
       setUserEmail(session?.user?.email || null);
 
       if (items.length === 0) {
@@ -189,22 +187,51 @@ const Checkout = () => {
         return;
       }
 
-      // Create payment intent
+      // If user is authenticated, create intent immediately
+      if (!isGuestUser) {
+        await createPaymentIntent(session.user.email);
+      } else {
+        // For guests, show email collection form
+        setShowGuestEmailForm(true);
+        setLoading(false);
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+      navigate("/buy-replays");
+    }
+  };
+
+  const createPaymentIntent = async (email: string) => {
+    setCreatingIntent(true);
+    try {
       const { data, error } = await supabase.functions.invoke("create-payment-intent", {
         body: {
           product_ids: items.map(item => item.product_id),
+          guest_email: email,
         },
       });
 
       if (error) throw error;
 
       setClientSecret(data.clientSecret);
+      setShowGuestEmailForm(false);
     } catch (error: any) {
       toast.error(error.message);
-      navigate("/buy-replays");
     } finally {
       setLoading(false);
+      setCreatingIntent(false);
     }
+  };
+
+  const handleGuestEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!guestEmail || !guestEmail.includes("@")) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    await createPaymentIntent(guestEmail);
   };
 
   if (loading || cartLoading) {
@@ -321,21 +348,80 @@ const Checkout = () => {
                   </p>
                 </div>
               )}
-              {isGuest && (
-                <div className="mb-6 p-4 bg-muted rounded-lg">
-                  <p className="text-sm mb-2">
-                    <strong>Checking out as guest</strong>
+              
+              {showGuestEmailForm ? (
+                <form onSubmit={handleGuestEmailSubmit} className="space-y-4">
+                  <div className="p-4 bg-muted rounded-lg mb-4">
+                    <p className="text-sm mb-2">
+                      <strong>Guest Checkout</strong>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Already have an account?{" "}
+                      <Button
+                        variant="link"
+                        className="h-auto p-0 text-xs"
+                        onClick={() => navigate("/auth")}
+                      >
+                        Sign in here
+                      </Button>
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="guest-email">Email Address</Label>
+                    <Input
+                      id="guest-email"
+                      type="email"
+                      value={guestEmail}
+                      onChange={(e) => setGuestEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      We'll send your purchase confirmation to this email
+                    </p>
+                  </div>
+
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    size="lg"
+                    disabled={creatingIntent || !guestEmail}
+                  >
+                    {creatingIntent && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Continue to Payment
+                  </Button>
+                </form>
+              ) : stripeError ? (
+                <div className="text-center p-6 bg-destructive/10 rounded-lg">
+                  <p className="text-destructive font-semibold mb-2">Payment system unavailable</p>
+                  <p className="text-sm text-muted-foreground">
+                    {stripeError}. Please contact support if this persists.
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    Already have an account?{" "}
-                    <Button
-                      variant="link"
-                      className="h-auto p-0 text-xs"
-                      onClick={() => navigate("/auth")}
-                    >
-                      Sign in here
-                    </Button>
-                  </p>
+                </div>
+              ) : clientSecret && stripePromise ? (
+                <Elements 
+                  stripe={stripePromise} 
+                  options={{ 
+                    clientSecret,
+                    appearance: {
+                      theme: 'stripe',
+                    },
+                    ...(userEmail && !isGuest && {
+                      defaultValues: {
+                        billingDetails: {
+                          email: userEmail,
+                        }
+                      }
+                    })
+                  }}
+                >
+                  <CheckoutForm isGuest={isGuest} userEmail={userEmail || guestEmail} />
+                </Elements>
+              ) : (
+                <div className="text-center p-6">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground mt-2">Loading payment form...</p>
                 </div>
               )}
               {stripeError ? (
