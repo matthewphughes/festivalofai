@@ -39,7 +39,6 @@ const AdminStripeProducts = () => {
   const [products, setProducts] = useState<StripeProduct[]>([]);
   const [replays, setReplays] = useState<Replay[]>([]);
   const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<StripeProduct | null>(null);
@@ -115,25 +114,6 @@ const AdminStripeProducts = () => {
     }
   };
 
-  const handleSync = async () => {
-    setSyncing(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("sync-stripe-products");
-      
-      if (error) throw error;
-
-      toast.success(`Synced ${data.synced} products, updated ${data.updated}`);
-      if (data.orphaned.length > 0) {
-        toast.warning(`${data.orphaned.length} orphaned products found`);
-      }
-      fetchProducts();
-    } catch (error) {
-      toast.error("Failed to sync products");
-      console.error(error);
-    } finally {
-      setSyncing(false);
-    }
-  };
 
 
   const handleCreate = async () => {
@@ -284,10 +264,6 @@ const AdminStripeProducts = () => {
             <p className="text-muted-foreground">Manage replay products and pricing</p>
           </div>
           <div className="flex gap-2">
-            <Button onClick={handleSync} disabled={syncing} variant="outline">
-              {syncing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-              Sync with Stripe
-            </Button>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
