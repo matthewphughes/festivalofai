@@ -143,6 +143,7 @@ const Checkout = () => {
   const { items, total, loading: cartLoading } = useCart();
   const [clientSecret, setClientSecret] = useState("");
   const [isGuest, setIsGuest] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -153,6 +154,7 @@ const Checkout = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       setIsGuest(!session);
+      setUserEmail(session?.user?.email || null);
 
       if (items.length === 0) {
         toast.error("Your cart is empty");
@@ -282,6 +284,16 @@ const Checkout = () => {
               <CardDescription>Complete your purchase securely</CardDescription>
             </CardHeader>
             <CardContent>
+              {!isGuest && userEmail && (
+                <div className="mb-6 p-4 bg-muted rounded-lg">
+                  <p className="text-sm mb-1">
+                    <strong>Purchasing as:</strong>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {userEmail}
+                  </p>
+                </div>
+              )}
               {isGuest && (
                 <div className="mb-6 p-4 bg-muted rounded-lg">
                   <p className="text-sm mb-2">
