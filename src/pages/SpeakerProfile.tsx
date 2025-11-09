@@ -391,11 +391,6 @@ const SpeakerProfile = () => {
                               <Play className="w-12 h-12 text-muted-foreground" />
                             </div>
                           )}
-                          {!hasAccess && (
-                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
-                              <Lock className="w-12 h-12 text-white" />
-                            </div>
-                          )}
                         </div>
 
                         {/* Content */}
@@ -428,10 +423,10 @@ const SpeakerProfile = () => {
                               <Button 
                                 size="lg"
                                 className="w-full md:w-auto"
-                                onClick={() => navigate("/replays")}
+                                onClick={() => window.open(replay.video_url, '_blank')}
                               >
                                 <Play className="w-4 h-4 mr-2" />
-                                Watch Replay
+                                Watch Now
                               </Button>
                             ) : (
                               <div className="flex flex-col sm:flex-row gap-3">
@@ -441,7 +436,6 @@ const SpeakerProfile = () => {
                                   disabled={isPurchasing}
                                   className="flex-1"
                                 >
-                                  <Lock className="w-4 h-4 mr-2" />
                                   {isPurchasing ? "Opening Checkout..." : "Purchase Session - £47"}
                                 </Button>
                                 <Button 
