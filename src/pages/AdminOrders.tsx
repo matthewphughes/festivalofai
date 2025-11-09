@@ -13,7 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { Download, Search, Plus, Edit, Trash2, ArrowLeft } from "lucide-react";
+import { Download, Search, Plus, Edit, Trash2, ArrowLeft, ChevronDown, ChevronRight } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useNavigate, Link } from "react-router-dom";
@@ -94,6 +95,7 @@ const AdminOrders = () => {
   const [editEventYear, setEditEventYear] = useState("");
   const [editProductId, setEditProductId] = useState("");
   const [editNotes, setEditNotes] = useState("");
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   // Check admin access
   const { data: isAdmin, isLoading: checkingAdmin } = useQuery({
@@ -576,82 +578,160 @@ const AdminOrders = () => {
                               onCheckedChange={handleSelectAll}
                             />
                           </TableHead>
+                          <TableHead className="w-12"></TableHead>
                           <TableHead>Date</TableHead>
                           <TableHead>Customer</TableHead>
                           <TableHead>Product</TableHead>
                           <TableHead>Amount</TableHead>
                           <TableHead>Type</TableHead>
-                          <TableHead>Payment Intent</TableHead>
-                          <TableHead>Notes</TableHead>
                           <TableHead>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {paginatedOrders.map((order) => (
-                          <TableRow key={order.id}>
-                            <TableCell>
-                              <Checkbox
-                                checked={selectedOrders.has(order.id)}
-                                onCheckedChange={(checked) => handleSelectOrder(order.id, checked as boolean)}
-                              />
-                            </TableCell>
-                            <TableCell className="whitespace-nowrap">
-                              {format(new Date(order.purchased_at), "MMM d, yyyy HH:mm")}
-                            </TableCell>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium">{order.profile?.full_name || "N/A"}</div>
-                                <div className="text-sm text-muted-foreground">{order.profile?.email}</div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {order.product?.product_name || order.session?.title || "N/A"}
-                            </TableCell>
-                            <TableCell>
-                              {formatAmount(order.product?.amount || null, order.product?.currency || null)}
-                            </TableCell>
-                            <TableCell>
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                order.order_type === "manual"
-                                  ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                                  : order.is_admin_grant 
-                                    ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" 
-                                    : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                              }`}>
-                                {order.order_type === "manual" ? "Manual" : order.is_admin_grant ? "Admin Grant" : "Paid"}
-                              </span>
-                            </TableCell>
-                            <TableCell className="font-mono text-xs">
-                              {order.stripe_payment_intent || "N/A"}
-                            </TableCell>
-                            <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
-                              {order.notes || "-"}
-                            </TableCell>
-                            <TableCell>
-                              {order.order_type === "manual" && (
-                                <div className="flex gap-2">
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => handleEditOrder(order)}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => {
-                                      setEditingOrder(order);
-                                      setDeleteDialogOpen(true);
-                                    }}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                        {paginatedOrders.map((order) => {
+                          const isExpanded = expandedRows.has(order.id);
+                          return (
+                            <Collapsible
+                              key={order.id}
+                              open={isExpanded}
+                              onOpenChange={(open) => {
+                                const newExpanded = new Set(expandedRows);
+                                if (open) {
+                                  newExpanded.add(order.id);
+                                } else {
+                                  newExpanded.delete(order.id);
+                                }
+                                setExpandedRows(newExpanded);
+                              }}
+                            >
+                              <TableRow>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <Checkbox
+                                      checked={selectedOrders.has(order.id)}
+                                      onCheckedChange={(checked) => handleSelectOrder(order.id, checked as boolean)}
+                                      onClick={(e) => e.stopPropagation()}
+                                    />
+                                    <CollapsibleTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="p-0 h-6 w-6">
+                                        {isExpanded ? (
+                                          <ChevronDown className="h-4 w-4" />
+                                        ) : (
+                                          <ChevronRight className="h-4 w-4" />
+                                        )}
+                                      </Button>
+                                    </CollapsibleTrigger>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="whitespace-nowrap">
+                                  {format(new Date(order.purchased_at), "MMM d, yyyy HH:mm")}
+                                </TableCell>
+                                <TableCell>
+                                  <div>
+                                    <div className="font-medium">{order.profile?.full_name || "N/A"}</div>
+                                    <div className="text-sm text-muted-foreground">{order.profile?.email}</div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  {order.product?.product_name || order.session?.title || "N/A"}
+                                </TableCell>
+                                <TableCell>
+                                  {formatAmount(order.product?.amount || null, order.product?.currency || null)}
+                                </TableCell>
+                                <TableCell>
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    order.order_type === "manual"
+                                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                                      : order.is_admin_grant 
+                                        ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" 
+                                        : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                  }`}>
+                                    {order.order_type === "manual" ? "Manual" : order.is_admin_grant ? "Admin Grant" : "Paid"}
+                                  </span>
+                                </TableCell>
+                                <TableCell>
+                                  {order.order_type === "manual" && (
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => handleEditOrder(order)}
+                                      >
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => {
+                                          setEditingOrder(order);
+                                          setDeleteDialogOpen(true);
+                                        }}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                              <CollapsibleContent asChild>
+                                <TableRow>
+                                  <TableCell colSpan={7} className="bg-muted/50 border-t">
+                                    <div className="p-4 space-y-3">
+                                      <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                          <span className="text-sm font-medium">Order ID:</span>
+                                          <p className="text-sm text-muted-foreground font-mono">{order.id}</p>
+                                        </div>
+                                        {order.stripe_payment_intent && (
+                                          <div>
+                                            <span className="text-sm font-medium">Payment Intent:</span>
+                                            <p className="text-sm text-muted-foreground font-mono">{order.stripe_payment_intent}</p>
+                                          </div>
+                                        )}
+                                        <div>
+                                          <span className="text-sm font-medium">Event Year:</span>
+                                          <p className="text-sm text-muted-foreground">{order.event_year}</p>
+                                        </div>
+                                        {order.coupon_code && (
+                                          <div>
+                                            <span className="text-sm font-medium">Coupon Code:</span>
+                                            <p className="text-sm text-muted-foreground">{order.coupon_code}</p>
+                                          </div>
+                                        )}
+                                        {order.discount_amount && order.discount_amount > 0 && (
+                                          <div>
+                                            <span className="text-sm font-medium">Discount:</span>
+                                            <p className="text-sm text-muted-foreground">{formatAmount(order.discount_amount, order.product?.currency || null)}</p>
+                                          </div>
+                                        )}
+                                        {order.granted_by && (
+                                          <>
+                                            <div>
+                                              <span className="text-sm font-medium">Granted By:</span>
+                                              <p className="text-sm text-muted-foreground">{order.granted_by}</p>
+                                            </div>
+                                            <div>
+                                              <span className="text-sm font-medium">Granted At:</span>
+                                              <p className="text-sm text-muted-foreground">
+                                                {order.granted_at ? format(new Date(order.granted_at), "MMM d, yyyy HH:mm") : "-"}
+                                              </p>
+                                            </div>
+                                          </>
+                                        )}
+                                      </div>
+                                      {order.notes && (
+                                        <div className="mt-4 pt-4 border-t border-border">
+                                          <span className="text-sm font-medium">Notes:</span>
+                                          <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">{order.notes}</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              </CollapsibleContent>
+                            </Collapsible>
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </div>
