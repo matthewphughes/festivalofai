@@ -118,6 +118,8 @@ export type Database = {
       }
       replay_purchases: {
         Row: {
+          coupon_code: string | null
+          discount_amount: number | null
           event_year: number
           granted_at: string | null
           granted_by: string | null
@@ -130,6 +132,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          coupon_code?: string | null
+          discount_amount?: number | null
           event_year: number
           granted_at?: string | null
           granted_by?: string | null
@@ -142,6 +146,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          coupon_code?: string | null
+          discount_amount?: number | null
           event_year?: number
           granted_at?: string | null
           granted_by?: string | null
@@ -240,6 +246,44 @@ export type Database = {
             columns: ["speaker_id"]
             isOneToOne: false
             referencedRelation: "speakers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shopping_cart: {
+        Row: {
+          created_at: string | null
+          id: string
+          product_id: string
+          quantity: number
+          session_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          product_id: string
+          quantity?: number
+          session_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          product_id?: string
+          quantity?: number
+          session_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopping_cart_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "stripe_products"
             referencedColumns: ["id"]
           },
         ]
@@ -355,6 +399,54 @@ export type Database = {
           id?: string
           message?: string | null
           phone?: string | null
+        }
+        Relationships: []
+      }
+      stripe_coupons: {
+        Row: {
+          active: boolean | null
+          code: string
+          created_at: string | null
+          currency: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          max_redemptions: number | null
+          stripe_coupon_id: string
+          times_redeemed: number | null
+          updated_at: string | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          code: string
+          created_at?: string | null
+          currency?: string | null
+          discount_type: string
+          discount_value: number
+          id?: string
+          max_redemptions?: number | null
+          stripe_coupon_id: string
+          times_redeemed?: number | null
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          code?: string
+          created_at?: string | null
+          currency?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          max_redemptions?: number | null
+          stripe_coupon_id?: string
+          times_redeemed?: number | null
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
         }
         Relationships: []
       }
