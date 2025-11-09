@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import confetti from "canvas-confetti";
 import { useNavigate } from "react-router-dom";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
@@ -100,6 +101,15 @@ const CheckoutForm = ({
 
       setDiscount(discountAmount);
       setAppliedCoupon(couponCode.toUpperCase());
+      
+      // Trigger confetti celebration
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0'],
+      });
+      
       toast.success(`Coupon applied! You saved £${(discountAmount / 100).toFixed(2)}`);
     } catch (error: any) {
       console.error("Error verifying coupon:", error);
