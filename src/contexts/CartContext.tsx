@@ -126,6 +126,31 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
+      // If adding a bundle or year_bundle, remove individual replays from the same year
+      if (product.product_type === "year_bundle" || product.product_type === "bundle") {
+        const individualReplaysToRemove = items.filter(
+          item => item.product_type === "individual_replay" && item.event_year === product.event_year
+        );
+
+        if (individualReplaysToRemove.length > 0) {
+          // Remove from database
+          for (const item of individualReplaysToRemove) {
+            await supabase
+              .from("shopping_cart")
+              .delete()
+              .eq("product_id", item.product_id)
+              .eq(session?.user ? "user_id" : "session_id", session?.user?.id || sessionId);
+          }
+
+          // Update local state
+          setItems(prev => prev.filter(
+            item => !(item.product_type === "individual_replay" && item.event_year === product.event_year)
+          ));
+
+          toast.info(`Removed ${individualReplaysToRemove.length} individual replay(s) - included in bundle`);
+        }
+      }
+
       // Add to database cart
       const cartItem = {
         product_id: productId,
