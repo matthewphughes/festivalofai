@@ -242,25 +242,28 @@ const AdminSpeakers = () => {
     const newSpeakers = arrayMove(speakers, oldIndex, newIndex);
     setSpeakers(newSpeakers);
 
-    // Update display_order in database
+    // Update display_order in database - update all at once to avoid conflicts
     try {
-      const updates = newSpeakers.map((speaker, index) => ({
-        id: speaker.id,
-        display_order: index + 1,
-      }));
-
-      for (const update of updates) {
-        const { error } = await supabase
+      // Update all speakers with their new positions
+      const updates = newSpeakers.map((speaker, index) => 
+        supabase
           .from('speakers')
-          .update({ display_order: update.display_order })
-          .eq('id', update.id);
+          .update({ display_order: index + 1 })
+          .eq('id', speaker.id)
+      );
 
-        if (error) throw error;
+      const results = await Promise.all(updates);
+      
+      // Check if any update failed
+      const hasError = results.some(result => result.error);
+      if (hasError) {
+        throw new Error("Failed to update some speakers");
       }
 
       toast.success("Speaker order updated");
     } catch (error: any) {
       toast.error("Failed to update order");
+      console.error("Reorder error:", error);
       // Revert on error
       await fetchSpeakers();
     }
