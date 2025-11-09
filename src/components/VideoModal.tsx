@@ -12,7 +12,15 @@ interface VideoModalProps {
 const VideoModal = ({ isOpen, onClose, videoUrl, title }: VideoModalProps) => {
   // Extract video ID and determine platform
   const getEmbedUrl = (url: string): string | null => {
-    // Vimeo
+    // Vimeo with privacy hash: https://vimeo.com/1135135283/7bd539dd20
+    const vimeoHashMatch = url.match(/vimeo\.com\/(\d+)\/([a-zA-Z0-9]+)/);
+    if (vimeoHashMatch) {
+      const videoId = vimeoHashMatch[1];
+      const hash = vimeoHashMatch[2];
+      return `https://player.vimeo.com/video/${videoId}?h=${hash}&autoplay=1`;
+    }
+
+    // Vimeo without privacy hash: https://vimeo.com/1135135283
     const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
     if (vimeoMatch) {
       return `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`;
