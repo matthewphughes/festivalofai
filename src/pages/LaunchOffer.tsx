@@ -36,6 +36,14 @@ import venueExterior from "@/assets/venue-exterior.jpg";
 import venueRockets from "@/assets/venue-rockets.jpg";
 import venuePlanetarium from "@/assets/venue-planetarium.jpg";
 import venueEventSpace from "@/assets/venue-event-space.jpg";
+import eventAtmosphere from "@/assets/event-atmosphere-1.jpg";
+import eventAudience1 from "@/assets/event-audience-1.jpg";
+import eventAudience2 from "@/assets/event-audience-2.jpg";
+import eventNetworking1 from "@/assets/event-networking-1.jpg";
+import eventNetworking2 from "@/assets/event-networking-2.jpg";
+import eventSpeaker1 from "@/assets/event-speaker-1.jpg";
+import eventSpeaker2 from "@/assets/event-speaker-2.jpg";
+import eventSpeaker3 from "@/assets/event-speaker-3.jpg";
 
 interface Speaker {
   id: string;
@@ -629,6 +637,94 @@ const LaunchOffer = () => {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </section>
+
+          {/* Event Gallery Section */}
+          <section className="mb-16 sm:mb-24">
+            <div className="text-center mb-8 sm:mb-12 px-4">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
+                Festival of AI <span className="text-accent">2025 Highlights</span>
+              </h2>
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+                Experience the energy, innovation, and connections from our 2025 event
+              </p>
+            </div>
+
+            <div className="px-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                {/* Column 1 */}
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="aspect-[3/4] overflow-hidden rounded-lg">
+                    <img 
+                      src={eventSpeaker1} 
+                      alt="Speaker presenting at Festival of AI 2025" 
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="aspect-square overflow-hidden rounded-lg">
+                    <img 
+                      src={eventNetworking1} 
+                      alt="Networking at Festival of AI 2025" 
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                </div>
+                
+                {/* Column 2 */}
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="aspect-square overflow-hidden rounded-lg">
+                    <img 
+                      src={eventAudience1} 
+                      alt="Engaged audience at Festival of AI 2025" 
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="aspect-[3/4] overflow-hidden rounded-lg">
+                    <img 
+                      src={eventAtmosphere} 
+                      alt="Festival of AI 2025 atmosphere" 
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                </div>
+                
+                {/* Column 3 */}
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="aspect-[3/4] overflow-hidden rounded-lg">
+                    <img 
+                      src={eventSpeaker2} 
+                      alt="Keynote speaker at Festival of AI 2025" 
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="aspect-square overflow-hidden rounded-lg">
+                    <img 
+                      src={eventAudience2} 
+                      alt="Audience participation at Festival of AI 2025" 
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                </div>
+                
+                {/* Column 4 */}
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="aspect-square overflow-hidden rounded-lg">
+                    <img 
+                      src={eventNetworking2} 
+                      alt="Professional networking at Festival of AI 2025" 
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="aspect-[3/4] overflow-hidden rounded-lg">
+                    <img 
+                      src={eventSpeaker3} 
+                      alt="Expert session at Festival of AI 2025" 
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
 
