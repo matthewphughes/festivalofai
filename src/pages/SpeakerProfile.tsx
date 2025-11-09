@@ -440,19 +440,31 @@ const SpeakerProfile = () => {
                     <CardContent className="p-0">
                       <div className="flex flex-col md:flex-row gap-0">
                         {/* Thumbnail */}
-                        <div className="relative md:w-96 flex-shrink-0">
-                          <div className="aspect-video bg-muted">
+                        <div 
+                          className="relative md:w-96 flex-shrink-0 group cursor-pointer"
+                          onClick={() => hasAccess && window.open(replay.video_url, '_blank')}
+                        >
+                          <div className="aspect-video bg-muted overflow-hidden">
                             {replay.thumbnail_url ? (
                               <img 
                                 src={replay.thumbnail_url} 
                                 alt={replay.title}
-                                className="w-full h-full object-contain"
+                                loading="lazy"
+                                className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
                                 <Play className="w-12 h-12 text-muted-foreground" />
                               </div>
                             )}
+                          </div>
+                          {/* Play button overlay */}
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center">
+                            <div className="transform scale-0 group-hover:scale-100 transition-transform duration-300">
+                              <div className="bg-primary rounded-full p-4">
+                                <Play className="w-8 h-8 text-primary-foreground fill-current" />
+                              </div>
+                            </div>
                           </div>
                         </div>
 
