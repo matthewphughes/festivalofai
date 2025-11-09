@@ -140,8 +140,10 @@ const LaunchOffer = () => {
   ];
 
   const benefits = [
-    "Access to all keynote sessions and workshops",
-    "Lifetime access to session replays",
+    "Choose your path: Beginner or Advanced stage",
+    "Two simultaneous stages with curated content for your level",
+    "Access to all keynote sessions",
+    "Lifetime access to session replays from both stages",
     "Exclusive networking opportunities with 200+ attendees",
     "Hands-on AI tool demonstrations",
     "Lunch, refreshments, and evening reception",
@@ -161,7 +163,7 @@ const LaunchOffer = () => {
     },
     {
       question: "Is this event suitable for beginners?",
-      answer: "Yes! Festival of AI caters to all skill levels. We have sessions for complete beginners as well as advanced practitioners. The workshops are particularly hands-on and practical for those just getting started."
+      answer: "Absolutely! In 2026, we're running two simultaneous stages - a Beginner Stage and an Advanced Stage. You can choose which stage to attend based on your skill level. Both stages run throughout the day on October 16th, and if you have a workshop ticket, you can also choose between beginner or advanced workshops on October 15th. Everyone finds value regardless of their AI experience!"
     },
     {
       question: "What makes this different from other AI conferences?",
@@ -173,7 +175,7 @@ const LaunchOffer = () => {
     },
     {
       question: "What's included in the Workshop ticket vs Standard?",
-      answer: "Workshop tickets include a second full day (October 15th, 2026) dedicated to hands-on workshops. You can choose between beginner-level or advanced workshops based on your skill level. You'll get everything in the Standard ticket for October 16th, plus an exclusive workshop day on October 15th with expert-led sessions, advanced tool demonstrations, priority seating, and all workshop materials and resources."
+      answer: "Workshop tickets include a second full day (October 15th, 2026) dedicated to hands-on workshops. On both days you can choose your track: Beginner or Advanced. October 15th offers workshop tracks, and October 16th features two simultaneous stages. You'll get everything in the Standard ticket plus an exclusive workshop day with expert-led sessions, advanced tool demonstrations, priority seating, and all workshop materials."
     },
     {
       question: "Is there parking available?",
@@ -202,7 +204,8 @@ const LaunchOffer = () => {
       savings: "£300",
       discount: "60%",
       features: [
-        "Full day access to all sessions (Oct 16th)",
+        "Full day access - choose your stage (Oct 16th)",
+        "Beginner Stage OR Advanced Stage sessions",
         "Networking reception",
         "Gift bag",
         "Workbook",
@@ -220,9 +223,9 @@ const LaunchOffer = () => {
       popular: true,
       features: [
         "TWO FULL DAYS: Oct 15th (Workshop) + Oct 16th (Festival)",
-        "Choose your track: Beginner OR Advanced workshops (Oct 15th)",
+        "Oct 15th: Choose Beginner OR Advanced workshop track",
+        "Oct 16th: Choose Beginner OR Advanced stage",
         "Exclusive hands-on workshops (Oct 15th)",
-        "Full day access to all sessions (Oct 16th)",
         "Networking reception",
         "Gift bag",
         "Workbook",
