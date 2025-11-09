@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Pencil, Trash2, Shield, User, Mic, Users, Video, Upload, Loader2 } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Shield, User, Mic, Users, Video, Upload, Loader2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 import { UserFilters } from "@/components/admin/UserFilters";
 import { BulkActionsBar } from "@/components/admin/BulkActionsBar";
@@ -60,6 +60,10 @@ const AdminUsers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+  
+  // Sorting states
+  const [sortField, setSortField] = useState<keyof UserProfile | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   // Bulk import states
   const [bulkImportOpen, setBulkImportOpen] = useState(false);
@@ -351,9 +355,31 @@ const AdminUsers = () => {
     }
   };
 
-  // Filter and search users
+  // Handle column sorting
+  const handleSort = (field: keyof UserProfile) => {
+    if (sortField === field) {
+      // Toggle direction if same field
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      // New field, default to ascending
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  // Get sort icon for column header
+  const getSortIcon = (field: keyof UserProfile) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="ml-2 h-4 w-4" />;
+    }
+    return sortDirection === "asc" 
+      ? <ArrowUp className="ml-2 h-4 w-4" />
+      : <ArrowDown className="ml-2 h-4 w-4" />;
+  };
+
+  // Filter, search, and sort users
   const filteredUsers = useMemo(() => {
-    return users.filter(user => {
+    let result = users.filter(user => {
       // Search filter
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch = 
@@ -367,7 +393,30 @@ const AdminUsers = () => {
 
       return matchesSearch && matchesRole;
     });
-  }, [users, searchTerm, roleFilter]);
+
+    // Apply sorting
+    if (sortField) {
+      result.sort((a, b) => {
+        let aValue = a[sortField];
+        let bValue = b[sortField];
+
+        // Handle null values
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+
+        // Convert to comparable values
+        if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+        if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+
+        // Compare
+        if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [users, searchTerm, roleFilter, sortField, sortDirection]);
 
   // Bulk selection handlers
   const toggleUserSelection = (userId: string) => {
@@ -731,11 +780,43 @@ const AdminUsers = () => {
                         onCheckedChange={toggleAllUsers}
                       />
                     </TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-accent/50"
+                      onClick={() => handleSort("full_name")}
+                    >
+                      <div className="flex items-center">
+                        Name
+                        {getSortIcon("full_name")}
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-accent/50"
+                      onClick={() => handleSort("email")}
+                    >
+                      <div className="flex items-center">
+                        Email
+                        {getSortIcon("email")}
+                      </div>
+                    </TableHead>
                     <TableHead>Role</TableHead>
-                    <TableHead>Joined</TableHead>
-                    <TableHead>Last Login</TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-accent/50"
+                      onClick={() => handleSort("created_at")}
+                    >
+                      <div className="flex items-center">
+                        Joined
+                        {getSortIcon("created_at")}
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-accent/50"
+                      onClick={() => handleSort("last_sign_in_at")}
+                    >
+                      <div className="flex items-center">
+                        Last Login
+                        {getSortIcon("last_sign_in_at")}
+                      </div>
+                    </TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
