@@ -457,12 +457,27 @@ const AdminTestimonials = () => {
                         <GripVertical className="w-5 h-5 text-muted-foreground" />
                       </div>
 
+                      {testimonial.thumbnail_url && (
+                        <div className="flex-shrink-0">
+                          <img 
+                            src={testimonial.thumbnail_url} 
+                            alt={`${testimonial.author} thumbnail`}
+                            className="w-24 h-24 object-cover rounded-md border border-border"
+                          />
+                        </div>
+                      )}
+
                       <div className="flex-1">
                         <div className="flex items-start justify-between mb-2">
                           <div>
                             <p className="italic text-foreground/90 mb-2">"{testimonial.quote}"</p>
                             <p className="text-sm font-semibold text-accent">— {testimonial.author}</p>
                             <p className="text-xs text-muted-foreground mt-1">Year: {testimonial.year}</p>
+                            {testimonial.video_url && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Video: {testimonial.video_url.substring(0, 50)}...
+                              </p>
+                            )}
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge variant={testimonial.is_published ? "default" : "secondary"}>
