@@ -11,7 +11,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Award, Star, Users } from "lucide-react";
 import { useState } from "react";
 
 const sponsorRequestSchema = z.object({
@@ -23,18 +22,6 @@ const sponsorRequestSchema = z.object({
 });
 
 type SponsorRequestFormData = z.infer<typeof sponsorRequestSchema>;
-
-const platinumSponsors = [
-  { name: "HighLevel", logo: "https://festivalof.ai/wp-content/uploads/2025/05/HighLevel-1024x216.png", url: "https://www.gohighlevel.com/festival-of-ai-promo" }
-];
-
-const goldSponsors = [
-  // Add gold sponsors here
-];
-
-const silverSponsors = [
-  // Add silver sponsors here
-];
 
 const Sponsors = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,107 +65,14 @@ const Sponsors = () => {
         <Navigation />
         
         <main className="pt-20">
-          {/* Hero Section */}
-          <section className="relative py-20 bg-gradient-to-b from-primary/5 to-background">
-            <div className="container mx-auto px-4">
-              <div className="max-w-4xl mx-auto text-center">
-                <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  Our Sponsors
-                </h1>
-                <p className="text-xl text-muted-foreground mb-8">
-                  Thank you to our amazing sponsors who make the Festival of AI possible.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Platinum Sponsors */}
-          {platinumSponsors.length > 0 && (
-            <section className="py-16 bg-gradient-to-b from-background to-primary/5">
-              <div className="container mx-auto px-4">
-                <div className="max-w-6xl mx-auto">
-                  <div className="flex items-center justify-center gap-3 mb-12">
-                    <Award className="h-8 w-8 text-primary" />
-                    <h2 className="text-3xl font-bold">Platinum Sponsors</h2>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-8">
-                    {platinumSponsors.map((sponsor, index) => (
-                      <Card key={index} className="p-8 hover:shadow-xl transition-shadow bg-gradient-to-br from-primary/5 to-background">
-                        <a href={sponsor.url} target="_blank" rel="noopener noreferrer" className="block">
-                          <img
-                            src={sponsor.logo}
-                            alt={sponsor.name}
-                            className="w-full h-32 object-contain"
-                          />
-                        </a>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* Gold Sponsors */}
-          {goldSponsors.length > 0 && (
-            <section className="py-16">
-              <div className="container mx-auto px-4">
-                <div className="max-w-6xl mx-auto">
-                  <div className="flex items-center justify-center gap-3 mb-12">
-                    <Star className="h-8 w-8 text-accent" />
-                    <h2 className="text-3xl font-bold">Gold Sponsors</h2>
-                  </div>
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {goldSponsors.map((sponsor, index) => (
-                      <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
-                        <a href={sponsor.url} target="_blank" rel="noopener noreferrer" className="block">
-                          <img
-                            src={sponsor.logo}
-                            alt={sponsor.name}
-                            className="w-full h-24 object-contain"
-                          />
-                        </a>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* Silver Sponsors */}
-          {silverSponsors.length > 0 && (
-            <section className="py-16 bg-gradient-to-b from-background to-primary/5">
-              <div className="container mx-auto px-4">
-                <div className="max-w-6xl mx-auto">
-                  <div className="flex items-center justify-center gap-3 mb-12">
-                    <Users className="h-8 w-8 text-muted-foreground" />
-                    <h2 className="text-3xl font-bold">Silver Sponsors</h2>
-                  </div>
-                  <div className="grid md:grid-cols-4 gap-4">
-                    {silverSponsors.map((sponsor, index) => (
-                      <Card key={index} className="p-4 hover:shadow-lg transition-shadow">
-                        <a href={sponsor.url} target="_blank" rel="noopener noreferrer" className="block">
-                          <img
-                            src={sponsor.logo}
-                            alt={sponsor.name}
-                            className="w-full h-20 object-contain"
-                          />
-                        </a>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* Become a Sponsor Section */}
-          <section className="py-16">
+          {/* Sponsor Request Section */}
+          <section className="py-20">
             <div className="container mx-auto px-4">
               <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-12">
-                  <h2 className="text-3xl font-bold mb-4">Become a Sponsor</h2>
+                  <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                    Become a Sponsor
+                  </h1>
                   <p className="text-xl text-muted-foreground">
                     Join us in shaping the future of AI. Get in touch to receive our sponsor pack.
                   </p>
