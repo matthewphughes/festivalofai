@@ -27,6 +27,7 @@ import AdminSessions from "./pages/AdminSessions";
 import AdminAgendaBuilder from "./pages/AdminAgendaBuilder";
 import AdminUsers from "./pages/AdminUsers";
 import AdminSpeakers from "./pages/AdminSpeakers";
+import AdminTestimonials from "./pages/AdminTestimonials";
 import NotFound from "./pages/NotFound";
 import Accommodation from "./pages/Accommodation";
 import Contact from "./pages/Contact";
@@ -85,6 +86,7 @@ const App = () => (
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/admin/users/:userId" element={<AdminUserEdit />} />
           <Route path="/admin/speakers" element={<AdminSpeakers />} />
+          <Route path="/admin/testimonials" element={<AdminTestimonials />} />
           <Route path="/admin/contacts" element={<AdminContacts />} />
           <Route path="/admin/sponsor-requests" element={<AdminSponsorRequests />} />
           <Route path="/admin/site-settings" element={<AdminSiteSettings />} />

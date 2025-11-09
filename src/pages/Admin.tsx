@@ -245,6 +245,18 @@ const Admin = () => {
                     </span>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
+
+                  <Button
+                    onClick={() => navigate("/admin/testimonials")}
+                    variant="ghost"
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4" />
+                      Testimonials
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </CardContent>
               </Card>
 

@@ -663,6 +663,45 @@ export type Database = {
           },
         ]
       }
+      testimonials: {
+        Row: {
+          author: string
+          created_at: string
+          display_order: number
+          id: string
+          is_published: boolean
+          quote: string
+          thumbnail_url: string | null
+          updated_at: string
+          video_url: string | null
+          year: string
+        }
+        Insert: {
+          author: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_published?: boolean
+          quote: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          video_url?: string | null
+          year: string
+        }
+        Update: {
+          author?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_published?: boolean
+          quote?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          video_url?: string | null
+          year?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
