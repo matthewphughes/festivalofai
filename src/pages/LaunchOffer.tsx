@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
 import MinimalFooter from "@/components/MinimalFooter";
+import DiscountBanner from "@/components/DiscountBanner";
 import StarField from "@/components/StarField";
 import CountdownTimer from "@/components/CountdownTimer";
 import VideoTestimonialCard from "@/components/VideoTestimonialCard";
@@ -23,7 +24,8 @@ import {
   Loader2,
   Clock,
   AlertCircle,
-  CreditCard
+  CreditCard,
+  Lock
 } from "lucide-react";
 import { trackButtonClick, trackPageView } from "@/lib/analytics";
 import { toast } from "sonner";
@@ -382,6 +384,24 @@ const LaunchOffer = () => {
                         </>
                       )}
                     </Button>
+                    
+                    {/* Trust Badges & Security Seals */}
+                    <div className="mt-4 pt-4 border-t border-border/50">
+                      <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1.5">
+                          <Lock className="w-3.5 h-3.5 text-accent" />
+                          <span>SSL Encrypted</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Shield className="w-3.5 h-3.5 text-accent" />
+                          <span>Secure Checkout</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
+                          <span>Money-Back Guarantee</span>
+                        </div>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -704,6 +724,9 @@ const LaunchOffer = () => {
       </main>
 
       <MinimalFooter />
+      
+      {/* Discount Banner */}
+      <DiscountBanner />
     </div>
   );
 };
