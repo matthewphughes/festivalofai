@@ -416,38 +416,6 @@ const Checkout = () => {
                   <p className="text-sm text-muted-foreground mt-2">Loading payment form...</p>
                 </div>
               )}
-              {stripeError ? (
-                <div className="text-center p-6 bg-destructive/10 rounded-lg">
-                  <p className="text-destructive font-semibold mb-2">Payment system unavailable</p>
-                  <p className="text-sm text-muted-foreground">
-                    {stripeError}. Please contact support if this persists.
-                  </p>
-                </div>
-              ) : clientSecret && stripePromise ? (
-                <Elements 
-                  stripe={stripePromise} 
-                  options={{ 
-                    clientSecret,
-                    appearance: {
-                      theme: 'stripe',
-                    },
-                    ...(userEmail && !isGuest && {
-                      defaultValues: {
-                        billingDetails: {
-                          email: userEmail,
-                        }
-                      }
-                    })
-                  }}
-                >
-                  <CheckoutForm isGuest={isGuest} userEmail={userEmail} />
-                </Elements>
-              ) : (
-                <div className="text-center p-6">
-                  <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground mt-2">Loading payment form...</p>
-                </div>
-              )}
             </CardContent>
           </Card>
         </div>
