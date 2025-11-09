@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Plus, RefreshCw, Edit, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Loader2, Plus, RefreshCw, Edit, Trash2, ToggleLeft, ToggleRight, Video } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface StripeProduct {
   id: string;
@@ -212,18 +213,70 @@ const AdminStripeProducts = () => {
     }
   };
 
-  const openEditDialog = (product: StripeProduct) => {
+  const openEditDialog = async (product: StripeProduct) => {
     setSelectedProduct(product);
+    
+    // Fetch associated replays for this product from stripe_product_replays
+    const { data: productReplays } = await supabase
+      .from("stripe_product_replays")
+      .select("replay_id")
+      .eq("product_id", product.id);
+    
+    const associatedReplayIds = productReplays?.map(pr => pr.replay_id) || [];
+    
     setFormData({
       product_name: product.product_name,
       product_type: product.product_type,
       event_year: product.event_year,
       replay_id: product.replay_id || "",
-      replay_ids: [],
+      replay_ids: associatedReplayIds,
       amount: product.amount,
       currency: product.currency,
     });
     setIsEditDialogOpen(true);
+  };
+  
+  const handleToggleReplayAssociation = async (replayId: string) => {
+    if (!selectedProduct) return;
+    
+    const isCurrentlyAssociated = formData.replay_ids.includes(replayId);
+    
+    try {
+      if (isCurrentlyAssociated) {
+        // Remove association
+        const { error } = await supabase
+          .from("stripe_product_replays")
+          .delete()
+          .eq("product_id", selectedProduct.id)
+          .eq("replay_id", replayId);
+        
+        if (error) throw error;
+        
+        setFormData({
+          ...formData,
+          replay_ids: formData.replay_ids.filter(id => id !== replayId)
+        });
+        toast.success("Replay removed from product");
+      } else {
+        // Add association
+        const { error } = await supabase
+          .from("stripe_product_replays")
+          .insert({
+            product_id: selectedProduct.id,
+            replay_id: replayId
+          });
+        
+        if (error) throw error;
+        
+        setFormData({
+          ...formData,
+          replay_ids: [...formData.replay_ids, replayId]
+        });
+        toast.success("Replay added to product");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update replay association");
+    }
   };
 
   const resetForm = () => {
@@ -557,10 +610,10 @@ const AdminStripeProducts = () => {
 
         {/* Edit Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Edit Product</DialogTitle>
-              <DialogDescription>Update product name and pricing</DialogDescription>
+              <DialogDescription>Update product details and associated replays</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -581,6 +634,55 @@ const AdminStripeProducts = () => {
                   Preview: {formatPrice(formData.amount, formData.currency)}
                 </p>
               </div>
+              
+              {/* Replay Association Section */}
+              {selectedProduct && (selectedProduct.product_type === "bundle" || selectedProduct.product_type === "year_bundle") && (
+                <div className="grid gap-3">
+                  <div className="flex items-center justify-between">
+                    <Label>
+                      <Video className="inline mr-2 h-4 w-4" />
+                      Associated Replays
+                    </Label>
+                    <Badge variant="outline">{formData.replay_ids.length} selected</Badge>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto border rounded-md p-3 space-y-3">
+                    {Array.from(new Set(replays.map(r => r.event_year))).sort((a, b) => b - a).map(year => (
+                      <div key={`year-${year}`} className="space-y-2">
+                        <div className="font-medium text-sm text-muted-foreground">
+                          {year} Replays
+                        </div>
+                        
+                        <div className="space-y-1 ml-2">
+                          {replays.filter(r => r.event_year === year).map(replay => (
+                            <div key={replay.id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`edit-replay-${replay.id}`}
+                                checked={formData.replay_ids.includes(replay.id)}
+                                onCheckedChange={() => handleToggleReplayAssociation(replay.id)}
+                              />
+                              <Label htmlFor={`edit-replay-${replay.id}`} className="text-sm font-normal cursor-pointer">
+                                {replay.title}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {selectedProduct && selectedProduct.product_type === "individual_replay" && (
+                <div>
+                  <Label>Associated Replay</Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {replays.find(r => r.id === selectedProduct.replay_id)?.title || "No replay associated"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Individual replay associations cannot be changed after creation
+                  </p>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
