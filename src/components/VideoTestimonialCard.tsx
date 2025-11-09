@@ -26,7 +26,7 @@ const VideoTestimonialCard = ({
     if (thumbnailUrl) return thumbnailUrl;
     if (!url) return "/placeholder.svg";
 
-    // Vimeo thumbnail
+    // Vimeo thumbnail (with or without privacy hash)
     const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
     if (vimeoMatch) {
       return `https://vumbnail.com/${vimeoMatch[1]}.jpg`;
