@@ -264,9 +264,7 @@ const LaunchOffer = () => {
       discount: "57%",
       popular: true,
       features: [
-        "TWO FULL DAYS: Oct 15th (Workshop) + Oct 16th (Festival)",
-        "Oct 15th: Choose Beginner OR Advanced workshop track",
-        "Oct 16th: Choose Beginner OR Advanced stage",
+        "Additional Workshop Day Oct 15th",
         "Exclusive hands-on workshops (Oct 15th)",
         "Networking reception",
         "Gift bag",
@@ -361,7 +359,7 @@ const LaunchOffer = () => {
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center gap-2 text-destructive">
                     <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                    <span className="font-bold text-sm sm:text-base">Only 47 Super Early Bird tickets remaining!</span>
+                    <span className="font-bold text-sm sm:text-base">22 Super Early Bird Tickets remaining!</span>
                   </div>
                 </CardContent>
               </Card>
@@ -460,8 +458,28 @@ const LaunchOffer = () => {
               ))}
             </div>
 
+            {/* NEW FOR 2026 Section */}
+            <div className="max-w-4xl mx-auto mt-12 sm:mt-16 mb-16 sm:mb-20 px-4">
+              <div className="text-center mb-6 sm:mb-8">
+                <Badge variant="outline" className="mb-4 text-accent border-accent">
+                  NEW FOR 2026
+                </Badge>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
+                  Two Stages, <span className="text-accent">Beginner and Advanced</span>
+                </h2>
+              </div>
+              
+              <Card className="bg-card/50 backdrop-blur-sm border-border">
+                <CardContent className="p-6 sm:p-8">
+                  <p className="text-base sm:text-lg text-center text-foreground/90 leading-relaxed">
+                    Choose between the two stages, switch at any time during the day, all sessions recorded so you can catch up on both stages
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Trust Indicators */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mt-6 px-4 text-xs sm:text-sm">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 px-4 text-xs sm:text-sm">
               <div className="flex items-center gap-2">
                 <Star className="w-4 h-4 sm:w-5 sm:h-5 text-accent fill-accent flex-shrink-0" />
                 <span className="text-foreground/70">200+ Attended 2025</span>
