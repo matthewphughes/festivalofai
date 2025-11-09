@@ -532,6 +532,13 @@ const Index = () => {
                       year={testimonial.year}
                     />
                   ))}
+                  <VideoTestimonialCard
+                    quote="An unforgettable experience that transformed my perspective on space exploration."
+                    author="Conference Attendee"
+                    year="2024"
+                    thumbnailUrl="https://vumbnail.com/1135135283.jpg"
+                    videoUrl="https://vimeo.com/1135135283/7bd539dd20"
+                  />
                 </div>
               </div>
             </section>
