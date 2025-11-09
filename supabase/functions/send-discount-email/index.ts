@@ -65,7 +65,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Festival of AI <onboarding@resend.dev>",
+        from: "Festival of AI <team@festivalof.ai>",
         to: [email],
         subject: campaign.email_subject,
         html: `
