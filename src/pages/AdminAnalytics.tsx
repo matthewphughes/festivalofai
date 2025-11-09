@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, TrendingUp, DollarSign, Users, ShoppingCart, ArrowLeft } from "lucide-react";
+import { Loader2, TrendingUp, DollarSign, Users, ShoppingCart, ArrowLeft, Eye, MousePointer, Activity } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface AnalyticsData {
   totalRevenue: number;
@@ -19,14 +20,27 @@ interface AnalyticsData {
   productSales: Array<{ name: string; sales: number }>;
 }
 
+interface GA4Data {
+  pageViews: number;
+  sessions: number;
+  activeUsers: number;
+  conversions: number;
+  topPages: Array<{ page: string; views: number }>;
+  trafficSources: Array<{ source: string; users: number }>;
+  deviceCategories: Array<{ device: string; users: number }>;
+}
+
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--muted))'];
 
 const AdminAnalytics = () => {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [ga4Data, setGA4Data] = useState<GA4Data | null>(null);
   const [loading, setLoading] = useState(true);
+  const [ga4Loading, setGA4Loading] = useState(true);
 
   useEffect(() => {
     fetchAnalytics();
+    fetchGA4Data();
   }, []);
 
   const fetchAnalytics = async () => {
@@ -115,7 +129,33 @@ const AdminAnalytics = () => {
     }
   };
 
-  if (loading) {
+  const fetchGA4Data = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error("Not authenticated");
+      }
+
+      const response = await supabase.functions.invoke("fetch-ga4-data", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      setGA4Data(response.data);
+    } catch (error: any) {
+      console.error("Failed to fetch GA4 data:", error);
+      toast.error("Failed to fetch Google Analytics data");
+    } finally {
+      setGA4Loading(false);
+    }
+  };
+
+  if (loading && ga4Loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -151,12 +191,19 @@ const AdminAnalytics = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Analytics Dashboard</h1>
           <p className="text-muted-foreground">
-            Key metrics and insights about ticket sales and revenue
+            Key metrics and insights about sales, revenue, and site traffic
           </p>
         </div>
 
-        {/* Key Metrics */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <Tabs defaultValue="sales" className="w-full">
+          <TabsList className="mb-8">
+            <TabsTrigger value="sales">Sales Analytics</TabsTrigger>
+            <TabsTrigger value="traffic">Google Analytics</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="sales" className="space-y-8">
+            {/* Key Metrics */}
+            <div className="grid md:grid-cols-4 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
@@ -200,10 +247,10 @@ const AdminAnalytics = () => {
               <p className="text-xs text-muted-foreground">Registered accounts</p>
             </CardContent>
           </Card>
-        </div>
+            </div>
 
-        {/* Charts */}
-        <div className="grid md:grid-cols-2 gap-6">
+            {/* Charts */}
+            <div className="grid md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Revenue by Product</CardTitle>
@@ -269,7 +316,141 @@ const AdminAnalytics = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="traffic" className="space-y-8">
+            {ga4Loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            ) : ga4Data ? (
+              <>
+                {/* GA4 Key Metrics */}
+                <div className="grid md:grid-cols-4 gap-6">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Page Views</CardTitle>
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{ga4Data.pageViews.toLocaleString()}</div>
+                      <p className="text-xs text-muted-foreground">Last 30 days</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Sessions</CardTitle>
+                      <Activity className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{ga4Data.sessions.toLocaleString()}</div>
+                      <p className="text-xs text-muted-foreground">Last 30 days</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{ga4Data.activeUsers.toLocaleString()}</div>
+                      <p className="text-xs text-muted-foreground">Last 30 days</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Conversions</CardTitle>
+                      <MousePointer className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{ga4Data.conversions.toLocaleString()}</div>
+                      <p className="text-xs text-muted-foreground">Last 30 days</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* GA4 Charts */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Top Pages</CardTitle>
+                      <CardDescription>Most viewed pages in the last 30 days</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={ga4Data.topPages}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="page" angle={-45} textAnchor="end" height={100} />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="views" fill="hsl(var(--primary))" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Traffic Sources</CardTitle>
+                      <CardDescription>User acquisition by source</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={ga4Data.trafficSources}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="source" />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="users" fill="hsl(var(--secondary))" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="md:col-span-2">
+                    <CardHeader>
+                      <CardTitle>Device Categories</CardTitle>
+                      <CardDescription>User distribution by device type</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-center">
+                        <ResponsiveContainer width="100%" height={300}>
+                          <PieChart>
+                            <Pie
+                              data={ga4Data.deviceCategories}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              label={({ device, percent }) => `${device} (${(percent * 100).toFixed(0)}%)`}
+                              outerRadius={80}
+                              fill="hsl(var(--primary))"
+                              dataKey="users"
+                            >
+                              {ga4Data.deviceCategories.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <Tooltip />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            ) : (
+              <Card>
+                <CardContent className="py-12">
+                  <p className="text-center text-muted-foreground">No Google Analytics data available</p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
 
       <Footer />
