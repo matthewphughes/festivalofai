@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { z } from "zod";
+import { ArrowLeft } from "lucide-react";
 
 const signInSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }).max(255, { message: "Email must be less than 255 characters" }),
@@ -30,6 +31,8 @@ export const AuthDialog = ({ open, onOpenChange, onSuccess }: AuthDialogProps) =
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,24 +130,86 @@ export const AuthDialog = ({ open, onOpenChange, onSuccess }: AuthDialogProps) =
     }
   };
 
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const emailValidation = z.string().email().safeParse(resetEmail);
+      if (!emailValidation.success) {
+        toast.error("Please enter a valid email address");
+        setLoading(false);
+        return;
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success("Password reset email sent! Check your inbox.");
+        setShowPasswordReset(false);
+        setResetEmail("");
+      }
+    } catch (error) {
+      toast.error("An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Sign in to continue</DialogTitle>
+          {showPasswordReset && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowPasswordReset(false)}
+              className="absolute left-4 top-4"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          )}
+          <DialogTitle>
+            {showPasswordReset ? "Reset Password" : "Sign in to continue"}
+          </DialogTitle>
           <DialogDescription>
-            Sign in or create an account to complete your purchase
+            {showPasswordReset
+              ? "Enter your email to receive a password reset link"
+              : "Sign in or create an account to complete your purchase"}
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
+        {showPasswordReset ? (
+          <form onSubmit={handlePasswordReset} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="reset-email">Email Address</Label>
+              <Input
+                id="reset-email"
+                type="email"
+                placeholder="you@example.com"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Sending..." : "Send Reset Link"}
+            </Button>
+          </form>
+        ) : (
+          <Tabs defaultValue="signin" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="signin">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="signin">
-            <form onSubmit={handleSignIn} className="space-y-4">
+            <TabsContent value="signin">
+              <form onSubmit={handleSignIn} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="dialog-signin-email">Email</Label>
                 <Input
@@ -157,7 +222,17 @@ export const AuthDialog = ({ open, onOpenChange, onSuccess }: AuthDialogProps) =
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="dialog-signin-password">Password</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="dialog-signin-password">Password</Label>
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="h-auto p-0 text-xs"
+                    onClick={() => setShowPasswordReset(true)}
+                  >
+                    Forgot password?
+                  </Button>
+                </div>
                 <Input
                   id="dialog-signin-password"
                   type="password"
@@ -287,6 +362,7 @@ export const AuthDialog = ({ open, onOpenChange, onSuccess }: AuthDialogProps) =
             </form>
           </TabsContent>
         </Tabs>
+        )}
       </DialogContent>
     </Dialog>
   );
