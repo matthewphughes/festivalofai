@@ -61,7 +61,7 @@ const VideoModal = ({ isOpen, onClose, videoUrl, title }: VideoModalProps) => {
     // YouTube
     const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
     if (youtubeMatch) {
-      return `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1`;
+      return `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1&modestbranding=1&rel=0&showinfo=0`;
     }
 
     return null;
