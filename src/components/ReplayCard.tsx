@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Clock, Edit, Save, X } from "lucide-react";
+import { Clock, Edit, Save, X, Play } from "lucide-react";
 
 interface Replay {
   id: string;
@@ -42,6 +42,7 @@ interface ReplayCardProps {
   onSpeakerClick: (speakerId: string | null) => void;
   onEditFormChange: (field: string, value: any) => void;
   getYouTubeEmbedUrl: (url: string) => string;
+  onPlayVideo: (videoUrl: string, title: string) => void;
 }
 
 const ReplayCard = React.memo<ReplayCardProps>(({
@@ -57,17 +58,30 @@ const ReplayCard = React.memo<ReplayCardProps>(({
   onSpeakerClick,
   onEditFormChange,
   getYouTubeEmbedUrl,
+  onPlayVideo,
 }) => {
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="aspect-video bg-muted">
-        <iframe
-          src={getYouTubeEmbedUrl(replay.video_url)}
-          title={replay.title}
-          className="w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
+      <div 
+        className="relative aspect-video bg-muted cursor-pointer group"
+        onClick={() => onPlayVideo(replay.video_url, replay.title)}
+      >
+        {replay.thumbnail_url ? (
+          <img
+            src={replay.thumbnail_url}
+            alt={replay.title}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-muted">
+            <Play className="h-16 w-16 text-muted-foreground" />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+          <div className="bg-primary rounded-full p-4 group-hover:scale-110 transition-transform">
+            <Play className="h-8 w-8 text-primary-foreground fill-current" />
+          </div>
+        </div>
       </div>
       <CardHeader>
         <div className="flex items-start justify-between gap-2 mb-2">

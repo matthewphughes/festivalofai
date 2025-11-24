@@ -15,6 +15,7 @@ import { Play, Clock, LogOut, Shield, ArrowLeft, Edit, Save, X } from "lucide-re
 import { toast } from "sonner";
 import { z } from "zod";
 import ReplayCard from "@/components/ReplayCard";
+import VideoModal from "@/components/VideoModal";
 
 
 // Validation schema for replay editing
@@ -61,6 +62,9 @@ const Replays = () => {
   const [purchasedYears, setPurchasedYears] = useState<number[]>([]);
   const [purchasedReplayIds, setPurchasedReplayIds] = useState<string[]>([]);
   const [verifyingPurchase, setVerifyingPurchase] = useState(false);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [currentVideoUrl, setCurrentVideoUrl] = useState("");
+  const [currentVideoTitle, setCurrentVideoTitle] = useState("");
 
   useEffect(() => {
     checkAuth();
@@ -324,6 +328,12 @@ const Replays = () => {
     setEditForm(prev => ({ ...prev, [field]: value }));
   }, []);
 
+  const handlePlayVideo = useCallback((videoUrl: string, title: string) => {
+    setCurrentVideoUrl(videoUrl);
+    setCurrentVideoTitle(title);
+    setVideoModalOpen(true);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -416,6 +426,7 @@ const Replays = () => {
                       onSpeakerClick={handleSpeakerClick}
                       onEditFormChange={handleEditFormChange}
                       getYouTubeEmbedUrl={getYouTubeEmbedUrl}
+                      onPlayVideo={handlePlayVideo}
                     />
                   ))}
                 </div>
@@ -458,6 +469,7 @@ const Replays = () => {
                       onSpeakerClick={handleSpeakerClick}
                       onEditFormChange={handleEditFormChange}
                       getYouTubeEmbedUrl={getYouTubeEmbedUrl}
+                      onPlayVideo={handlePlayVideo}
                     />
                   ))}
                 </div>
@@ -468,6 +480,14 @@ const Replays = () => {
       </main>
 
       <Footer />
+
+      {/* Video Modal */}
+      <VideoModal
+        isOpen={videoModalOpen}
+        onClose={() => setVideoModalOpen(false)}
+        videoUrl={currentVideoUrl}
+        title={currentVideoTitle}
+      />
 
       {/* Speaker Profile Dialog */}
       <Dialog open={!!selectedSpeaker} onOpenChange={() => setSelectedSpeaker(null)}>
