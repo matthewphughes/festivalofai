@@ -1,6 +1,7 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { X } from "lucide-react";
+import { X, Maximize, Minimize } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState, useRef, useEffect } from "react";
 
 interface VideoModalProps {
   isOpen: boolean;
@@ -10,6 +11,37 @@ interface VideoModalProps {
 }
 
 const VideoModal = ({ isOpen, onClose, videoUrl, title }: VideoModalProps) => {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const toggleFullscreen = async () => {
+    if (!containerRef.current) return;
+
+    try {
+      if (!document.fullscreenElement) {
+        await containerRef.current.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    } catch (error) {
+      console.error("Error toggling fullscreen:", error);
+    }
+  };
+
+  // Listen for fullscreen changes (e.g., when user presses ESC)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   // Extract video ID and determine platform
   const getEmbedUrl = (url: string): string | null => {
     // Vimeo with privacy hash: https://vimeo.com/1135135283/7bd539dd20
@@ -40,15 +72,33 @@ const VideoModal = ({ isOpen, onClose, videoUrl, title }: VideoModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl w-full p-0 overflow-hidden bg-background">
-        <div className="relative">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2 z-50 bg-background/80 hover:bg-background"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+        <div 
+          className="relative" 
+          ref={containerRef}
+        >
+          <div className="absolute top-2 right-2 z-50 flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="bg-background/80 hover:bg-background"
+              onClick={toggleFullscreen}
+              title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            >
+              {isFullscreen ? (
+                <Minimize className="h-4 w-4" />
+              ) : (
+                <Maximize className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="bg-background/80 hover:bg-background"
+              onClick={onClose}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
           
           {embedUrl ? (
             <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
