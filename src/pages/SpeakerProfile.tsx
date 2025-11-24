@@ -10,6 +10,7 @@ import { Linkedin, Twitter, Globe, Youtube, Instagram, ArrowLeft, Play, Clock, L
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
 import { useCart } from "@/contexts/CartContext";
+import VideoModal from "@/components/VideoModal";
 
 interface Replay {
   id: string;
@@ -62,6 +63,9 @@ const SpeakerProfile = () => {
   const [purchasedReplayIds, setPurchasedReplayIds] = useState<string[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [stripeProducts, setStripeProducts] = useState<StripeProduct[]>([]);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [currentVideoUrl, setCurrentVideoUrl] = useState("");
+  const [currentVideoTitle, setCurrentVideoTitle] = useState("");
 
   useEffect(() => {
     checkAuthAndFetch();
@@ -188,6 +192,12 @@ const SpeakerProfile = () => {
     }
 
     await addToCart(product.id);
+  };
+
+  const handlePlayVideo = (videoUrl: string, title: string) => {
+    setCurrentVideoUrl(videoUrl);
+    setCurrentVideoTitle(title);
+    setVideoModalOpen(true);
   };
 
   if (loading) {
@@ -388,7 +398,7 @@ const SpeakerProfile = () => {
                         {/* Thumbnail */}
                         <div 
                           className="relative md:w-96 flex-shrink-0 group cursor-pointer"
-                          onClick={() => hasAccess && window.open(replay.video_url, '_blank')}
+                          onClick={() => hasAccess && handlePlayVideo(replay.video_url, replay.title)}
                         >
                           <div className="aspect-video bg-muted overflow-hidden">
                             {replay.thumbnail_url ? (
@@ -444,7 +454,7 @@ const SpeakerProfile = () => {
                               <Button 
                                 size="lg"
                                 className="w-full md:w-auto"
-                                onClick={() => window.open(replay.video_url, '_blank')}
+                                onClick={() => handlePlayVideo(replay.video_url, replay.title)}
                               >
                                 <Play className="w-4 h-4 mr-2" />
                                 Watch Now
@@ -496,6 +506,14 @@ const SpeakerProfile = () => {
           </Link>
         </Card>
       </main>
+
+      {/* Video Modal */}
+      <VideoModal
+        isOpen={videoModalOpen}
+        onClose={() => setVideoModalOpen(false)}
+        videoUrl={currentVideoUrl}
+        title={currentVideoTitle}
+      />
 
       <Footer />
     </div>
