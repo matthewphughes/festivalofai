@@ -17,6 +17,7 @@ import { Play, Clock, Edit, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
 import { useCart } from "@/contexts/CartContext";
+import VideoModal from "@/components/VideoModal";
 
 const sessionSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
@@ -54,6 +55,8 @@ const PublicReplays = () => {
   const [loading, setLoading] = useState(true);
   const [selectedReplay, setSelectedReplay] = useState<Replay | null>(null);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [currentVideoUrl, setCurrentVideoUrl] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingSession, setEditingSession] = useState<Replay | null>(null);
@@ -109,11 +112,15 @@ const PublicReplays = () => {
     }
   };
 
-  useEffect(() => {
-    if (selectedReplay) {
-      setPurchaseDialogOpen(true);
-    }
-  }, [selectedReplay]);
+  const handlePlayVideo = (videoUrl: string) => {
+    setCurrentVideoUrl(videoUrl);
+    setVideoModalOpen(true);
+  };
+
+  const handleOpenPurchaseDialog = (replay: Replay) => {
+    setSelectedReplay(replay);
+    setPurchaseDialogOpen(true);
+  };
 
   const fetchReplays = async () => {
     setLoading(true);
@@ -349,7 +356,10 @@ const PublicReplays = () => {
                 key={replay.id}
                 className="group hover:shadow-lg transition-all duration-300 overflow-hidden"
               >
-                <div className="relative aspect-video bg-muted cursor-pointer" onClick={() => setSelectedReplay(replay)}>
+                <div 
+                  className="relative aspect-video bg-muted cursor-pointer" 
+                  onClick={() => handlePlayVideo(replay.video_url)}
+                >
                   {replay.thumbnail_url ? (
                     <img
                       src={replay.thumbnail_url}
@@ -374,8 +384,8 @@ const PublicReplays = () => {
                   )}
                 </div>
                 <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 cursor-pointer" onClick={() => setSelectedReplay(replay)}>
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div className="flex-1">
                       <h3 className="font-bold text-lg mb-2 line-clamp-2">{replay.title}</h3>
                       {replay.speaker_name && (
                         <p 
@@ -408,6 +418,18 @@ const PublicReplays = () => {
                       </Button>
                     )}
                   </div>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenPurchaseDialog(replay);
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                  >
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Purchase Access
+                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -416,6 +438,14 @@ const PublicReplays = () => {
       </main>
 
       <Footer />
+
+      {/* Video Modal */}
+      <VideoModal
+        isOpen={videoModalOpen}
+        onClose={() => setVideoModalOpen(false)}
+        videoUrl={currentVideoUrl}
+        title={selectedReplay?.title}
+      />
 
       {/* Purchase Dialog */}
       <Dialog open={purchaseDialogOpen} onOpenChange={(open) => {
