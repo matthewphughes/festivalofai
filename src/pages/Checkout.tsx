@@ -5,6 +5,7 @@ import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
+import { Trash2 } from "lucide-react";
 import { trackBeginCheckout } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Loader2, ShoppingBag, ArrowLeft } from "lucide-react";
+import { Loader2, ShoppingBag } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import logoLight from "@/assets/logo-light.png";
@@ -255,7 +256,7 @@ const CheckoutForm = ({
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { items, total, loading: cartLoading } = useCart();
+  const { items, total, loading: cartLoading, removeFromCart } = useCart();
   const [clientSecret, setClientSecret] = useState("");
   const [isGuest, setIsGuest] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -460,8 +461,8 @@ const Checkout = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {items.map((item) => (
-                <div key={item.product_id} className="flex justify-between items-start">
-                  <div>
+                <div key={item.product_id} className="flex justify-between items-start gap-4">
+                  <div className="flex-1">
                     <p className="font-semibold">{item.product_name}</p>
                     <p className="text-sm text-muted-foreground">
                       {item.product_type === "year_bundle" 
@@ -469,7 +470,17 @@ const Checkout = () => {
                         : `${item.event_year} Replay`}
                     </p>
                   </div>
-                  <p className="font-semibold">£{(item.amount / 100).toFixed(2)}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold">£{(item.amount / 100).toFixed(2)}</p>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeFromCart(item.product_id)}
+                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
               <Separator />
