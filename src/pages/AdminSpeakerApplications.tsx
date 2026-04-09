@@ -284,7 +284,8 @@ const AdminSpeakerApplications = () => {
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-6">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 bg-muted/50 rounded-lg p-3">
+                  <Badge className={statusColors[selectedApp.status] || ""} variant="secondary">{selectedApp.status}</Badge>
                   <Select value={selectedApp.status} onValueChange={s => { updateStatusMutation.mutate({ id: selectedApp.id, status: s }); setSelectedApp({ ...selectedApp, status: s }); }}>
                     <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -293,6 +294,12 @@ const AdminSpeakerApplications = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  {selectedApp.status === "accepted" && (
+                    <Button size="sm" variant="default" onClick={() => convertToSpeakerMutation.mutate(selectedApp)} disabled={convertToSpeakerMutation.isPending}>
+                      <UserPlus className="h-4 w-4 mr-1" />
+                      {convertToSpeakerMutation.isPending ? "Converting..." : "Convert to Speaker"}
+                    </Button>
+                  )}
                   <AlertDialog>
                     <AlertDialogTrigger asChild><Button variant="destructive" size="sm"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger>
                     <AlertDialogContent>
