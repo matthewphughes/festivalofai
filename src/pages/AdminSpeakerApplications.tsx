@@ -164,6 +164,15 @@ const AdminSpeakerApplications = () => {
     },
   });
 
+  const getCompletionPct = (a: any): number => {
+    if (a.status === "submitted") return 100;
+    const required = [a.first_name, a.last_name, a.email, a.phone, a.address_line1, a.city, a.postal_code, a.profile_picture_url, a.bio, a.session_title, a.session_description, a.preferred_track];
+    const optional = [a.address_line2, a.website_url, a.youtube_url, a.linkedin_url, a.tiktok_url, a.instagram_url, a.supporting_materials, a.additional_comments];
+    const rPct = (required.filter(Boolean).length / required.length) * 80;
+    const oPct = (optional.filter(Boolean).length / optional.length) * 20;
+    return Math.round(rPct + oPct);
+  };
+
   const filtered = useMemo(() => {
     if (!applications) return [];
     return applications.filter((a: any) => {
