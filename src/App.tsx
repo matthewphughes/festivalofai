@@ -49,6 +49,7 @@ import BecomeASpeaker from "./pages/BecomeASpeaker";
 import CallForSpeakers from "./pages/CallForSpeakers";
 import SpeakerThanks from "./pages/SpeakerThanks";
 import AdminSpeakerApplications from "./pages/AdminSpeakerApplications";
+import SponsorThanks from "./pages/SponsorThanks";
 
 const queryClient = new QueryClient();
 
@@ -74,7 +75,8 @@ const App = () => (
           <Route path="/previous-events" element={<PreviousEvents />} />
           <Route path="/venue" element={<Venue />} />
           <Route path="/accommodation" element={<Accommodation />} />
-          <Route path="/sponsors" element={<Sponsors />} />
+           <Route path="/sponsors" element={<Sponsors />} />
+           <Route path="/sponsor-thanks" element={<SponsorThanks />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/thank-you" element={<ThankYou />} />

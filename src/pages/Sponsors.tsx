@@ -12,6 +12,7 @@ import * as z from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const sponsorRequestSchema = z.object({
   company_name: z.string().trim().min(1, { message: "Company name is required" }).max(100, { message: "Company name must be less than 100 characters" }),
@@ -25,6 +26,7 @@ type SponsorRequestFormData = z.infer<typeof sponsorRequestSchema>;
 
 const Sponsors = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
   
   const {
     register,
@@ -44,8 +46,8 @@ const Sponsors = () => {
 
       if (error) throw error;
 
-      toast.success("Sponsor pack request sent successfully! We'll be in touch soon.");
       reset();
+      navigate("/sponsor-thanks");
     } catch (error) {
       console.error('Error sending sponsor request:', error);
       toast.error("Failed to send request. Please use our contact form or try again later.");
