@@ -360,9 +360,9 @@ const CallForSpeakers = () => {
                     <Select value={formData.preferred_track} onValueChange={v => setFormData(prev => ({ ...prev, preferred_track: v }))}>
                       <SelectTrigger id="preferred_track" className="bg-background"><SelectValue placeholder="Select a track" /></SelectTrigger>
                       <SelectContent className="bg-background border-border z-50">
-                        <SelectItem value="main">Main Stage</SelectItem>
+                        <SelectItem value="beginner">Beginner</SelectItem>
+                        <SelectItem value="advanced">Advanced</SelectItem>
                         <SelectItem value="workshop">Workshop</SelectItem>
-                        <SelectItem value="lightning">Lightning Talk</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
