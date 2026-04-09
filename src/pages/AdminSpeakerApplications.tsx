@@ -237,6 +237,7 @@ const AdminSpeakerApplications = () => {
                     <TableHead>Applicant</TableHead>
                     <TableHead>Session</TableHead>
                     <TableHead>Track</TableHead>
+                    <TableHead>Completion</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Actions</TableHead>
