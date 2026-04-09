@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Upload, Save, Copy, Check } from "lucide-react";
+import { HeadshotCropper } from "@/components/HeadshotCropper";
 import { Helmet } from "react-helmet-async";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -27,6 +28,8 @@ const CallForSpeakers = () => {
   const [showReturnLink, setShowReturnLink] = useState(false);
   const [profilePictureUrl, setProfilePictureUrl] = useState("");
   const [profilePictureOriginalUrl, setProfilePictureOriginalUrl] = useState("");
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropperImageUrl, setCropperImageUrl] = useState("");
 
   const [formData, setFormData] = useState({
     first_name: "", last_name: "", email: "", phone: "",
@@ -149,19 +152,41 @@ const CallForSpeakers = () => {
     }
 
     try {
+      // Upload original image
       const fileId = Math.random().toString(36).substring(7);
       const ext = file.name.split(".").pop() || "jpg";
-      const fileName = `speaker-profiles/${fileId}.${ext}`;
+      const originalFileName = `speaker-profiles/${fileId}-original.${ext}`;
 
-      const { error } = await supabase.storage.from("speaker-images").upload(fileName, file);
+      const { error } = await supabase.storage.from("speaker-images").upload(originalFileName, file);
       if (error) throw error;
 
-      const { data: { publicUrl } } = supabase.storage.from("speaker-images").getPublicUrl(fileName);
-      setProfilePictureUrl(publicUrl);
-      setProfilePictureOriginalUrl(publicUrl);
-      toast({ title: "Headshot uploaded", description: "Your photo has been uploaded." });
+      const { data: { publicUrl: originalUrl } } = supabase.storage.from("speaker-images").getPublicUrl(originalFileName);
+      setProfilePictureOriginalUrl(originalUrl);
+
+      // Open cropper with the original URL
+      setCropperImageUrl(originalUrl);
+      setCropperOpen(true);
     } catch (err: any) {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    setCropperOpen(false);
+    try {
+      const fileId = Math.random().toString(36).substring(7);
+      const croppedFileName = `speaker-profiles/${fileId}-cropped.jpg`;
+
+      const { error } = await supabase.storage.from("speaker-images").upload(croppedFileName, croppedBlob, {
+        contentType: "image/jpeg",
+      });
+      if (error) throw error;
+
+      const { data: { publicUrl: croppedUrl } } = supabase.storage.from("speaker-images").getPublicUrl(croppedFileName);
+      setProfilePictureUrl(croppedUrl);
+      toast({ title: "Headshot cropped & saved", description: "Your optimised headshot is ready." });
+    } catch (err: any) {
+      toast({ title: "Crop upload failed", description: err.message, variant: "destructive" });
     }
   };
 
