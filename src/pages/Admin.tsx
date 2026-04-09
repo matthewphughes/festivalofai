@@ -247,6 +247,18 @@ const Admin = () => {
                   </Button>
 
                   <Button
+                    onClick={() => navigate("/admin/speaker-applications")}
+                    variant="ghost"
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Mic className="h-4 w-4" />
+                      Speaker Applications
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+
+                  <Button
                     onClick={() => navigate("/admin/testimonials")}
                     variant="ghost"
                     className="w-full justify-between"
