@@ -233,35 +233,35 @@ const CallForSpeakers = () => {
     }
   };
 
-  const handlePrevious = () => setCurrentStep(prev => Math.max(prev - 1, 1));
-
-  const handleSubmit = async () => {
-    if (!validateStep(currentStep)) return;
-    setSubmitting(true);
-    try {
-      await handleSaveDraft();
-      if (applicationId) {
-        const sessionId = getSessionId();
-        const { data: success, error } = await supabase
-          .rpc("update_my_speaker_application" as any, {
-            client_session_id: sessionId, app_id: applicationId, app_data: { status: "submitted" },
-          });
-        if (error) throw error;
-        if (!success) throw new Error("Failed to submit");
-        localStorage.removeItem("speaker_app_session_id");
-        navigate("/speaker-thanks");
-      }
-    } catch (err: any) {
-      toast({ title: "Submission failed", description: err.message, variant: "destructive" });
-    } finally {
-      setSubmitting(false);
-    }
+  const handlePrevious = async () => {
+    await handleSaveDraft();
+    setShowReturnLink(false);
+    setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
-  const handleInputChange = (field: keyof typeof formData) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => setFormData(prev => ({ ...prev, [field]: e.target.value }));
+  // Calculate completion percentage based on filled required + optional fields
+  const getCompletionPercentage = () => {
+    const requiredFields = [
+      formData.first_name, formData.last_name, formData.email, formData.phone,
+      formData.address_line1, formData.city, formData.postal_code,
+      profilePictureUrl, formData.bio,
+      formData.session_title, formData.session_description, formData.preferred_track,
+    ];
+    const optionalFields = [
+      formData.address_line2,
+      formData.website_url, formData.youtube_url, formData.linkedin_url,
+      formData.tiktok_url, formData.instagram_url,
+      formData.supporting_materials, formData.additional_comments,
+    ];
+    // Required fields = 80% weight, optional = 20%
+    const requiredFilled = requiredFields.filter(Boolean).length;
+    const optionalFilled = optionalFields.filter(Boolean).length;
+    const requiredPct = (requiredFilled / requiredFields.length) * 80;
+    const optionalPct = (optionalFilled / optionalFields.length) * 20;
+    return Math.round(requiredPct + optionalPct);
+  };
 
+  const completionPct = getCompletionPercentage();
   const progress = (currentStep / TOTAL_STEPS) * 100;
   const stepTitles = ["Contact Information", "Address", "Headshot & Bio", "Session Details", "Social Links", "Final Details", "Review & Submit"];
 
