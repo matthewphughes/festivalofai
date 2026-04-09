@@ -100,6 +100,69 @@ const AdminSpeakerApplications = () => {
     },
   });
 
+  const convertToSpeakerMutation = useMutation({
+    mutationFn: async (app: any) => {
+      const fullName = `${app.first_name || ""} ${app.last_name || ""}`.trim();
+      if (!fullName) throw new Error("Speaker name is required");
+
+      // Generate slug using the DB function
+      const { data: slug, error: slugError } = await supabase.rpc("generate_speaker_slug", { speaker_name: fullName });
+      if (slugError) throw slugError;
+
+      // Get max display_order
+      const { data: speakers } = await supabase.from("speakers").select("display_order").order("display_order", { ascending: false }).limit(1);
+      const nextOrder = (speakers?.[0]?.display_order ?? 0) + 1;
+
+      // Insert speaker
+      const { data: newSpeaker, error: speakerError } = await supabase
+        .from("speakers")
+        .insert({
+          name: fullName,
+          slug,
+          bio: app.bio || null,
+          image_url: app.profile_picture_url || null,
+          website_url: app.website_url || null,
+          youtube_url: app.youtube_url || null,
+          linkedin_url: app.linkedin_url || null,
+          instagram_url: app.instagram_url || null,
+          tiktok_url: app.tiktok_url || null,
+          years: [2026],
+          display_order: nextOrder,
+        })
+        .select("id")
+        .single();
+      if (speakerError) throw speakerError;
+
+      // Create session if session_title exists
+      if (app.session_title) {
+        const { error: sessionError } = await supabase
+          .from("sessions")
+          .insert({
+            title: app.session_title,
+            description: app.session_description || null,
+            event_year: 2026,
+            speaker_name: fullName,
+            speaker_id: newSpeaker.id,
+            video_url: "",
+            published: false,
+          });
+        if (sessionError) throw sessionError;
+      }
+
+      return newSpeaker;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["speakerApplications"] });
+      queryClient.invalidateQueries({ queryKey: ["speakers"] });
+      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+      setDialogOpen(false);
+      toast.success("Speaker profile and session created successfully!");
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to convert: ${error.message}`);
+    },
+  });
+
   const filtered = useMemo(() => {
     if (!applications) return [];
     return applications.filter((a: any) => {
