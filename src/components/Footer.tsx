@@ -10,11 +10,11 @@ const Footer = () => {
           {/* About */}
           <div>
             <h3 className="text-lg font-bold mb-4">Festival of AI</h3>
-            <p className="text-muted-foreground text-sm mb-3">
+            <p className="text-muted-foreground mb-3">
               Discover practical AI that actually moves the needle for your business.
             </p>
-            <Link to="/speak" className="text-muted-foreground hover:text-accent transition-colors text-sm">
-              Become a Speaker
+            <Link to="/speak" className="text-primary font-semibold hover:text-accent transition-colors">
+              Become a Speaker →
             </Link>
           </div>
 
@@ -23,22 +23,22 @@ const Footer = () => {
             <h3 className="text-lg font-bold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/about" className="text-muted-foreground hover:text-accent transition-colors text-sm">
+                <Link to="/about" className="text-muted-foreground hover:text-accent transition-colors">
                   About
                 </Link>
               </li>
               <li>
-                <Link to="/speakers" className="text-muted-foreground hover:text-accent transition-colors text-sm">
+                <Link to="/speakers" className="text-muted-foreground hover:text-accent transition-colors">
                   Speakers
                 </Link>
               </li>
               <li>
-                <Link to="/speak" className="text-muted-foreground hover:text-accent transition-colors text-sm">
+                <Link to="/speak" className="text-muted-foreground hover:text-accent transition-colors">
                   Become a Speaker
                 </Link>
               </li>
               <li>
-                <Link to="/venue" className="text-muted-foreground hover:text-accent transition-colors text-sm">
+                <Link to="/venue" className="text-muted-foreground hover:text-accent transition-colors">
                   Venue
                 </Link>
               </li>
@@ -48,7 +48,7 @@ const Footer = () => {
           {/* Event Info */}
           <div>
             <h3 className="text-lg font-bold mb-4">Event Info</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+            <ul className="space-y-2 text-muted-foreground">
               <li>📅 October 16th, 2026</li>
               <li>📍 National Space Centre</li>
               <li>🏙️ Leicester, UK</li>
@@ -119,12 +119,12 @@ const Footer = () => {
 
         <div className="mt-8 pt-8 border-t border-border">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground">
               &copy; {new Date().getFullYear()} Festival of AI. All rights reserved.
             </p>
             <Link 
               to="/auth" 
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors"
+              className="flex items-center gap-2 text-muted-foreground hover:text-accent transition-colors"
             >
               <LogIn size={16} />
               <span>Login</span>
