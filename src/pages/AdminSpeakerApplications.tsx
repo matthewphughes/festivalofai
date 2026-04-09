@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Eye, Download, Search, Trash2 } from "lucide-react";
+import { Eye, Download, Search, Trash2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -97,6 +97,69 @@ const AdminSpeakerApplications = () => {
       queryClient.invalidateQueries({ queryKey: ["speakerApplications"] });
       setDialogOpen(false);
       toast.success("Application deleted");
+    },
+  });
+
+  const convertToSpeakerMutation = useMutation({
+    mutationFn: async (app: any) => {
+      const fullName = `${app.first_name || ""} ${app.last_name || ""}`.trim();
+      if (!fullName) throw new Error("Speaker name is required");
+
+      // Generate slug using the DB function
+      const { data: slug, error: slugError } = await supabase.rpc("generate_speaker_slug", { speaker_name: fullName });
+      if (slugError) throw slugError;
+
+      // Get max display_order
+      const { data: speakers } = await supabase.from("speakers").select("display_order").order("display_order", { ascending: false }).limit(1);
+      const nextOrder = (speakers?.[0]?.display_order ?? 0) + 1;
+
+      // Insert speaker
+      const { data: newSpeaker, error: speakerError } = await supabase
+        .from("speakers")
+        .insert({
+          name: fullName,
+          slug,
+          bio: app.bio || null,
+          image_url: app.profile_picture_url || null,
+          website_url: app.website_url || null,
+          youtube_url: app.youtube_url || null,
+          linkedin_url: app.linkedin_url || null,
+          instagram_url: app.instagram_url || null,
+          tiktok_url: app.tiktok_url || null,
+          years: [2026],
+          display_order: nextOrder,
+        })
+        .select("id")
+        .single();
+      if (speakerError) throw speakerError;
+
+      // Create session if session_title exists
+      if (app.session_title) {
+        const { error: sessionError } = await supabase
+          .from("sessions")
+          .insert({
+            title: app.session_title,
+            description: app.session_description || null,
+            event_year: 2026,
+            speaker_name: fullName,
+            speaker_id: newSpeaker.id,
+            video_url: "",
+            published: false,
+          });
+        if (sessionError) throw sessionError;
+      }
+
+      return newSpeaker;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["speakerApplications"] });
+      queryClient.invalidateQueries({ queryKey: ["speakers"] });
+      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+      setDialogOpen(false);
+      toast.success("Speaker profile and session created successfully!");
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to convert: ${error.message}`);
     },
   });
 
@@ -221,7 +284,8 @@ const AdminSpeakerApplications = () => {
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-6">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 bg-muted/50 rounded-lg p-3">
+                  <Badge className={statusColors[selectedApp.status] || ""} variant="secondary">{selectedApp.status}</Badge>
                   <Select value={selectedApp.status} onValueChange={s => { updateStatusMutation.mutate({ id: selectedApp.id, status: s }); setSelectedApp({ ...selectedApp, status: s }); }}>
                     <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -230,6 +294,12 @@ const AdminSpeakerApplications = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  {selectedApp.status === "accepted" && (
+                    <Button size="sm" variant="default" onClick={() => convertToSpeakerMutation.mutate(selectedApp)} disabled={convertToSpeakerMutation.isPending}>
+                      <UserPlus className="h-4 w-4 mr-1" />
+                      {convertToSpeakerMutation.isPending ? "Converting..." : "Convert to Speaker"}
+                    </Button>
+                  )}
                   <AlertDialog>
                     <AlertDialogTrigger asChild><Button variant="destructive" size="sm"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger>
                     <AlertDialogContent>
