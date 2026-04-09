@@ -66,7 +66,7 @@ const BecomeASpeaker = () => {
       <Navigation />
 
       {/* Countdown */}
-      <div className="bg-primary/10 border-b border-primary/20 py-4 px-4 pt-24">
+      <div className="bg-primary/10 border-b border-primary/20 pt-28 pb-4 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col md:flex-row items-center justify-center gap-4">
             <div className="flex items-center gap-2 text-foreground">
