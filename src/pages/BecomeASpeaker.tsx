@@ -178,16 +178,20 @@ const BecomeASpeaker = () => {
           <div className="space-y-6">
             {[
               {
-                title: "Main Stage",
+                title: "Main Stage Talk",
                 desc: "We're seeking AI experts and business leaders who can deliver inspiring talks on practical AI applications. Share real-world case studies, strategies, and insights that attendees can implement immediately."
               },
               {
-                title: "Workshop",
-                desc: "Hands-on, interactive sessions where attendees learn by doing. Ideal for tool demonstrations, workflow tutorials, and guided AI implementation exercises."
+                title: "Full-Day Workshop",
+                desc: "Lead a full-day, hands-on workshop where attendees learn by doing. Ideal for deep-dive tool demonstrations, workflow tutorials, and guided AI implementation exercises."
               },
               {
-                title: "Lightning Talk",
-                desc: "Short, punchy presentations (10-15 minutes) perfect for showcasing a specific AI tool, technique, or case study. Great for first-time speakers!"
+                title: "Pre-Event Webinar",
+                desc: "All speakers run a promotional webinar ahead of the event to build excitement and showcase their expertise. This helps drive ticket sales and gives attendees a preview of your session."
+              },
+              {
+                title: "Bring Your Audience",
+                desc: "We ask speakers to bring at least 10 attendees from their own audience. We'll pay up to £1,000 per speaker on an affiliate basis for every ticket sold through your network."
               },
             ].map((item, i) => (
               <Card key={i} className="border-border/50 bg-card/50 backdrop-blur-sm">
@@ -212,10 +216,12 @@ const BecomeASpeaker = () => {
           </p>
           <Accordion type="single" collapsible className="space-y-4">
             {[
-              { q: "How do I choose the right track for my session?", a: "Choose Main Stage for keynote-style talks, Workshop for hands-on interactive sessions, or Lightning Talk for short focused presentations. If you're unsure, describe your session and we'll help place you." },
-              { q: "Do I need to be a professional speaker?", a: "Not at all! We welcome first-time speakers alongside seasoned professionals. What matters is your expertise and passion for the subject. Lightning Talks are a great starting point." },
+              { q: "How do I choose the right track for my session?", a: "Choose Main Stage for keynote-style talks or a Full-Day Workshop for hands-on interactive sessions. If you're unsure, describe your session and we'll help place you." },
+              { q: "Do I need to be a professional speaker?", a: "Not at all! We welcome first-time speakers alongside seasoned professionals. What matters is your expertise and passion for the subject." },
+              { q: "What's the session format?", a: "Main Stage talks are typically 30-40 minutes plus Q&A. Workshops run for a full day. All sessions are professionally recorded." },
+              { q: "What's the pre-event webinar requirement?", a: "All speakers are asked to host a promotional webinar before the event. This helps build excitement, showcases your expertise, and drives ticket sales. We'll support you with promotion and logistics." },
+              { q: "How does the affiliate programme work?", a: "We ask speakers to bring at least 10 attendees from their audience. For every ticket sold through your unique referral link, you'll earn an affiliate commission — up to £1,000 per speaker." },
               { q: "Is travel and accommodation covered?", a: "We work with speakers on a case-by-case basis. Let us know your requirements in your application and we'll do our best to accommodate." },
-              { q: "What's the session format?", a: "Main Stage talks are typically 30-40 minutes plus Q&A. Workshops are 60-90 minutes. Lightning Talks are 10-15 minutes. All sessions are professionally recorded." },
               { q: "When will I hear back about my application?", a: "We review applications on a rolling basis and aim to respond within 2-3 weeks of submission. You'll receive email updates about your application status." },
             ].map((faq, i) => (
               <AccordionItem key={i} value={`faq-${i}`} className="border border-border/50 bg-card/50 backdrop-blur-sm rounded-lg px-6">
