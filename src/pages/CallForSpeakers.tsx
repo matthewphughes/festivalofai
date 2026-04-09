@@ -473,6 +473,13 @@ const CallForSpeakers = () => {
             </div>
           )}
         </div>
+
+        <HeadshotCropper
+          isOpen={cropperOpen}
+          onClose={() => setCropperOpen(false)}
+          imageUrl={cropperImageUrl}
+          onCropComplete={handleCropComplete}
+        />
       </div>
 
       <Footer />
