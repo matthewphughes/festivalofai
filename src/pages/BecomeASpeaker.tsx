@@ -13,7 +13,7 @@ import Footer from "@/components/Footer";
 
 const BecomeASpeaker = () => {
   const navigate = useNavigate();
-  const deadline = new Date('2026-06-01T17:00:00');
+  const deadline = new Date('2026-05-08T17:00:00');
 
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
@@ -79,7 +79,7 @@ const BecomeASpeaker = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4">
             <div className="flex items-center gap-2 text-foreground">
               <Clock className="h-5 w-5 text-primary" />
-              <span className="font-medium">Applications close 1st June 2026</span>
+              <span className="font-medium">Applications close 8th May 2026</span>
             </div>
             <div className="flex items-center gap-3">
               {[
