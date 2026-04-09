@@ -261,6 +261,33 @@ const CallForSpeakers = () => {
     return Math.round(requiredPct + optionalPct);
   };
 
+  const handleSubmit = async () => {
+    if (!validateStep(currentStep)) return;
+    setSubmitting(true);
+    try {
+      await handleSaveDraft();
+      if (applicationId) {
+        const sessionId = getSessionId();
+        const { data: success, error } = await supabase
+          .rpc("update_my_speaker_application" as any, {
+            client_session_id: sessionId, app_id: applicationId, app_data: { status: "submitted" },
+          });
+        if (error) throw error;
+        if (!success) throw new Error("Failed to submit");
+        localStorage.removeItem("speaker_app_session_id");
+        navigate("/speaker-thanks");
+      }
+    } catch (err: any) {
+      toast({ title: "Submission failed", description: err.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (field: keyof typeof formData) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => setFormData(prev => ({ ...prev, [field]: e.target.value }));
+
   const completionPct = getCompletionPercentage();
   const progress = (currentStep / TOTAL_STEPS) * 100;
   const stepTitles = ["Contact Information", "Address", "Headshot & Bio", "Session Details", "Social Links", "Final Details", "Review & Submit"];
