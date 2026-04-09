@@ -322,9 +322,14 @@ const CallForSpeakers = () => {
             </div>
           ) : (
             <div className="bg-card border border-border rounded-lg p-8">
-              <p className="text-foreground font-medium">{stepTitles[currentStep - 1]}</p>
-              <p className="text-sm text-muted-foreground mb-6">Step {currentStep} of {TOTAL_STEPS}</p>
-              <Progress value={progress} className="mb-8" />
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-foreground font-medium">{stepTitles[currentStep - 1]}</p>
+                <span className="text-sm font-medium text-primary">{completionPct}% complete</span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">Step {currentStep} of {TOTAL_STEPS}</p>
+              <div className="space-y-2 mb-8">
+                <Progress value={completionPct} className="h-2" />
+              </div>
 
               {currentStep === 1 && (
                 <div className="space-y-6">
