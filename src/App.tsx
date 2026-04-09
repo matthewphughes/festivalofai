@@ -45,6 +45,10 @@ import Checkout from "./pages/Checkout";
 import LaunchOffer from "./pages/LaunchOffer";
 import ResetPassword from "./pages/ResetPassword";
 import AdminUserEdit from "./pages/AdminUserEdit";
+import BecomeASpeaker from "./pages/BecomeASpeaker";
+import CallForSpeakers from "./pages/CallForSpeakers";
+import SpeakerThanks from "./pages/SpeakerThanks";
+import AdminSpeakerApplications from "./pages/AdminSpeakerApplications";
 
 const queryClient = new QueryClient();
 
@@ -95,8 +99,13 @@ const App = () => (
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/email-settings" element={<AdminEmailSettings />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
-          <Route path="/admin/discount-campaigns" element={<AdminDiscountCampaigns />} />
-          <Route path="/checkout" element={<Checkout />} />
+           <Route path="/admin/discount-campaigns" element={<AdminDiscountCampaigns />} />
+           <Route path="/admin/speaker-applications" element={<AdminSpeakerApplications />} />
+           <Route path="/speak" element={<BecomeASpeaker />} />
+           <Route path="/call-for-speakers" element={<CallForSpeakers />} />
+           <Route path="/speaker-thanks" element={<SpeakerThanks />} />
+           <Route path="/checkout" element={<Checkout />} />
+           <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/thank-you" element={<ThankYou />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
