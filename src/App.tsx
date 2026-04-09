@@ -45,6 +45,10 @@ import Checkout from "./pages/Checkout";
 import LaunchOffer from "./pages/LaunchOffer";
 import ResetPassword from "./pages/ResetPassword";
 import AdminUserEdit from "./pages/AdminUserEdit";
+import BecomeASpeaker from "./pages/BecomeASpeaker";
+import CallForSpeakers from "./pages/CallForSpeakers";
+import SpeakerThanks from "./pages/SpeakerThanks";
+import AdminSpeakerApplications from "./pages/AdminSpeakerApplications";
 
 const queryClient = new QueryClient();
 
