@@ -233,7 +233,33 @@ const CallForSpeakers = () => {
     }
   };
 
-  const handlePrevious = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+  const handlePrevious = async () => {
+    await handleSaveDraft();
+    setShowReturnLink(false);
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+  };
+
+  // Calculate completion percentage based on filled required + optional fields
+  const getCompletionPercentage = () => {
+    const requiredFields = [
+      formData.first_name, formData.last_name, formData.email, formData.phone,
+      formData.address_line1, formData.city, formData.postal_code,
+      profilePictureUrl, formData.bio,
+      formData.session_title, formData.session_description, formData.preferred_track,
+    ];
+    const optionalFields = [
+      formData.address_line2,
+      formData.website_url, formData.youtube_url, formData.linkedin_url,
+      formData.tiktok_url, formData.instagram_url,
+      formData.supporting_materials, formData.additional_comments,
+    ];
+    // Required fields = 80% weight, optional = 20%
+    const requiredFilled = requiredFields.filter(Boolean).length;
+    const optionalFilled = optionalFields.filter(Boolean).length;
+    const requiredPct = (requiredFilled / requiredFields.length) * 80;
+    const optionalPct = (optionalFilled / optionalFields.length) * 20;
+    return Math.round(requiredPct + optionalPct);
+  };
 
   const handleSubmit = async () => {
     if (!validateStep(currentStep)) return;
@@ -262,6 +288,7 @@ const CallForSpeakers = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => setFormData(prev => ({ ...prev, [field]: e.target.value }));
 
+  const completionPct = getCompletionPercentage();
   const progress = (currentStep / TOTAL_STEPS) * 100;
   const stepTitles = ["Contact Information", "Address", "Headshot & Bio", "Session Details", "Social Links", "Final Details", "Review & Submit"];
 
@@ -295,9 +322,14 @@ const CallForSpeakers = () => {
             </div>
           ) : (
             <div className="bg-card border border-border rounded-lg p-8">
-              <p className="text-foreground font-medium">{stepTitles[currentStep - 1]}</p>
-              <p className="text-sm text-muted-foreground mb-6">Step {currentStep} of {TOTAL_STEPS}</p>
-              <Progress value={progress} className="mb-8" />
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-foreground font-medium">{stepTitles[currentStep - 1]}</p>
+                <span className="text-sm font-medium text-primary">{completionPct}% complete</span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">Step {currentStep} of {TOTAL_STEPS}</p>
+              <div className="space-y-2 mb-8">
+                <Progress value={completionPct} className="h-2" />
+              </div>
 
               {currentStep === 1 && (
                 <div className="space-y-6">

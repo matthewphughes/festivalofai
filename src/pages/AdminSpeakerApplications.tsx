@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -163,6 +164,15 @@ const AdminSpeakerApplications = () => {
     },
   });
 
+  const getCompletionPct = (a: any): number => {
+    if (a.status === "submitted") return 100;
+    const required = [a.first_name, a.last_name, a.email, a.phone, a.address_line1, a.city, a.postal_code, a.profile_picture_url, a.bio, a.session_title, a.session_description, a.preferred_track];
+    const optional = [a.address_line2, a.website_url, a.youtube_url, a.linkedin_url, a.tiktok_url, a.instagram_url, a.supporting_materials, a.additional_comments];
+    const rPct = (required.filter(Boolean).length / required.length) * 80;
+    const oPct = (optional.filter(Boolean).length / optional.length) * 20;
+    return Math.round(rPct + oPct);
+  };
+
   const filtered = useMemo(() => {
     if (!applications) return [];
     return applications.filter((a: any) => {
@@ -227,6 +237,7 @@ const AdminSpeakerApplications = () => {
                     <TableHead>Applicant</TableHead>
                     <TableHead>Session</TableHead>
                     <TableHead>Track</TableHead>
+                    <TableHead>Completion</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Actions</TableHead>
@@ -250,6 +261,12 @@ const AdminSpeakerApplications = () => {
                       <TableCell className="max-w-[200px] truncate">{app.session_title || "—"}</TableCell>
                       <TableCell className="capitalize">{app.preferred_track || "—"}</TableCell>
                       <TableCell>
+                        <div className="flex items-center gap-2 min-w-[100px]">
+                          <Progress value={getCompletionPct(app)} className="h-2 flex-1" />
+                          <span className="text-xs text-muted-foreground w-8">{getCompletionPct(app)}%</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
                         <Badge className={statusColors[app.status] || ""} variant="secondary">{app.status}</Badge>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
@@ -263,7 +280,7 @@ const AdminSpeakerApplications = () => {
                     </TableRow>
                   ))}
                   {!filtered.length && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No applications found</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No applications found</TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>
