@@ -425,6 +425,102 @@ export type Database = {
         }
         Relationships: []
       }
+      speaker_applications: {
+        Row: {
+          additional_comments: string | null
+          address_line1: string | null
+          address_line2: string | null
+          admin_notes: string | null
+          bio: string | null
+          city: string | null
+          created_at: string
+          email: string | null
+          first_name: string | null
+          id: string
+          instagram_url: string | null
+          last_name: string | null
+          linkedin_url: string | null
+          phone: string | null
+          postal_code: string | null
+          preferred_track: string | null
+          profile_picture_original_url: string | null
+          profile_picture_url: string | null
+          session_description: string | null
+          session_id: string | null
+          session_title: string | null
+          status: string
+          submitted_at: string | null
+          supporting_materials: string | null
+          tiktok_url: string | null
+          updated_at: string
+          user_id: string | null
+          website_url: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          additional_comments?: string | null
+          address_line1?: string | null
+          address_line2?: string | null
+          admin_notes?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          instagram_url?: string | null
+          last_name?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          preferred_track?: string | null
+          profile_picture_original_url?: string | null
+          profile_picture_url?: string | null
+          session_description?: string | null
+          session_id?: string | null
+          session_title?: string | null
+          status?: string
+          submitted_at?: string | null
+          supporting_materials?: string | null
+          tiktok_url?: string | null
+          updated_at?: string
+          user_id?: string | null
+          website_url?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          additional_comments?: string | null
+          address_line1?: string | null
+          address_line2?: string | null
+          admin_notes?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          instagram_url?: string | null
+          last_name?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          preferred_track?: string | null
+          profile_picture_original_url?: string | null
+          profile_picture_url?: string | null
+          session_description?: string | null
+          session_id?: string | null
+          session_title?: string | null
+          status?: string
+          submitted_at?: string | null
+          supporting_materials?: string | null
+          tiktok_url?: string | null
+          updated_at?: string
+          user_id?: string | null
+          website_url?: string | null
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
       speakers: {
         Row: {
           bio: string | null
@@ -728,12 +824,60 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_speaker_application: {
+        Args: { app_data: Json; client_session_id: string }
+        Returns: string
+      }
       generate_speaker_slug: { Args: { speaker_name: string }; Returns: string }
+      get_my_speaker_application: {
+        Args: { client_session_id: string }
+        Returns: {
+          additional_comments: string | null
+          address_line1: string | null
+          address_line2: string | null
+          admin_notes: string | null
+          bio: string | null
+          city: string | null
+          created_at: string
+          email: string | null
+          first_name: string | null
+          id: string
+          instagram_url: string | null
+          last_name: string | null
+          linkedin_url: string | null
+          phone: string | null
+          postal_code: string | null
+          preferred_track: string | null
+          profile_picture_original_url: string | null
+          profile_picture_url: string | null
+          session_description: string | null
+          session_id: string | null
+          session_title: string | null
+          status: string
+          submitted_at: string | null
+          supporting_materials: string | null
+          tiktok_url: string | null
+          updated_at: string
+          user_id: string | null
+          website_url: string | null
+          youtube_url: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "speaker_applications"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      update_my_speaker_application: {
+        Args: { app_data: Json; app_id: string; client_session_id: string }
         Returns: boolean
       }
     }
