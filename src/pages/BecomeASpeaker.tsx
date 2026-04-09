@@ -61,7 +61,15 @@ const BecomeASpeaker = () => {
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>Become a Speaker | Festival of AI</title>
-        <meta name="description" content="Apply to speak at the Festival of AI. Share your AI expertise with 300+ attendees at the National Space Centre, Leicester." />
+        <meta name="description" content="Apply to speak at the Festival of AI 2026. Share your AI expertise with 300+ attendees at the National Space Centre, Leicester." />
+        <meta property="og:title" content="Become a Speaker | Festival of AI 2026" />
+        <meta property="og:description" content="Apply to speak at the Festival of AI 2026. Share your AI expertise with 300+ attendees at the National Space Centre, Leicester." />
+        <meta property="og:image" content="https://festivalofai.lovable.app/og-speak.jpg" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Become a Speaker | Festival of AI 2026" />
+        <meta name="twitter:description" content="Apply to speak at the Festival of AI 2026." />
+        <meta name="twitter:image" content="https://festivalofai.lovable.app/og-speak.jpg" />
       </Helmet>
       <Navigation />
 
