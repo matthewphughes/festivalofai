@@ -191,7 +191,7 @@ const BecomeASpeaker = () => {
               },
               {
                 title: "Bring Your Audience",
-                desc: "We ask speakers to bring at least 10 attendees from their own audience. We'll pay up to £1,000 per speaker on an affiliate basis for every ticket sold through your network."
+                desc: "We ask speakers to bring at least 10 attendees from their own audience. We'll pay up to £1,000 per speaker on an affiliate basis — £50 per ticket sold, up to £1,000."
               },
             ].map((item, i) => (
               <Card key={i} className="border-border/50 bg-card/50 backdrop-blur-sm">
@@ -220,7 +220,7 @@ const BecomeASpeaker = () => {
               { q: "Do I need to be a professional speaker?", a: "Not at all! We welcome first-time speakers alongside seasoned professionals. What matters is your expertise and passion for the subject." },
               { q: "What's the session format?", a: "Main Stage talks are typically 30-40 minutes plus Q&A. Workshops run for a full day. All sessions are professionally recorded." },
               { q: "What's the pre-event webinar requirement?", a: "All speakers are asked to host a promotional webinar before the event. This helps build excitement, showcases your expertise, and drives ticket sales. We'll support you with promotion and logistics." },
-              { q: "How does the affiliate programme work?", a: "We ask speakers to bring at least 10 attendees from their audience. For every ticket sold through your unique referral link, you'll earn an affiliate commission — up to £1,000 per speaker." },
+              { q: "How does the affiliate programme work?", a: "We ask speakers to bring at least 10 attendees from their audience. You'll earn £50 per ticket sold through your unique referral link — up to £1,000 per speaker." },
               { q: "Is travel and accommodation covered?", a: "We work with speakers on a case-by-case basis. Let us know your requirements in your application and we'll do our best to accommodate." },
               { q: "When will I hear back about my application?", a: "We review applications on a rolling basis and aim to respond within 2-3 weeks of submission. You'll receive email updates about your application status." },
             ].map((faq, i) => (
