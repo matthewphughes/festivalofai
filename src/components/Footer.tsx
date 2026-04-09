@@ -10,9 +10,12 @@ const Footer = () => {
           {/* About */}
           <div>
             <h3 className="text-lg font-bold mb-4">Festival of AI</h3>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm mb-3">
               Discover practical AI that actually moves the needle for your business.
             </p>
+            <Link to="/speak" className="text-muted-foreground hover:text-accent transition-colors text-sm">
+              Become a Speaker
+            </Link>
           </div>
 
           {/* Quick Links */}
