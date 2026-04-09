@@ -26,6 +26,7 @@ type SponsorRequestFormData = z.infer<typeof sponsorRequestSchema>;
 
 const Sponsors = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
   
   const {
     register,
@@ -45,8 +46,8 @@ const Sponsors = () => {
 
       if (error) throw error;
 
-      toast.success("Sponsor pack request sent successfully! We'll be in touch soon.");
       reset();
+      navigate("/sponsor-thanks");
     } catch (error) {
       console.error('Error sending sponsor request:', error);
       toast.error("Failed to send request. Please use our contact form or try again later.");
