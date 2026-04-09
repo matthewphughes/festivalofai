@@ -280,7 +280,7 @@ const AdminSpeakerApplications = () => {
                     </TableRow>
                   ))}
                   {!filtered.length && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No applications found</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No applications found</TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>
