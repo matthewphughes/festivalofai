@@ -348,6 +348,12 @@ const AdminSpeakerApplications = () => {
                       {convertToSpeakerMutation.isPending ? "Converting..." : "Convert to Speaker"}
                     </Button>
                   )}
+                  {selectedApp.status === "draft" && selectedApp.email && (
+                    <Button size="sm" variant="outline" onClick={() => sendReminderMutation.mutate(selectedApp)} disabled={sendReminderMutation.isPending}>
+                      <Mail className="h-4 w-4 mr-1" />
+                      {sendReminderMutation.isPending ? "Sending..." : "Send Reminder"}
+                    </Button>
+                  )}
                   <AlertDialog>
                     <AlertDialogTrigger asChild><Button variant="destructive" size="sm"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger>
                     <AlertDialogContent>
