@@ -280,6 +280,16 @@ const CallForSpeakers = () => {
           });
         if (error) throw error;
         if (!success) throw new Error("Failed to submit");
+        
+        // Send confirmation + admin notification emails (fire-and-forget)
+        try {
+          await supabase.functions.invoke("notify-speaker-submission", {
+            body: { application_id: applicationId },
+          });
+        } catch (emailErr) {
+          console.error("Email notification failed:", emailErr);
+        }
+        
         localStorage.removeItem("speaker_app_session_id");
         navigate("/speaker-thanks");
       }

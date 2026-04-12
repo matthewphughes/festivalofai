@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.send-order-confirmation]
 verify_jwt = false
+
+[functions.notify-speaker-submission]
+verify_jwt = false
