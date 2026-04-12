@@ -101,6 +101,37 @@ const AdminSpeakerApplications = () => {
     },
   });
 
+  const sendReminderMutation = useMutation({
+    mutationFn: async (app: any) => {
+      if (!app.email) throw new Error("No email address on this application");
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-speaker-reminder`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({
+            applicationId: app.id,
+            email: app.email,
+            firstName: app.first_name,
+            sessionId: app.session_id,
+            applicationLink: `https://festivalofai.lovable.app/call-for-speakers?resume=${app.session_id}`,
+          }),
+        }
+      );
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to send reminder");
+      }
+      return res.json();
+    },
+    onSuccess: () => toast.success("Reminder email sent!"),
+    onError: (error: any) => toast.error(error.message),
+  });
+
   const convertToSpeakerMutation = useMutation({
     mutationFn: async (app: any) => {
       const fullName = `${app.first_name || ""} ${app.last_name || ""}`.trim();
