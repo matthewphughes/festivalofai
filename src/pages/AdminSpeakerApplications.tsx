@@ -8,10 +8,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Eye, Download, Search, Mail } from "lucide-react";
+import { Eye, Download, Search, Mail, Trash2, Send } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import SpeakerApplicationDetailPane from "@/components/admin/SpeakerApplicationDetailPane";
@@ -35,6 +39,13 @@ const AdminSpeakerApplications = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
+  // Email compose modal state (for inline status change + mail icon)
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [emailModalMode, setEmailModalMode] = useState<"status" | "reminder">("status");
+  const [emailModalApp, setEmailModalApp] = useState<any>(null);
+  const [emailPendingStatus, setEmailPendingStatus] = useState("");
+  const [emailCustomMessage, setEmailCustomMessage] = useState("");
+
   useEffect(() => {
     const check = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -57,19 +68,90 @@ const AdminSpeakerApplications = () => {
     },
   });
 
-  const updateStatusMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from("speaker_applications" as any)
-        .update({ status } as any)
+        .delete()
         .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["speakerApplications"] });
-      toast.success("Status updated");
+      toast.success("Application deleted");
     },
   });
+
+  const sendEmailMutation = useMutation({
+    mutationFn: async ({ app, type, message, newStatus }: { app: any; type: "status" | "reminder"; message: string; newStatus?: string }) => {
+      // Update status in DB if it's a status change
+      if (type === "status" && newStatus) {
+        const { error } = await supabase
+          .from("speaker_applications" as any)
+          .update({ status: newStatus } as any)
+          .eq("id", app.id);
+        if (error) throw error;
+      }
+
+      if (!app.email) {
+        // No email - just update status silently
+        return { success: true, noEmail: true };
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-speaker-reminder`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({
+            applicationId: app.id,
+            email: app.email,
+            firstName: app.first_name,
+            sessionId: app.session_id,
+            applicationLink: `https://festivalofai.lovable.app/call-for-speakers?resume=${app.session_id}`,
+            customMessage: message || undefined,
+            emailType: type,
+            newStatus: newStatus || undefined,
+          }),
+        }
+      );
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to send email");
+      }
+      return res.json();
+    },
+    onSuccess: (result, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["speakerApplications"] });
+      setEmailModalOpen(false);
+      setEmailCustomMessage("");
+      if (result?.noEmail) {
+        toast.success("Status updated");
+      } else {
+        toast.success(vars.type === "status" ? "Status updated & email sent" : "Reminder email sent!");
+      }
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const handleStatusChange = (app: any, newStatus: string) => {
+    setEmailModalApp(app);
+    setEmailPendingStatus(newStatus);
+    setEmailModalMode("status");
+    setEmailCustomMessage("");
+    setEmailModalOpen(true);
+  };
+
+  const handleSendReminder = (app: any) => {
+    setEmailModalApp(app);
+    setEmailModalMode("reminder");
+    setEmailCustomMessage("");
+    setEmailModalOpen(true);
+  };
 
   const getCompletionPct = (a: any): number => {
     if (a.status === "submitted") return 100;
@@ -176,7 +258,7 @@ const AdminSpeakerApplications = () => {
                       <TableCell>
                         <Select
                           value={app.status}
-                          onValueChange={s => updateStatusMutation.mutate({ id: app.id, status: s })}
+                          onValueChange={s => handleStatusChange(app, s)}
                         >
                           <SelectTrigger className={`w-32 h-7 text-xs border-none ${statusColors[app.status] || ""}`}>
                             <SelectValue />
@@ -207,17 +289,40 @@ const AdminSpeakerApplications = () => {
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost" size="sm" className="h-8 w-8 p-0"
-                                    onClick={() => { setSelectedApp(app); setPaneOpen(true); }}
-                                  >
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleSendReminder(app)}>
                                     <Mail className="h-4 w-4 text-muted-foreground" />
                                   </Button>
                                 </TooltipTrigger>
-                                <TooltipContent>Send reminder</TooltipContent>
+                                <TooltipContent>Send email</TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
                           )}
+                          <AlertDialog>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:text-destructive">
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent>Delete</TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete application?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will permanently delete {app.first_name} {app.last_name}'s application. This cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteMutation.mutate(app.id)}>Delete</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -237,6 +342,78 @@ const AdminSpeakerApplications = () => {
         open={paneOpen}
         onOpenChange={setPaneOpen}
       />
+
+      {/* Email compose modal (shared for status change + reminder from table) */}
+      <Dialog open={emailModalOpen} onOpenChange={setEmailModalOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              {emailModalMode === "status"
+                ? `Status change → ${emailPendingStatus}`
+                : "Send reminder email"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {emailModalMode === "status"
+                ? `${emailModalApp?.email ? `An email will be sent to ${emailModalApp.email} notifying them.` : "No email on this application — status will be updated without notification."} You can add a personal message below.`
+                : `A reminder email will be sent to ${emailModalApp?.email} with a link to continue their application.`}
+            </p>
+            <div>
+              <Label className="text-sm">Personal message (optional)</Label>
+              <div className="mt-1.5 border border-border rounded-md overflow-hidden">
+                <div className="flex gap-1 p-1.5 border-b border-border bg-muted/30">
+                  <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs font-bold"
+                    onClick={() => setEmailCustomMessage(prev => prev + "<b></b>")}>B</Button>
+                  <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs italic"
+                    onClick={() => setEmailCustomMessage(prev => prev + "<i></i>")}>I</Button>
+                  <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs underline"
+                    onClick={() => setEmailCustomMessage(prev => prev + "<u></u>")}>U</Button>
+                  <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs"
+                    onClick={() => setEmailCustomMessage(prev => prev + '<a href="">link</a>')}>🔗</Button>
+                </div>
+                <Textarea
+                  rows={6}
+                  value={emailCustomMessage}
+                  onChange={e => setEmailCustomMessage(e.target.value)}
+                  placeholder="Add a personal note to include in the email..."
+                  className="border-0 rounded-none focus-visible:ring-0 resize-none"
+                />
+              </div>
+              {emailCustomMessage && (
+                <div className="mt-2 p-3 bg-muted/30 rounded-md">
+                  <p className="text-xs text-muted-foreground mb-1">Preview:</p>
+                  <div className="text-sm prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: emailCustomMessage }} />
+                </div>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            {emailModalMode === "status" && (
+              <Button variant="outline" onClick={() => {
+                sendEmailMutation.mutate({ app: emailModalApp, type: "status", message: "", newStatus: emailPendingStatus });
+              }}>
+                Update without email
+              </Button>
+            )}
+            {emailModalMode === "reminder" && (
+              <Button variant="outline" onClick={() => setEmailModalOpen(false)}>Cancel</Button>
+            )}
+            <Button
+              onClick={() => sendEmailMutation.mutate({
+                app: emailModalApp,
+                type: emailModalMode,
+                message: emailCustomMessage,
+                newStatus: emailModalMode === "status" ? emailPendingStatus : undefined,
+              })}
+              disabled={sendEmailMutation.isPending || (emailModalMode === "reminder" && !emailModalApp?.email)}
+            >
+              <Send className="h-4 w-4 mr-2" />
+              {sendEmailMutation.isPending ? "Sending..." : "Send & Update"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>
