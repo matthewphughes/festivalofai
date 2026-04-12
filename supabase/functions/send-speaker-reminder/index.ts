@@ -58,7 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const name = firstName || "there";
-    const link = applicationLink || `https://festivalofai.lovable.app/call-for-speakers?resume=${sessionId}`;
+    const link = applicationLink || `https://festivalof.ai/call-for-speakers?resume=${sessionId}`;
 
     let subject: string;
     let bodyHtml: string;

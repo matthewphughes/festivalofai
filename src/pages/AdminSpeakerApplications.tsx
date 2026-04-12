@@ -112,7 +112,7 @@ const AdminSpeakerApplications = () => {
             email: app.email,
             firstName: app.first_name,
             sessionId: app.session_id,
-            applicationLink: `https://festivalofai.lovable.app/call-for-speakers?resume=${app.session_id}`,
+            applicationLink: `https://festivalof.ai/call-for-speakers?resume=${app.session_id}`,
             customMessage: message || undefined,
             emailType: type,
             newStatus: newStatus || undefined,
