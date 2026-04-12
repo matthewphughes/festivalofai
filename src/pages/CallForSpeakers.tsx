@@ -40,6 +40,12 @@ const CallForSpeakers = () => {
   });
 
   const getSessionId = (): string => {
+    // If resume param is present, use that session ID (from reminder email link)
+    const resumeId = searchParams.get("resume");
+    if (resumeId) {
+      localStorage.setItem("speaker_app_session_id", resumeId);
+      return resumeId;
+    }
     let sid = localStorage.getItem("speaker_app_session_id");
     if (!sid) {
       sid = crypto.randomUUID();

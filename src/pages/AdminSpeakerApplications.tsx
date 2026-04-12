@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Eye, Download, Search, Trash2, UserPlus } from "lucide-react";
+import { Eye, Download, Search, Trash2, UserPlus, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -99,6 +99,37 @@ const AdminSpeakerApplications = () => {
       setDialogOpen(false);
       toast.success("Application deleted");
     },
+  });
+
+  const sendReminderMutation = useMutation({
+    mutationFn: async (app: any) => {
+      if (!app.email) throw new Error("No email address on this application");
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-speaker-reminder`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({
+            applicationId: app.id,
+            email: app.email,
+            firstName: app.first_name,
+            sessionId: app.session_id,
+            applicationLink: `https://festivalofai.lovable.app/call-for-speakers?resume=${app.session_id}`,
+          }),
+        }
+      );
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to send reminder");
+      }
+      return res.json();
+    },
+    onSuccess: () => toast.success("Reminder email sent!"),
+    onError: (error: any) => toast.error(error.message),
   });
 
   const convertToSpeakerMutation = useMutation({
@@ -315,6 +346,12 @@ const AdminSpeakerApplications = () => {
                     <Button size="sm" variant="default" onClick={() => convertToSpeakerMutation.mutate(selectedApp)} disabled={convertToSpeakerMutation.isPending}>
                       <UserPlus className="h-4 w-4 mr-1" />
                       {convertToSpeakerMutation.isPending ? "Converting..." : "Convert to Speaker"}
+                    </Button>
+                  )}
+                  {selectedApp.status === "draft" && selectedApp.email && (
+                    <Button size="sm" variant="outline" onClick={() => sendReminderMutation.mutate(selectedApp)} disabled={sendReminderMutation.isPending}>
+                      <Mail className="h-4 w-4 mr-1" />
+                      {sendReminderMutation.isPending ? "Sending..." : "Send Reminder"}
                     </Button>
                   )}
                   <AlertDialog>
