@@ -6,12 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, UserPlus, Mail, Save, Send } from "lucide-react";
+import { UserPlus, Save, ChevronDown, ExternalLink, Globe, Youtube, Linkedin, Instagram } from "lucide-react";
 import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
@@ -31,13 +29,40 @@ interface Props {
   onOpenChange: (open: boolean) => void;
 }
 
+const CollapsibleSection = ({ title, defaultOpen = true, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) => {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <CollapsibleTrigger className="flex items-center justify-between w-full py-2 text-sm font-semibold text-foreground hover:text-primary transition-colors">
+        {title}
+        <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="space-y-3 pt-2">
+        {children}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+};
+
+const SocialLinkField = ({ label, icon: Icon, value, onChange }: { label: string; icon: any; value: string; onChange: (v: string) => void }) => (
+  <div className="flex items-end gap-2">
+    <div className="flex-1">
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <Input value={value} onChange={e => onChange(e.target.value)} placeholder={`https://...`} />
+    </div>
+    {value && (
+      <Button variant="outline" size="sm" className="h-9 w-9 p-0 shrink-0" asChild>
+        <a href={value} target="_blank" rel="noopener noreferrer">
+          <ExternalLink className="h-4 w-4" />
+        </a>
+      </Button>
+    )}
+  </div>
+);
+
 const SpeakerApplicationDetailPane = ({ app, open, onOpenChange }: Props) => {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<any>({});
-  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
-  const [messageDialogMode, setMessageDialogMode] = useState<"status" | "reminder">("status");
-  const [customMessage, setCustomMessage] = useState("");
-  const [pendingStatus, setPendingStatus] = useState("");
 
   useEffect(() => {
     if (app) setForm({ ...app });
@@ -59,71 +84,6 @@ const SpeakerApplicationDetailPane = ({ app, open, onOpenChange }: Props) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["speakerApplications"] });
       toast.success("Application saved");
-    },
-    onError: (e: any) => toast.error(e.message),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from("speaker_applications" as any)
-        .delete()
-        .eq("id", form.id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["speakerApplications"] });
-      onOpenChange(false);
-      toast.success("Application deleted");
-    },
-  });
-
-  const sendEmailMutation = useMutation({
-    mutationFn: async ({ type, message, newStatus }: { type: "status" | "reminder"; message: string; newStatus?: string }) => {
-      if (!form.email) throw new Error("No email address on this application");
-
-      // If status change, update status first
-      if (type === "status" && newStatus) {
-        const { error } = await supabase
-          .from("speaker_applications" as any)
-          .update({ status: newStatus } as any)
-          .eq("id", form.id);
-        if (error) throw error;
-        updateField("status", newStatus);
-      }
-
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-speaker-reminder`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({
-            applicationId: form.id,
-            email: form.email,
-            firstName: form.first_name,
-            sessionId: form.session_id,
-            applicationLink: `https://festivalofai.lovable.app/call-for-speakers?resume=${form.session_id}`,
-            customMessage: message || undefined,
-            emailType: type,
-            newStatus: newStatus || undefined,
-          }),
-        }
-      );
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to send email");
-      }
-      return res.json();
-    },
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["speakerApplications"] });
-      setMessageDialogOpen(false);
-      setCustomMessage("");
-      toast.success(vars.type === "status" ? "Status updated & email sent" : "Reminder email sent!");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -179,231 +139,127 @@ const SpeakerApplicationDetailPane = ({ app, open, onOpenChange }: Props) => {
     onError: (e: any) => toast.error(`Failed to convert: ${e.message}`),
   });
 
-  const openStatusChangeDialog = (newStatus: string) => {
-    setPendingStatus(newStatus);
-    setMessageDialogMode("status");
-    setCustomMessage("");
-    if (form.email) {
-      setMessageDialogOpen(true);
-    } else {
-      // No email, just update status directly
-      sendEmailMutation.mutate({ type: "status", message: "", newStatus });
-    }
-  };
-
-  const openReminderDialog = () => {
-    setMessageDialogMode("reminder");
-    setCustomMessage("");
-    setMessageDialogOpen(true);
-  };
-
   if (!app) return null;
 
   return (
-    <>
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
-          <SheetHeader className="pb-4">
-            <SheetTitle className="flex items-center gap-3">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={form.profile_picture_url} />
-                <AvatarFallback>{(form.first_name?.[0] || "") + (form.last_name?.[0] || "")}</AvatarFallback>
-              </Avatar>
-              <span>{form.first_name} {form.last_name}</span>
-            </SheetTitle>
-          </SheetHeader>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetHeader className="pb-4">
+          <div className="flex items-start gap-4">
+            {form.profile_picture_url ? (
+              <img
+                src={form.profile_picture_url}
+                alt={`${form.first_name} ${form.last_name}`}
+                className="w-20 h-20 rounded-xl object-cover shrink-0"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-xl bg-muted flex items-center justify-center text-2xl font-bold text-muted-foreground shrink-0">
+                {(form.first_name?.[0] || "") + (form.last_name?.[0] || "")}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <SheetTitle className="text-xl">{form.first_name} {form.last_name}</SheetTitle>
+              {form.email && <p className="text-sm text-muted-foreground mt-0.5">{form.email}</p>}
+              <div className="flex items-center gap-2 mt-2">
+                <Badge className={statusColors[form.status] || ""} variant="secondary">{form.status}</Badge>
+                {form.status === "accepted" && (
+                  <Button size="sm" variant="outline" onClick={() => convertToSpeakerMutation.mutate()} disabled={convertToSpeakerMutation.isPending}>
+                    <UserPlus className="h-3.5 w-3.5 mr-1" />
+                    {convertToSpeakerMutation.isPending ? "Converting..." : "Convert to Speaker"}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </SheetHeader>
 
-          <div className="space-y-6 pb-8">
-            {/* Actions bar */}
-            <div className="flex flex-wrap items-center gap-2 bg-muted/50 rounded-lg p-3">
-              <Badge className={statusColors[form.status] || ""} variant="secondary">{form.status}</Badge>
-              <Select value={form.status} onValueChange={openStatusChangeDialog}>
-                <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+        <div className="space-y-1 pb-8">
+          {/* Personal Details */}
+          <CollapsibleSection title="Personal Details">
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label className="text-xs text-muted-foreground">First Name</Label><Input value={form.first_name || ""} onChange={e => updateField("first_name", e.target.value)} /></div>
+              <div><Label className="text-xs text-muted-foreground">Last Name</Label><Input value={form.last_name || ""} onChange={e => updateField("last_name", e.target.value)} /></div>
+              <div><Label className="text-xs text-muted-foreground">Email</Label><Input type="email" value={form.email || ""} onChange={e => updateField("email", e.target.value)} /></div>
+              <div><Label className="text-xs text-muted-foreground">Phone</Label><Input value={form.phone || ""} onChange={e => updateField("phone", e.target.value)} /></div>
+            </div>
+          </CollapsibleSection>
+
+          <div className="border-t border-border" />
+
+          {/* Address */}
+          <CollapsibleSection title="Address" defaultOpen={false}>
+            <div><Label className="text-xs text-muted-foreground">Address Line 1</Label><Input value={form.address_line1 || ""} onChange={e => updateField("address_line1", e.target.value)} /></div>
+            <div><Label className="text-xs text-muted-foreground">Address Line 2</Label><Input value={form.address_line2 || ""} onChange={e => updateField("address_line2", e.target.value)} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label className="text-xs text-muted-foreground">City</Label><Input value={form.city || ""} onChange={e => updateField("city", e.target.value)} /></div>
+              <div><Label className="text-xs text-muted-foreground">Postal Code</Label><Input value={form.postal_code || ""} onChange={e => updateField("postal_code", e.target.value)} /></div>
+            </div>
+          </CollapsibleSection>
+
+          <div className="border-t border-border" />
+
+          {/* Session */}
+          <CollapsibleSection title="Session Details">
+            <div><Label className="text-xs text-muted-foreground">Session Title</Label><Input value={form.session_title || ""} onChange={e => updateField("session_title", e.target.value)} /></div>
+            <div><Label className="text-xs text-muted-foreground">Session Description</Label><Textarea rows={4} value={form.session_description || ""} onChange={e => updateField("session_description", e.target.value)} /></div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Preferred Track</Label>
+              <Select value={form.preferred_track || ""} onValueChange={v => updateField("preferred_track", v)}>
+                <SelectTrigger><SelectValue placeholder="Select track" /></SelectTrigger>
                 <SelectContent>
-                  {STATUSES.map(s => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
+                  <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
+                  <SelectItem value="workshops">Workshops</SelectItem>
                 </SelectContent>
               </Select>
-              {form.status === "accepted" && (
-                <Button size="sm" onClick={() => convertToSpeakerMutation.mutate()} disabled={convertToSpeakerMutation.isPending}>
-                  <UserPlus className="h-4 w-4 mr-1" />
-                  {convertToSpeakerMutation.isPending ? "Converting..." : "Convert to Speaker"}
-                </Button>
-              )}
-              {form.email && (
-                <Button size="sm" variant="outline" onClick={openReminderDialog} disabled={sendEmailMutation.isPending}>
-                  <Mail className="h-4 w-4 mr-1" />
-                  Send Reminder
-                </Button>
-              )}
-              <AlertDialog>
-                <AlertDialogTrigger asChild><Button variant="destructive" size="sm"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader><AlertDialogTitle>Delete application?</AlertDialogTitle><AlertDialogDescription>This cannot be undone.</AlertDialogDescription></AlertDialogHeader>
-                  <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteMutation.mutate()}>Delete</AlertDialogAction></AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
             </div>
+          </CollapsibleSection>
 
-            {/* Personal Details */}
-            <fieldset className="space-y-3">
-              <legend className="text-sm font-semibold text-foreground mb-2">Personal Details</legend>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label className="text-xs text-muted-foreground">First Name</Label><Input value={form.first_name || ""} onChange={e => updateField("first_name", e.target.value)} /></div>
-                <div><Label className="text-xs text-muted-foreground">Last Name</Label><Input value={form.last_name || ""} onChange={e => updateField("last_name", e.target.value)} /></div>
-                <div><Label className="text-xs text-muted-foreground">Email</Label><Input type="email" value={form.email || ""} onChange={e => updateField("email", e.target.value)} /></div>
-                <div><Label className="text-xs text-muted-foreground">Phone</Label><Input value={form.phone || ""} onChange={e => updateField("phone", e.target.value)} /></div>
-              </div>
-            </fieldset>
+          <div className="border-t border-border" />
 
-            {/* Address */}
-            <fieldset className="space-y-3">
-              <legend className="text-sm font-semibold text-foreground mb-2">Address</legend>
-              <div><Label className="text-xs text-muted-foreground">Address Line 1</Label><Input value={form.address_line1 || ""} onChange={e => updateField("address_line1", e.target.value)} /></div>
-              <div><Label className="text-xs text-muted-foreground">Address Line 2</Label><Input value={form.address_line2 || ""} onChange={e => updateField("address_line2", e.target.value)} /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label className="text-xs text-muted-foreground">City</Label><Input value={form.city || ""} onChange={e => updateField("city", e.target.value)} /></div>
-                <div><Label className="text-xs text-muted-foreground">Postal Code</Label><Input value={form.postal_code || ""} onChange={e => updateField("postal_code", e.target.value)} /></div>
-              </div>
-            </fieldset>
+          {/* Bio */}
+          <CollapsibleSection title="Bio">
+            <div><Textarea rows={4} value={form.bio || ""} onChange={e => updateField("bio", e.target.value)} placeholder="Speaker biography..." /></div>
+          </CollapsibleSection>
 
-            {/* Session */}
-            <fieldset className="space-y-3">
-              <legend className="text-sm font-semibold text-foreground mb-2">Session</legend>
-              <div><Label className="text-xs text-muted-foreground">Session Title</Label><Input value={form.session_title || ""} onChange={e => updateField("session_title", e.target.value)} /></div>
-              <div><Label className="text-xs text-muted-foreground">Session Description</Label><Textarea rows={4} value={form.session_description || ""} onChange={e => updateField("session_description", e.target.value)} /></div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Preferred Track</Label>
-                <Select value={form.preferred_track || ""} onValueChange={v => updateField("preferred_track", v)}>
-                  <SelectTrigger><SelectValue placeholder="Select track" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="beginner">Beginner</SelectItem>
-                    <SelectItem value="advanced">Advanced</SelectItem>
-                    <SelectItem value="workshops">Workshops</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </fieldset>
+          <div className="border-t border-border" />
 
-            {/* Bio */}
-            <fieldset className="space-y-3">
-              <legend className="text-sm font-semibold text-foreground mb-2">Bio & Profile</legend>
-              <div><Label className="text-xs text-muted-foreground">Bio</Label><Textarea rows={4} value={form.bio || ""} onChange={e => updateField("bio", e.target.value)} /></div>
-              {form.profile_picture_url && (
-                <div>
-                  <Label className="text-xs text-muted-foreground">Profile Picture</Label>
-                  <img src={form.profile_picture_url} alt="Profile" className="w-24 h-24 rounded-lg object-cover mt-1" />
-                </div>
-              )}
-            </fieldset>
-
-            {/* Social Links */}
-            <fieldset className="space-y-3">
-              <legend className="text-sm font-semibold text-foreground mb-2">Social Links</legend>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label className="text-xs text-muted-foreground">Website</Label><Input value={form.website_url || ""} onChange={e => updateField("website_url", e.target.value)} /></div>
-                <div><Label className="text-xs text-muted-foreground">YouTube</Label><Input value={form.youtube_url || ""} onChange={e => updateField("youtube_url", e.target.value)} /></div>
-                <div><Label className="text-xs text-muted-foreground">LinkedIn</Label><Input value={form.linkedin_url || ""} onChange={e => updateField("linkedin_url", e.target.value)} /></div>
-                <div><Label className="text-xs text-muted-foreground">TikTok</Label><Input value={form.tiktok_url || ""} onChange={e => updateField("tiktok_url", e.target.value)} /></div>
-                <div><Label className="text-xs text-muted-foreground">Instagram</Label><Input value={form.instagram_url || ""} onChange={e => updateField("instagram_url", e.target.value)} /></div>
-              </div>
-            </fieldset>
-
-            {/* Additional */}
-            <fieldset className="space-y-3">
-              <legend className="text-sm font-semibold text-foreground mb-2">Additional</legend>
-              <div><Label className="text-xs text-muted-foreground">Supporting Materials</Label><Textarea rows={3} value={form.supporting_materials || ""} onChange={e => updateField("supporting_materials", e.target.value)} /></div>
-              <div><Label className="text-xs text-muted-foreground">Additional Comments</Label><Textarea rows={3} value={form.additional_comments || ""} onChange={e => updateField("additional_comments", e.target.value)} /></div>
-            </fieldset>
-
-            {/* Admin Notes */}
-            <fieldset className="space-y-3">
-              <legend className="text-sm font-semibold text-foreground mb-2">Admin Notes</legend>
-              <Textarea rows={4} value={form.admin_notes || ""} onChange={e => updateField("admin_notes", e.target.value)} placeholder="Internal notes..." />
-            </fieldset>
-
-            {/* Save Button */}
-            <div className="sticky bottom-0 pt-4 bg-background border-t border-border">
-              <Button className="w-full" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
-                <Save className="h-4 w-4 mr-2" />
-                {saveMutation.isPending ? "Saving..." : "Save All Changes"}
-              </Button>
+          {/* Social Links */}
+          <CollapsibleSection title="Social Links" defaultOpen={false}>
+            <div className="space-y-3">
+              <SocialLinkField label="Website" icon={Globe} value={form.website_url || ""} onChange={v => updateField("website_url", v)} />
+              <SocialLinkField label="YouTube" icon={Youtube} value={form.youtube_url || ""} onChange={v => updateField("youtube_url", v)} />
+              <SocialLinkField label="LinkedIn" icon={Linkedin} value={form.linkedin_url || ""} onChange={v => updateField("linkedin_url", v)} />
+              <SocialLinkField label="TikTok" icon={Globe} value={form.tiktok_url || ""} onChange={v => updateField("tiktok_url", v)} />
+              <SocialLinkField label="Instagram" icon={Instagram} value={form.instagram_url || ""} onChange={v => updateField("instagram_url", v)} />
             </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+          </CollapsibleSection>
 
-      {/* Message compose dialog */}
-      <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>
-              {messageDialogMode === "status"
-                ? `Notify applicant of status change → ${pendingStatus}`
-                : "Send reminder email"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              {messageDialogMode === "status"
-                ? `An email will be sent to ${form.email} notifying them of the status change. You can add a personal message below.`
-                : `A reminder email will be sent to ${form.email} with a link to continue their application.`}
-            </p>
-            <div>
-              <Label className="text-sm">Personal message (optional)</Label>
-              <div className="mt-1.5 border border-border rounded-md overflow-hidden">
-                <div className="flex gap-1 p-1.5 border-b border-border bg-muted/30">
-                  <Button
-                    type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs font-bold"
-                    onClick={() => setCustomMessage(prev => prev + "<b></b>")}
-                  >B</Button>
-                  <Button
-                    type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs italic"
-                    onClick={() => setCustomMessage(prev => prev + "<i></i>")}
-                  >I</Button>
-                  <Button
-                    type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs underline"
-                    onClick={() => setCustomMessage(prev => prev + "<u></u>")}
-                  >U</Button>
-                  <Button
-                    type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs"
-                    onClick={() => setCustomMessage(prev => prev + '<a href="">link</a>')}
-                  >🔗</Button>
-                </div>
-                <Textarea
-                  rows={6}
-                  value={customMessage}
-                  onChange={e => setCustomMessage(e.target.value)}
-                  placeholder="Add a personal note to include in the email..."
-                  className="border-0 rounded-none focus-visible:ring-0 resize-none"
-                />
-              </div>
-              {customMessage && (
-                <div className="mt-2 p-3 bg-muted/30 rounded-md">
-                  <p className="text-xs text-muted-foreground mb-1">Preview:</p>
-                  <div className="text-sm prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: customMessage }} />
-                </div>
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setMessageDialogOpen(false)}>
-              {messageDialogMode === "status" ? "Update without email" : "Cancel"}
+          <div className="border-t border-border" />
+
+          {/* Additional */}
+          <CollapsibleSection title="Additional Information" defaultOpen={false}>
+            <div><Label className="text-xs text-muted-foreground">Supporting Materials</Label><Textarea rows={3} value={form.supporting_materials || ""} onChange={e => updateField("supporting_materials", e.target.value)} /></div>
+            <div><Label className="text-xs text-muted-foreground">Additional Comments</Label><Textarea rows={3} value={form.additional_comments || ""} onChange={e => updateField("additional_comments", e.target.value)} /></div>
+          </CollapsibleSection>
+
+          <div className="border-t border-border" />
+
+          {/* Admin Notes */}
+          <CollapsibleSection title="Admin Notes">
+            <Textarea rows={4} value={form.admin_notes || ""} onChange={e => updateField("admin_notes", e.target.value)} placeholder="Internal notes..." />
+          </CollapsibleSection>
+
+          {/* Save Button */}
+          <div className="sticky bottom-0 pt-4 bg-background border-t border-border mt-4">
+            <Button className="w-full" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+              <Save className="h-4 w-4 mr-2" />
+              {saveMutation.isPending ? "Saving..." : "Save All Changes"}
             </Button>
-            <Button
-              onClick={() => sendEmailMutation.mutate({
-                type: messageDialogMode,
-                message: customMessage,
-                newStatus: messageDialogMode === "status" ? pendingStatus : undefined,
-              })}
-              disabled={sendEmailMutation.isPending}
-            >
-              <Send className="h-4 w-4 mr-2" />
-              {sendEmailMutation.isPending ? "Sending..." : "Send Email"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
 
