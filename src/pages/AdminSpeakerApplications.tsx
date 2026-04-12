@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Eye, Download, Search } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Eye, Download, Search, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import SpeakerApplicationDetailPane from "@/components/admin/SpeakerApplicationDetailPane";
@@ -191,9 +192,33 @@ const AdminSpeakerApplications = () => {
                         {app.submitted_at ? format(new Date(app.submitted_at), "dd MMM yyyy") : format(new Date(app.created_at), "dd MMM yyyy")}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm" onClick={() => { setSelectedApp(app); setPaneOpen(true); }}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => { setSelectedApp(app); setPaneOpen(true); }}>
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>View details</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          {app.email && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost" size="sm" className="h-8 w-8 p-0"
+                                    onClick={() => { setSelectedApp(app); setPaneOpen(true); }}
+                                  >
+                                    <Mail className="h-4 w-4 text-muted-foreground" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Send reminder</TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
