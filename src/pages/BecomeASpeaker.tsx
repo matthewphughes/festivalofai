@@ -13,7 +13,7 @@ import Footer from "@/components/Footer";
 
 const BecomeASpeaker = () => {
   const navigate = useNavigate();
-  const deadline = new Date('2026-05-08T17:00:00');
+  const deadline = new Date('2026-05-10T17:00:00');
 
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
