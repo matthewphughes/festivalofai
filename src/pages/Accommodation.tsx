@@ -4,12 +4,15 @@ import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
+import hotelNovotel from "@/assets/hotel-novotel.jpg";
+import hotelHolidayInn from "@/assets/hotel-holiday-inn.jpg";
+import hotelTravelodge from "@/assets/hotel-travelodge.jpg";
 
 const hotels = [
   {
     name: "Novotel Leicester",
     description: "A new hotel in the heart of the city, slightly higher priced than the others but a more modern and luxurious experience too.",
-    image: "https://festivalof.ai/wp-content/uploads/2025/07/a9p4_ho_00_p_2048x1536-1024x768.jpg",
+    image: hotelNovotel,
     bookingUrl: "https://www.novotelleicester.com/",
     distance: "Less than 10 minutes by taxi",
     category: "Premium"
@@ -17,7 +20,7 @@ const hotels = [
   {
     name: "Holiday Inn Leicester by IHG",
     description: "A modern Leicester hotel near the city centre with an open lobby, meeting facilities and spacious bedrooms. There's parking available next door to this hotel.",
-    image: "https://festivalof.ai/wp-content/uploads/2025/07/2024-07-17.jpg",
+    image: hotelHolidayInn,
     bookingUrl: "https://www.ihg.com/holidayinn/hotels/gb/en/leicester/lctuk/hoteldetail",
     distance: "Less than 10 minutes by taxi",
     category: "Mid-Range"
@@ -25,7 +28,7 @@ const hotels = [
   {
     name: "Travelodge Leicester Central",
     description: "Travelodge are a staple hotel chain in the UK's cities, these are standard, straight to the point, cheap and cheerful hotels right in the heart of the city.",
-    image: "https://festivalof.ai/wp-content/uploads/2025/07/2021-07-05.jpg",
+    image: hotelTravelodge,
     bookingUrl: "https://www.travelodge.co.uk/hotels/261/Leicester-Central-hotel",
     distance: "Less than 10 minutes by taxi",
     category: "Budget"
