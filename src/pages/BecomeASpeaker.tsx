@@ -10,12 +10,25 @@ import {
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { supabase } from "@/integrations/supabase/client";
+
+const DEFAULT_DEADLINE = '2026-05-31T17:00:00';
 
 const BecomeASpeaker = () => {
   const navigate = useNavigate();
-  const deadline = new Date('2026-05-10T17:00:00');
-
+  const [deadline, setDeadline] = useState<Date>(new Date(DEFAULT_DEADLINE));
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  useEffect(() => {
+    supabase
+      .from('site_settings')
+      .select('setting_value')
+      .eq('setting_key', 'speaker_application_deadline')
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.setting_value) setDeadline(new Date(data.setting_value));
+      });
+  }, []);
 
   useEffect(() => {
     const calc = () => {
@@ -27,12 +40,18 @@ const BecomeASpeaker = () => {
           minutes: Math.floor((diff / 1000 / 60) % 60),
           seconds: Math.floor((diff / 1000) % 60),
         });
+      } else {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
       }
     };
     calc();
     const t = setInterval(calc, 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [deadline]);
+
+  const deadlineLabel = deadline.toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  });
 
   const benefits = [
     {
