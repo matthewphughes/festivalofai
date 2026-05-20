@@ -75,7 +75,7 @@ const handler = async (req: Request): Promise<Response> => {
               <li>You'll receive an update on your application status via email</li>
               <li>Shortlisted speakers will be contacted for further details</li>
             </ul>
-            <p>Applications close on <strong>May 10th, 2026</strong>.</p>
+            <p>Applications close on <strong>${deadlineLabel}</strong>.</p>
             <p>If you have any questions, please reach out to us at <a href="mailto:team@festivalof.ai">team@festivalof.ai</a>.</p>
             <br>
             <p>Best regards,<br>The Festival of AI Team</p>
