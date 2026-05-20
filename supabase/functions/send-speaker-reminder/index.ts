@@ -60,6 +60,14 @@ const handler = async (req: Request): Promise<Response> => {
     const name = firstName || "there";
     const link = applicationLink || `https://festivalof.ai/call-for-speakers?resume=${sessionId}`;
 
+    const { data: deadlineSetting } = await supabase
+      .from("site_settings")
+      .select("setting_value")
+      .eq("setting_key", "speaker_application_deadline")
+      .maybeSingle();
+    const deadlineDate = new Date(deadlineSetting?.setting_value || "2026-05-31T17:00:00");
+    const deadlineLabel = deadlineDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
     let subject: string;
     let bodyHtml: string;
 
