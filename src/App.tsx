@@ -49,6 +49,7 @@ import BecomeASpeaker from "./pages/BecomeASpeaker";
 import CallForSpeakers from "./pages/CallForSpeakers";
 import SpeakerThanks from "./pages/SpeakerThanks";
 import AdminSpeakerApplications from "./pages/AdminSpeakerApplications";
+import AdminCallForSpeakers from "./pages/AdminCallForSpeakers";
 import SponsorThanks from "./pages/SponsorThanks";
 
 const queryClient = new QueryClient();
@@ -103,6 +104,7 @@ const App = () => (
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
            <Route path="/admin/discount-campaigns" element={<AdminDiscountCampaigns />} />
            <Route path="/admin/speaker-applications" element={<AdminSpeakerApplications />} />
+           <Route path="/admin/call-for-speakers" element={<AdminCallForSpeakers />} />
            <Route path="/speak" element={<BecomeASpeaker />} />
            <Route path="/call-for-speakers" element={<CallForSpeakers />} />
            <Route path="/speaker-thanks" element={<SpeakerThanks />} />

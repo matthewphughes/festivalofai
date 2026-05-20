@@ -60,6 +60,14 @@ const handler = async (req: Request): Promise<Response> => {
     const name = firstName || "there";
     const link = applicationLink || `https://festivalof.ai/call-for-speakers?resume=${sessionId}`;
 
+    const { data: deadlineSetting } = await supabase
+      .from("site_settings")
+      .select("setting_value")
+      .eq("setting_key", "speaker_application_deadline")
+      .maybeSingle();
+    const deadlineDate = new Date(deadlineSetting?.setting_value || "2026-05-31T17:00:00");
+    const deadlineLabel = deadlineDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
     let subject: string;
     let bodyHtml: string;
 
@@ -91,7 +99,7 @@ const handler = async (req: Request): Promise<Response> => {
           <h2>Hi ${name}!</h2>
           <p>We noticed you started a speaker application but haven't submitted it yet. We'd love to hear from you!</p>
           ${customMessage ? `<div style="margin: 20px 0; padding: 16px; background-color: #f8f9fa; border-left: 4px solid #6366f1; border-radius: 4px;">${customMessage}</div>` : ""}
-          <p>Applications close on <strong>May 10th, 2026</strong> — don't miss your chance to speak at one of the UK's most exciting AI events.</p>
+          <p>Applications close on <strong>${deadlineLabel}</strong> — don't miss your chance to speak at one of the UK's most exciting AI events.</p>
           <p style="margin: 30px 0;">
             <a href="${link}" style="background-color: #6366f1; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
               Continue Your Application
