@@ -45,6 +45,14 @@ const handler = async (req: Request): Promise<Response> => {
     const name = [app.first_name, app.last_name].filter(Boolean).join(" ") || "Speaker";
     const trackLabel = app.preferred_track || "Not specified";
 
+    const { data: deadlineSetting } = await supabase
+      .from("site_settings")
+      .select("setting_value")
+      .eq("setting_key", "speaker_application_deadline")
+      .maybeSingle();
+    const deadlineDate = new Date(deadlineSetting?.setting_value || "2026-05-31T17:00:00");
+    const deadlineLabel = deadlineDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
     // 1. Send confirmation email to applicant
     if (app.email) {
       await resend.emails.send({
