@@ -104,6 +104,7 @@ const App = () => (
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
            <Route path="/admin/discount-campaigns" element={<AdminDiscountCampaigns />} />
            <Route path="/admin/speaker-applications" element={<AdminSpeakerApplications />} />
+           <Route path="/admin/call-for-speakers" element={<AdminCallForSpeakers />} />
            <Route path="/speak" element={<BecomeASpeaker />} />
            <Route path="/call-for-speakers" element={<CallForSpeakers />} />
            <Route path="/speaker-thanks" element={<SpeakerThanks />} />
