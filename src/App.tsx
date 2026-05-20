@@ -49,6 +49,7 @@ import BecomeASpeaker from "./pages/BecomeASpeaker";
 import CallForSpeakers from "./pages/CallForSpeakers";
 import SpeakerThanks from "./pages/SpeakerThanks";
 import AdminSpeakerApplications from "./pages/AdminSpeakerApplications";
+import AdminCallForSpeakers from "./pages/AdminCallForSpeakers";
 import SponsorThanks from "./pages/SponsorThanks";
 
 const queryClient = new QueryClient();
