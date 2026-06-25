@@ -174,16 +174,53 @@ const AdminSpeakerApplications = () => {
 
   const exportCSV = () => {
     if (!filtered.length) return;
-    const headers = ["First Name", "Last Name", "Email", "Phone", "Session Title", "Track", "Status", "Submitted"];
-    const rows = filtered.map((a: any) => [
-      a.first_name, a.last_name, a.email, a.phone, a.session_title,
-      a.preferred_track, a.status, a.submitted_at ? format(new Date(a.submitted_at), "yyyy-MM-dd") : "",
-    ]);
-    const csv = [headers, ...rows].map(r => r.map((c: string) => `"${(c || "").replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
+    const fieldMap: { key: string; label: string }[] = [
+      { key: "id", label: "ID" },
+      { key: "first_name", label: "First Name" },
+      { key: "last_name", label: "Last Name" },
+      { key: "email", label: "Email" },
+      { key: "phone", label: "Phone" },
+      { key: "address_line1", label: "Address Line 1" },
+      { key: "address_line2", label: "Address Line 2" },
+      { key: "city", label: "City" },
+      { key: "postal_code", label: "Postal Code" },
+      { key: "website_url", label: "Website" },
+      { key: "linkedin_url", label: "LinkedIn" },
+      { key: "youtube_url", label: "YouTube" },
+      { key: "tiktok_url", label: "TikTok" },
+      { key: "instagram_url", label: "Instagram" },
+      { key: "bio", label: "Bio" },
+      { key: "session_title", label: "Session Title" },
+      { key: "session_description", label: "Session Description" },
+      { key: "preferred_track", label: "Track" },
+      { key: "supporting_materials", label: "Supporting Materials" },
+      { key: "additional_comments", label: "Additional Comments" },
+      { key: "profile_picture_url", label: "Profile Picture" },
+      { key: "profile_picture_original_url", label: "Profile Picture (Original)" },
+      { key: "status", label: "Status" },
+      { key: "completion_pct", label: "Completion %" },
+      { key: "created_at", label: "Created" },
+      { key: "updated_at", label: "Updated" },
+      { key: "submitted_at", label: "Submitted" },
+    ];
+    const fmt = (v: any, key: string) => {
+      if (v === null || v === undefined) return "";
+      if (["created_at", "updated_at", "submitted_at"].includes(key)) {
+        return v ? format(new Date(v), "yyyy-MM-dd HH:mm") : "";
+      }
+      return String(v);
+    };
+    const headers = fieldMap.map(f => f.label);
+    const rows = filtered.map((a: any) =>
+      fieldMap.map(f => f.key === "completion_pct" ? `${getCompletionPct(a)}%` : fmt(a[f.key], f.key))
+    );
+    const csv = [headers, ...rows]
+      .map(r => r.map((c: string) => `"${(c ?? "").toString().replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = "speaker-applications.csv"; a.click();
+    a.href = url; a.download = `speaker-applications-${format(new Date(), "yyyy-MM-dd")}.csv`; a.click();
     URL.revokeObjectURL(url);
   };
 
