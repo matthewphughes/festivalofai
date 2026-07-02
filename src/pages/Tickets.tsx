@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import StarField from "@/components/StarField";
@@ -12,18 +11,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Check, CreditCard, Calendar } from "lucide-react";
-import { addDays, nextMonday, set } from "date-fns";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
-import { useCart } from "@/contexts/CartContext";
+import { addDays, set } from "date-fns";
 
 const Tickets = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { addToCart } = useCart();
-  const [loadingTicket, setLoadingTicket] = useState<string | null>(null);
-  const [products, setProducts] = useState<any[]>([]);
 
   // Calculate next Friday at 5:00 PM
   const getNextFridayEvening = () => {
@@ -35,56 +25,6 @@ const Tickets = () => {
 
   const superEarlyBirdEndDate = getNextFridayEvening();
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    const { data, error } = await supabase
-      .from("stripe_products")
-      .select("*")
-      .eq("active", true)
-      .eq("product_type", "ticket")
-      .eq("event_year", 2026);
-
-    if (error) {
-      console.error("Failed to load products", error);
-    } else {
-      setProducts(data || []);
-    }
-  };
-
-  const handleBuyNow = async (stripeProductId: string, ticketName: string) => {
-    setLoadingTicket(ticketName);
-    
-    try {
-      const product = products.find(p => p.stripe_product_id === stripeProductId);
-
-      if (!product) {
-        console.error("Product not found. Looking for:", stripeProductId, "Available products:", products);
-        toast({
-          title: "Product Not Found",
-          description: "This ticket is not available yet. Please contact support.",
-          variant: "destructive",
-        });
-        setLoadingTicket(null);
-        return;
-      }
-
-      // Add to cart and navigate to checkout
-      await addToCart(product.id);
-      navigate("/checkout");
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingTicket(null);
-    }
-  };
 
   const ticketTiers = [
     {
@@ -217,11 +157,16 @@ const Tickets = () => {
                         : "bg-primary hover:bg-primary/90"
                     }`}
                     size="lg"
-                    onClick={() => handleBuyNow(tier.stripe_product_id, tier.name)}
-                    disabled={loadingTicket === tier.name}
+                    asChild
                   >
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    {loadingTicket === tier.name ? "Processing..." : "Buy Now"}
+                    <a
+                      href="https://checkout.hazelskye.co.uk/festival-of-ai-2026/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Buy Now
+                    </a>
                   </Button>
                   {tier.footerNote && (
                     <p className="text-xs text-muted-foreground text-center mt-3 italic">
