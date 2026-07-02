@@ -11,19 +11,17 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Check, CreditCard, Calendar } from "lucide-react";
-import { addDays, set } from "date-fns";
+import { set } from "date-fns";
 
 const Tickets = () => {
 
-  // Calculate next Friday at 5:00 PM
-  const getNextFridayEvening = () => {
+  // Calculate midnight tonight
+  const getMidnightTonight = () => {
     const now = new Date();
-    const daysUntilFriday = (5 - now.getDay() + 7) % 7 || 7; // 5 is Friday
-    const nextFriday = addDays(now, daysUntilFriday);
-    return set(nextFriday, { hours: 17, minutes: 0, seconds: 0, milliseconds: 0 });
+    return set(now, { hours: 23, minutes: 59, seconds: 59, milliseconds: 0 });
   };
 
-  const superEarlyBirdEndDate = getNextFridayEvening();
+  const superEarlyBirdEndDate = getMidnightTonight();
 
 
   const ticketTiers = [
@@ -39,7 +37,6 @@ const Tickets = () => {
         "Networking reception",
         "Gift bag",
         "Workbook",
-        "12 months access to Practical AI",
       ],
       highlighted: false,
       footerNote: "Switch between virtual and in-person at any time",
@@ -57,7 +54,7 @@ const Tickets = () => {
         "Networking reception",
         "Gift bag",
         "Workbook",
-        "12 months access to Practical AI",
+        
       ],
       highlighted: true,
     },
@@ -105,7 +102,7 @@ const Tickets = () => {
                     🎉 SUPER EARLY BIRD PRICING - Limited Time Only!
                   </div>
                   <h3 className="text-xl md:text-2xl font-bold mb-1 md:mb-2">Offer Ends In:</h3>
-                  <p className="text-xs md:text-sm text-muted-foreground">Friday at 5PM</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Midnight tonight</p>
                 </div>
                 <CountdownTimer targetDate={superEarlyBirdEndDate} />
               </div>
@@ -248,65 +245,6 @@ const Tickets = () => {
             </CardContent>
           </Card>
 
-          {/* Practical AI Section */}
-          <Card className="mt-16 bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 border-primary">
-            <CardContent className="p-8 md:p-12">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  Included: <span className="text-accent">12 Months of Practical AI</span>
-                </h2>
-                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                  Your learning doesn't end when the event does
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-8">
-                <div className="bg-card/50 backdrop-blur-sm rounded-lg p-6 border border-border">
-                  <div className="text-accent text-3xl mb-4">🎓</div>
-                  <h3 className="text-xl font-bold mb-3">What is Practical AI?</h3>
-                  <p className="text-muted-foreground">
-                    Practical AI is an exclusive private community where Festival of AI attendees continue their learning journey throughout the year. Connect with fellow AI enthusiasts, share insights, and stay at the cutting edge of AI innovation.
-                  </p>
-                </div>
-
-                <div className="bg-card/50 backdrop-blur-sm rounded-lg p-6 border border-border">
-                  <div className="text-accent text-3xl mb-4">✨</div>
-                  <h3 className="text-xl font-bold mb-3">What's Included?</h3>
-                  <ul className="space-y-2 text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                      <span>Monthly expert-led webinars and workshops</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                      <span>Private discussion forums and channels</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                      <span>Exclusive resources and case studies</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                      <span>Networking with peers and industry leaders</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                      <span>Early access to 2027 tickets and content</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <p className="text-lg font-semibold text-accent mb-2">
-                  Worth £297 - Included FREE with Every Ticket
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Continue learning and growing long after the event ends
-                </p>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* FAQ Section */}
           <Card className="mt-16 bg-card/50 backdrop-blur-sm border-border">
@@ -329,7 +267,7 @@ const Tickets = () => {
                     What happens when Super Early Bird pricing ends?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    When the Super Early Bird period ends on Friday at 5PM, ticket prices will increase to the next pricing phase. Standard and Workshop tickets will move to a higher price point. We recommend booking now to lock in the maximum discount.
+                    When the Super Early Bird period ends at midnight tonight, ticket prices will increase to the next pricing phase. Standard and Workshop tickets will move to a higher price point. We recommend booking now to lock in the maximum discount.
                   </AccordionContent>
                 </AccordionItem>
 
